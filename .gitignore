@@ -416,3 +416,17 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Setup directories
+setup/**/CCEM.Setup_x64-cache/
+setup/**/CCEM.Setup_x64-SetupFiles/
+setup/**/CCEM.Setup_x86-cache/
+setup/**/CCEM.Setup_x86-SetupFiles/
+setup/**/CCEM.Setup_arm64-cache/
+setup/**/CCEM.Setup_arm64-SetupFiles/
+
+# ClaudeAI files
+.claude/settings.local.json
+
+# .Codewiz
+.codewiz/*
