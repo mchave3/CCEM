@@ -588,6 +588,516 @@ src/CCEM/
 - [ ] Update existing Settings section
 - [ ] T4 templates will auto-generate mappings
 
+---
+
+## 🎨 Navigation Menu Structure
+
+### ⚖️ Decision Criteria
+
+Consider these factors when choosing:
+- **User workflow** - How do admins typically work?
+- **Scalability** - Easy to add Intune features later?
+- **Discoverability** - Can users find features easily?
+- **Visual balance** - Not too cluttered?
+
+---
+
+### 📐 Platform-First Navigation (Selected)
+
+**Concept**: Top-level split between SCCM and Intune, each with their own sub-structure
+
+**Pros**:
+- ✅ Clear separation of concerns
+- ✅ Easy to add Intune features incrementally
+- ✅ Users immediately know which platform they're managing
+- ✅ Best for orgs managing both SCCM and Intune
+
+**Cons**:
+- ⚠️ More clicks to reach specific features
+- ⚠️ Some duplicate categories (e.g., both have "Applications")
+
+```json
+{
+  "Groups": [
+    {
+      "Id": "HomeGroup",
+      "Title": "Home",
+      "Glyph": "\uE80F",
+      "Items": [
+        {
+          "Id": "Dashboard",
+          "Title": "Dashboard",
+          "Glyph": "\uE8BC",
+          "PageType": "CCEM.Views.DashboardPage",
+          "Description": "Unified overview of SCCM and Intune"
+        },
+        {
+          "Id": "QuickActions",
+          "Title": "Quick Actions",
+          "Glyph": "\uE945",
+          "PageType": "CCEM.Views.QuickActionsPage"
+        }
+      ]
+    },
+    {
+      "Id": "SCCMGroup",
+      "Title": "Configuration Manager",
+      "Glyph": "\uE950",
+      "IsExpandable": true,
+      "Items": [
+        {
+          "Id": "SCCMConnection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.SCCM.ConnectionPage"
+        },
+        {
+          "Id": "SCCMAgent",
+          "Title": "Agent Management",
+          "Glyph": "\uE713",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "Components", "Title": "Components", "PageType": "CCEM.Views.SCCM.ComponentsPage" },
+            { "Id": "Settings", "Title": "Settings", "PageType": "CCEM.Views.SCCM.AgentSettingsPage" },
+            { "Id": "InstallRepair", "Title": "Install/Repair", "PageType": "CCEM.Views.SCCM.InstallRepairPage" }
+          ]
+        },
+        {
+          "Id": "SCCMInventory",
+          "Title": "Inventory",
+          "Glyph": "\uE8F1",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "Cache", "Title": "Cache", "PageType": "CCEM.Views.SCCM.CachePage" },
+            { "Id": "Applications", "Title": "Applications", "PageType": "CCEM.Views.SCCM.ApplicationsPage" },
+            { "Id": "InstalledSoftware", "Title": "Installed Software", "PageType": "CCEM.Views.SCCM.InstalledSoftwarePage" }
+          ]
+        },
+        {
+          "Id": "SCCMUpdates",
+          "Title": "Software Updates",
+          "Glyph": "\uE895",
+          "HasSubItems": true
+        },
+        {
+          "Id": "SCCMSystem",
+          "Title": "System",
+          "Glyph": "\uE770",
+          "HasSubItems": true
+        },
+        {
+          "Id": "SCCMTools",
+          "Title": "Tools",
+          "Glyph": "\uE90F",
+          "HasSubItems": true,
+          "IsDynamic": true
+        }
+      ]
+    },
+    {
+      "Id": "IntuneGroup",
+      "Title": "Intune",
+      "Glyph": "\uE753",
+      "IsExpandable": true,
+      "Items": [
+        {
+          "Id": "IntuneConnection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.Intune.ConnectionPage"
+        },
+        {
+          "Id": "IntuneDevices",
+          "Title": "Devices",
+          "Glyph": "\uE977",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "AllDevices", "Title": "All Devices", "PageType": "CCEM.Views.Intune.DevicesPage" },
+            { "Id": "Compliance", "Title": "Compliance", "PageType": "CCEM.Views.Intune.CompliancePage" }
+          ]
+        },
+        {
+          "Id": "IntuneApps",
+          "Title": "Applications",
+          "Glyph": "\uE8B7",
+          "HasSubItems": true
+        },
+        {
+          "Id": "IntunePolicies",
+          "Title": "Policies",
+          "Glyph": "\uE8CB",
+          "HasSubItems": true
+        }
+      ]
+    }
+  ],
+  "FooterItems": [
+    {
+      "Id": "Settings",
+      "Title": "Settings",
+      "Glyph": "\uE713",
+      "PageType": "CCEM.Views.SettingsPage"
+    },
+    {
+      "Id": "About",
+      "Title": "About",
+      "Glyph": "\uE946",
+      "PageType": "CCEM.Views.AboutPage"
+    }
+  ]
+}
+```
+
+---
+
+### Implementation Details
+
+**Selected Structure**: Platform-First Navigation
+
+**DevWinUI NavigationView Layout**:
+
+```json
+{
+  "Groups": [
+    {
+      "Id": "DashboardGroup",
+      "Title": "Dashboard",
+      "Glyph": "\uE80F",
+      "Items": [
+        {
+          "Id": "Connection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.SCCM.ConnectionPage",
+          "Description": "Connect to SCCM client"
+        },
+        {
+          "Id": "Overview",
+          "Title": "Overview",
+          "Glyph": "\uE8BC",
+          "PageType": "CCEM.Views.SCCM.OverviewPage",
+          "Description": "Client status overview"
+        }
+      ]
+    },
+    {
+      "Id": "AgentGroup",
+      "Title": "Agent Management",
+      "Glyph": "\uE950",
+      "Items": [
+        {
+          "Id": "Components",
+          "Title": "Components",
+          "Glyph": "\uE9F9",
+          "PageType": "CCEM.Views.SCCM.ComponentsPage"
+        },
+        {
+          "Id": "Settings",
+          "Title": "Settings",
+          "Glyph": "\uE713",
+          "PageType": "CCEM.Views.SCCM.AgentSettingsPage"
+        },
+        {
+          "Id": "InstallRepair",
+          "Title": "Install/Repair",
+          "Glyph": "\uE90F",
+          "PageType": "CCEM.Views.SCCM.InstallRepairPage"
+        },
+        {
+          "Id": "InstallAgent",
+          "Title": "Install Agent",
+          "Glyph": "\uE896",
+          "PageType": "CCEM.Views.SCCM.InstallAgentPage"
+        }
+      ]
+    },
+    {
+      "Id": "InventoryGroup",
+      "Title": "Inventory",
+      "Glyph": "\uE8F1",
+      "Items": [
+        {
+          "Id": "Cache",
+          "Title": "Cache",
+          "Glyph": "\uE895",
+          "PageType": "CCEM.Views.SCCM.CachePage"
+        },
+        {
+          "Id": "Applications",
+          "Title": "Applications",
+          "Glyph": "\uE8B7",
+          "PageType": "CCEM.Views.SCCM.ApplicationsPage"
+        },
+        {
+          "Id": "InstalledSoftware",
+          "Title": "Installed Software",
+          "Glyph": "\uE74C",
+          "PageType": "CCEM.Views.SCCM.InstalledSoftwarePage"
+        },
+        {
+          "Id": "Advertisements",
+          "Title": "Advertisements",
+          "Glyph": "\uE789",
+          "PageType": "CCEM.Views.SCCM.AdvertisementsPage"
+        },
+        {
+          "Id": "ExecutionHistory",
+          "Title": "Execution History",
+          "Glyph": "\uE81C",
+          "PageType": "CCEM.Views.SCCM.ExecutionHistoryPage"
+        }
+      ]
+    },
+    {
+      "Id": "SoftwareUpdatesGroup",
+      "Title": "Software Updates",
+      "Glyph": "\uE895",
+      "Items": [
+        {
+          "Id": "Updates",
+          "Title": "Updates",
+          "Glyph": "\uE777",
+          "PageType": "CCEM.Views.SCCM.UpdatesPage"
+        },
+        {
+          "Id": "AllUpdates",
+          "Title": "All Updates",
+          "Glyph": "\uE8FD",
+          "PageType": "CCEM.Views.SCCM.AllUpdatesPage"
+        },
+        {
+          "Id": "UpdateStatus",
+          "Title": "Update Status",
+          "Glyph": "\uE7BA",
+          "PageType": "CCEM.Views.SCCM.UpdateStatusPage"
+        }
+      ]
+    },
+    {
+      "Id": "SystemGroup",
+      "Title": "System Management",
+      "Glyph": "\uE770",
+      "Items": [
+        {
+          "Id": "Services",
+          "Title": "Services",
+          "Glyph": "\uE950",
+          "PageType": "CCEM.Views.SCCM.ServicesPage"
+        },
+        {
+          "Id": "Processes",
+          "Title": "Processes",
+          "Glyph": "\uE9D9",
+          "PageType": "CCEM.Views.SCCM.ProcessesPage"
+        },
+        {
+          "Id": "Logs",
+          "Title": "Logs",
+          "Glyph": "\uE8A5",
+          "PageType": "CCEM.Views.SCCM.LogsPage"
+        },
+        {
+          "Id": "LogViewer",
+          "Title": "Log Viewer",
+          "Glyph": "\uE8A5",
+          "PageType": "CCEM.Views.SCCM.LogViewerPage"
+        },
+        {
+          "Id": "EventMonitoring",
+          "Title": "Event Monitoring",
+          "Glyph": "\uE7C1",
+          "PageType": "CCEM.Views.SCCM.EventMonitoringPage"
+        }
+      ]
+    },
+    {
+      "Id": "AdvancedGroup",
+      "Title": "Advanced",
+      "Glyph": "\uE9E9",
+      "Items": [
+        {
+          "Id": "ServiceWindows",
+          "Title": "Service Windows",
+          "Glyph": "\uE787",
+          "PageType": "CCEM.Views.SCCM.ServiceWindowsPage"
+        },
+        {
+          "Id": "Variables",
+          "Title": "Variables",
+          "Glyph": "\uE8CB",
+          "PageType": "CCEM.Views.SCCM.VariablesPage"
+        },
+        {
+          "Id": "Power",
+          "Title": "Power Management",
+          "Glyph": "\uE945",
+          "PageType": "CCEM.Views.SCCM.PowerPage"
+        },
+        {
+          "Id": "WMIBrowser",
+          "Title": "WMI Browser",
+          "Glyph": "\uE8B7",
+          "PageType": "CCEM.Views.SCCM.WMIBrowserPage"
+        },
+        {
+          "Id": "Evaluation",
+          "Title": "Evaluation",
+          "Glyph": "\uE9D5",
+          "PageType": "CCEM.Views.SCCM.EvaluationPage"
+        },
+        {
+          "Id": "ImportApp",
+          "Title": "Import Application",
+          "Glyph": "\uE8B5",
+          "PageType": "CCEM.Views.SCCM.ImportAppPage"
+        }
+      ]
+    },
+    {
+      "Id": "PluginsGroup",
+      "Title": "Tools & Plugins",
+      "Glyph": "\uE90F",
+      "Visibility": "Dynamic",
+      "Items": [
+        {
+          "Id": "RDP",
+          "Title": "Remote Desktop",
+          "Glyph": "\uE8AF",
+          "PluginId": "CCEM.SCCM.Plugins.RDP"
+        },
+        {
+          "Id": "CompMgmt",
+          "Title": "Computer Management",
+          "Glyph": "\uE7F8",
+          "PluginId": "CCEM.SCCM.Plugins.ComputerManagement"
+        },
+        {
+          "Id": "RemoteTools",
+          "Title": "Remote Tools",
+          "Glyph": "\uE90A",
+          "PluginId": "CCEM.SCCM.Plugins.RemoteTools"
+        },
+        {
+          "Id": "ResourceExplorer",
+          "Title": "Resource Explorer",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.ResourceExplorer"
+        },
+        {
+          "Id": "StatusMessageViewer",
+          "Title": "Status Message Viewer",
+          "Glyph": "\uE8F2",
+          "PluginId": "CCEM.SCCM.Plugins.StatusMessageViewer"
+        },
+        {
+          "Id": "Explorer",
+          "Title": "File Explorer",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.FileExplorer"
+        },
+        {
+          "Id": "Regedit",
+          "Title": "Registry Editor",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.RegistryEditor"
+        },
+        {
+          "Id": "MSInfo32",
+          "Title": "System Information",
+          "Glyph": "\uE946",
+          "PluginId": "CCEM.SCCM.Plugins.SystemInfo"
+        },
+        {
+          "Id": "MSRA",
+          "Title": "Remote Assistance",
+          "Glyph": "\uE8AF",
+          "PluginId": "CCEM.SCCM.Plugins.RemoteAssistance"
+        },
+        {
+          "Id": "PSScripts",
+          "Title": "PowerShell Scripts",
+          "Glyph": "\uE756",
+          "PluginId": "CCEM.SCCM.Plugins.PowerShellScripts"
+        }
+      ]
+    },
+    {
+      "Id": "IntuneGroup",
+      "Title": "Intune",
+      "Glyph": "\uE753",
+      "Visibility": "ComingSoon",
+      "Items": [
+        {
+          "Id": "IntuneOverview",
+          "Title": "Coming Soon",
+          "Glyph": "\uE823",
+          "PageType": "CCEM.Views.Intune.ComingSoonPage"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Navigation Structure Explanation**:
+
+1. **Dashboard Group** - Points d'entrée principaux
+   - Connection: Gestion de la connexion client SCCM
+   - Overview: Vue d'ensemble du statut client
+
+2. **Agent Management** - Gestion de l'agent SCCM
+   - Components: Composants de l'agent
+   - Settings: Paramètres de l'agent
+   - Install/Repair: Installation/réparation
+   - Install Agent: Assistant d'installation
+
+3. **Inventory Group** - Inventaire et applications
+   - Cache: Gestion du cache
+   - Applications: Applications déployées
+   - Installed Software: Logiciels installés
+   - Advertisements: Déploiements
+   - Execution History: Historique d'exécution
+
+4. **Software Updates** - Mises à jour logicielles
+   - Updates: Mises à jour disponibles
+   - All Updates: Toutes les mises à jour
+   - Update Status: Statut des mises à jour
+
+5. **System Management** - Gestion système
+   - Services: Services Windows
+   - Processes: Processus en cours
+   - Logs: Fichiers de logs
+   - Log Viewer: Visualiseur de logs
+   - Event Monitoring: Surveillance des événements
+
+6. **Advanced Group** - Fonctionnalités avancées
+   - Service Windows: Fenêtres de maintenance
+   - Variables: Variables de collection
+   - Power Management: Gestion de l'alimentation
+   - WMI Browser: Navigateur WMI
+   - Evaluation: Règles d'évaluation
+   - Import Application: Import d'applications
+
+7. **Plugins Group** - Outils et extensions
+   - Dynamiquement peuplé par les plugins chargés
+   - RDP, Computer Management, Remote Tools, etc.
+
+8. **Intune Group** - Préparation future
+   - Coming Soon placeholder
+
+```csharp
+// In App.xaml.cs - Load navigation
+private void LoadNavigationMenu()
+{
+    var json = File.ReadAllText("Assets/NavViewMenu/AppData.json");
+    var navData = JsonSerializer.Deserialize<NavigationData>(json);
+
+    // DevWinUI NavigationView binding
+    MainWindow.NavigationView.MenuItemsSource = navData.Groups;
+    MainWindow.NavigationView.FooterMenuItemsSource = navData.FooterItems;
+}
+```
+
 ### 2.2 Create Connection UI
 
 **Status**: ⏳ Not Started
