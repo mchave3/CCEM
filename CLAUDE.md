@@ -102,3 +102,41 @@ GitHub Actions workflow for releases is configured but requires setup:
 - Update `PROJECT_PATH` in [.github/workflows/dotnet-release.yml](.github/workflows/dotnet-release.yml) to `src/CCEM/CCEM.csproj`
 - Workflow creates platform-specific zip files and GitHub releases
 - Triggered manually via `workflow_dispatch`
+
+## Claude Code Sub-Agents
+
+When working with this codebase, use the appropriate specialized sub-agents for optimal results:
+
+### C# Expert Agent (`csharp-expert`)
+**Use proactively for:**
+- C# code refactoring and optimization
+- Implementing complex C# patterns (MVVM, dependency injection, async/await)
+- Performance optimization in C# code
+- Code quality improvements and best practices
+- Working with .NET 9.0 features
+- LINQ queries and expression optimization
+- WinUI 3 / XAML code-behind implementations
+
+**Example tasks:**
+- Refactoring ViewModels to follow MVVM best practices
+- Optimizing async operations in services
+- Implementing advanced C# features (records, pattern matching, etc.)
+- Code reviews for C# files
+
+### GitHub Actions Expert (`github-actions-expert`)
+**Use for:**
+- Modifying or creating GitHub Actions workflows
+- CI/CD pipeline configuration
+- Setting up automated builds and releases
+- Troubleshooting workflow issues
+
+**Example tasks:**
+- Updating the release workflow in `.github/workflows/dotnet-release.yml`
+- Adding new build steps or platforms
+- Configuring automated testing
+
+### When to Use Sub-Agents
+- **Proactive usage**: The `csharp-expert` should be used proactively without explicit request when working with C# code that involves refactoring, optimization, or complex patterns
+- **Parallel execution**: When multiple independent tasks need sub-agents, launch them in parallel with a single message containing multiple Task tool calls
+- **Research vs. Implementation**: For complex multi-step research tasks across the codebase, use specialized agents; clearly specify whether the agent should research/search or write code
+
