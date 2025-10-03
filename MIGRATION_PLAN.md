@@ -50,6 +50,12 @@
 - JSON-based navigation system
 - Dependency injection with services
 
+**✅ Confirmed Compatibility**:
+- **Windows App SDK 1.8** is officially compatible with **.NET 9.0**
+- Target Framework Moniker (TFM): `net9.0-windows10.0.26100.0`
+- Minimum OS: Windows 10 version 1809 (build 17763)
+- Visual Studio 2022 version 17.0+ required
+
 ---
 
 ## 🔄 WPF to WinUI 3 Conversion Guide
@@ -60,19 +66,48 @@
 
 ### 1. XAML Namespace Changes
 
+**⚠️ IMPORTANT: XAML namespaces are IDENTICAL, but C# types are DIFFERENT!**
+
 **WPF Namespaces** → **WinUI 3 Namespaces**:
 ```xml
 <!-- WPF -->
-xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Uses System.Windows.* in code-behind -->
+</Window>
 
-<!-- WinUI 3 -->
-xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-mc:Ignorable="d"
+<!-- WinUI 3 - SAME XAML namespace! -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d">
+    <!-- Uses Microsoft.UI.Xaml.* in code-behind -->
+</Window>
 ```
+
+**Code-behind - Mandatory Changes**:
+```csharp
+// ❌ WPF - Namespaces .NET Framework
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
+
+// ✅ WinUI 3 - Namespaces Windows App SDK
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+```
+
+**C# Type Mapping**:
+| WPF Type (C#) | WinUI 3 Type (C#) | XAML |
+|---------------|-------------------|------|
+| `System.Windows.Window` | `Microsoft.UI.Xaml.Window` | `<Window>` (identique) |
+| `System.Windows.Controls.Button` | `Microsoft.UI.Xaml.Controls.Button` | `<Button>` (identique) |
+| `System.Windows.Controls.Grid` | `Microsoft.UI.Xaml.Controls.Grid` | `<Grid>` (identique) |
+| `System.Windows.Application` | `Microsoft.UI.Xaml.Application` | `<Application>` (identique) |
 
 ### 2. Control Mapping Reference
 
@@ -90,6 +125,22 @@ mc:Ignorable="d"
 | `System.Windows.Controls.Button` | `Button` | ✅ Direct conversion |
 | `System.Windows.Controls.Grid` | `Grid` | ✅ Direct conversion |
 | `System.Windows.Controls.StackPanel` | `StackPanel` | ✅ Direct conversion |
+
+### 2.1 WPF Controls NOT Supported in WinUI 3
+
+**⚠️ IMPORTANT: The following controls have NO direct equivalent in WinUI 3**
+
+| WPF Control | WinUI 3 Status | Recommended Alternative | Notes |
+|--------------|----------------|-------------------------|-------|
+| `InkCanvas` | ❌ **Not supported** (v1.7+) | [Win2D for WinUI 3](https://microsoft.github.io/Win2D/WinUI3/html/Introduction.htm) | Requires custom implementation with Win2D |
+| `MediaElement` | ❌ Deprecated | `MediaPlayerElement` | Available since Windows App SDK 1.2 |
+| `WebBrowser` | ❌ Not supported | `WebView2` | Mandatory migration to Chromium |
+| `WindowsFormsHost` | ❌ Not supported | None (complete migration required) | No WinForms interop in WinUI 3 |
+| `FlowDocument` | ❌ Not supported | `RichEditBox` with limitations | Reduced functionality |
+
+**Actions for this project**:
+- ⚠️ **ScheduleControl** (lines 510-514) potentially uses Canvas - verify if InkCanvas is used
+- ✅ If yes: migrate to Win2D or design an alternative with `Microsoft.UI.Composition`
 
 ### 3. Code-Behind Conversion Patterns
 
@@ -132,6 +183,32 @@ public string Text
 [ObservableProperty]
 private string text;
 ```
+
+**⚠️ Important Note on AOT Warnings**:
+
+Using `[ObservableProperty]` on **private fields** (pattern above) generates warnings **MVVMTK0045** and **MVVMTK0051** in WinRT scenarios with NativeAOT.
+
+**Option 1: Use current pattern (recommended for this project)**
+```csharp
+// ✅ Simple pattern - Generates AOT warnings (ignorable if not using NativeAOT)
+[ObservableProperty]
+private string text;
+```
+- ✅ Simple and concise
+- ✅ Works perfectly in standard mode
+- ⚠️ Generates warnings if NativeAOT is enabled (not used in this project)
+
+**Option 2: AOT-compatible pattern (optional)**
+```csharp
+// ✅ AOT-compatible pattern - No warnings (C# 11+, VS 17.12+)
+[ObservableProperty]
+public partial string Text { get; set; }
+```
+- ✅ NativeAOT compatible
+- ✅ No warnings
+- ⚠️ Requires C# 11+ and partial properties
+
+**Decision for this project**: Use **Option 1** (private fields) since NativeAOT is not required.
 
 #### Pattern 3: Collections
 ```csharp
@@ -245,6 +322,93 @@ using System.Management.Automation.Runspaces;
 | **FileDialog** | `Microsoft.Win32.OpenFileDialog` | ❌ Different | Use `Windows.Storage.Pickers.FileOpenPicker` |
 | **Clipboard** | `Clipboard.SetText()` | Different namespace | Use `Windows.ApplicationModel.DataTransfer.Clipboard` |
 | **App.xaml.cs** | Inherits `Application` | Different initialization | Override `OnLaunched` instead of `StartupUri` |
+
+#### ⚠️ ContentDialog and XamlRoot - MANDATORY
+
+**WPF → WinUI 3: XamlRoot is REQUIRED for dialogs**
+
+```csharp
+// ❌ WPF - MessageBox.Show()
+MessageBoxResult result = MessageBox.Show(
+    "Are you sure?",
+    "Confirmation",
+    MessageBoxButton.YesNo,
+    MessageBoxImage.Question
+);
+
+if (result == MessageBoxResult.Yes)
+{
+    // Action confirmed
+}
+
+// ✅ WinUI 3 - ContentDialog with XamlRoot MANDATORY
+var dialog = new ContentDialog
+{
+    Title = "Confirmation",
+    Content = "Are you sure?",
+    PrimaryButtonText = "Yes",
+    CloseButtonText = "No",
+    DefaultButton = ContentDialogButton.Primary,
+
+    // ⚠️ WITHOUT XamlRoot → GUARANTEED CRASH!
+    XamlRoot = this.Content.XamlRoot  // ← MANDATORY from Page/UserControl
+};
+
+ContentDialogResult result = await dialog.ShowAsync();
+
+if (result == ContentDialogResult.Primary)
+{
+    // Action confirmed
+}
+```
+
+**Getting XamlRoot depending on context**:
+```csharp
+// From a Page
+XamlRoot = this.XamlRoot;
+
+// From a UserControl
+XamlRoot = this.XamlRoot;
+
+// From a ViewModel (via injection)
+XamlRoot = App.GetService<MainWindow>().Content.XamlRoot;
+
+// From MainWindow.xaml.cs
+XamlRoot = this.Content.XamlRoot;
+```
+
+**Recommended pattern for ViewModels**:
+```csharp
+// Dialog helper service
+public interface IDialogService
+{
+    Task<ContentDialogResult> ShowConfirmationAsync(string title, string content);
+}
+
+public class DialogService : IDialogService
+{
+    private XamlRoot _xamlRoot;
+
+    public DialogService(MainWindow mainWindow)
+    {
+        _xamlRoot = mainWindow.Content.XamlRoot;
+    }
+
+    public async Task<ContentDialogResult> ShowConfirmationAsync(string title, string content)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = content,
+            PrimaryButtonText = "Yes",
+            CloseButtonText = "No",
+            XamlRoot = _xamlRoot  // Automatically injected
+        };
+
+        return await dialog.ShowAsync();
+    }
+}
+```
 
 ---
 
