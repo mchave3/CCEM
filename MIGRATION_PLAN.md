@@ -20,6 +20,7 @@
 | Phase 8: Intune Preparation | ⏳ Not Started | 0/3 | - | - |
 
 **Status Legend:**
+
 - ⏳ Not Started
 - 🔄 In Progress
 - ✅ Completed
@@ -39,6 +40,7 @@
 ## Analysis Summary
 
 **Source**: Client Center for Configuration Manager (WPF, .NET Framework 4.8)
+
 - ~228 source files
 - ~18,264 lines in core automation library
 - 29 user controls for SCCM management
@@ -46,11 +48,13 @@
 - PowerShell remoting-based architecture
 
 **Target**: CCEM (WinUI 3, .NET 9, Windows App SDK 1.8)
+
 - Modern MVVM architecture with DevWinUI
 - JSON-based navigation system
 - Dependency injection with services
 
 **✅ Confirmed Compatibility**:
+
 - **Windows App SDK 1.8** is officially compatible with **.NET 9.0**
 - Target Framework Moniker (TFM): `net9.0-windows10.0.26100.0`
 - Minimum OS: Windows 10 version 1809 (build 17763)
@@ -62,13 +66,14 @@
 
 ### Critical Conversion Rules
 
-**⚠️ IMPORTANT: Every WPF component must be adapted for WinUI 3/.NET 9**
+#### ⚠️ IMPORTANT: Every WPF component must be adapted for WinUI 3/.NET 9
 
 ### 1. XAML Namespace Changes
 
 **⚠️ IMPORTANT: XAML namespaces are IDENTICAL, but C# types are DIFFERENT!**
 
 **WPF Namespaces** → **WinUI 3 Namespaces**:
+
 ```xml
 <!-- WPF -->
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -87,6 +92,7 @@
 ```
 
 **Code-behind - Mandatory Changes**:
+
 ```csharp
 // ❌ WPF - Namespaces .NET Framework
 using System.Windows;
@@ -102,6 +108,7 @@ using Microsoft.UI.Xaml.Input;
 ```
 
 **C# Type Mapping**:
+
 | WPF Type (C#) | WinUI 3 Type (C#) | XAML |
 |---------------|-------------------|------|
 | `System.Windows.Window` | `Microsoft.UI.Xaml.Window` | `<Window>` (identique) |
@@ -128,7 +135,7 @@ using Microsoft.UI.Xaml.Input;
 
 ### 2.1 WPF Controls NOT Supported in WinUI 3
 
-**⚠️ IMPORTANT: The following controls have NO direct equivalent in WinUI 3**
+#### ⚠️ IMPORTANT: The following controls have NO direct equivalent in WinUI 3
 
 | WPF Control | WinUI 3 Status | Recommended Alternative | Notes |
 |--------------|----------------|-------------------------|-------|
@@ -139,12 +146,14 @@ using Microsoft.UI.Xaml.Input;
 | `FlowDocument` | ❌ Not supported | `RichEditBox` with limitations | Reduced functionality |
 
 **Actions for this project**:
+
 - ⚠️ **ScheduleControl** (lines 510-514) potentially uses Canvas - verify if InkCanvas is used
 - ✅ If yes: migrate to Win2D or design an alternative with `Microsoft.UI.Composition`
 
 ### 3. Code-Behind Conversion Patterns
 
 #### Pattern 1: Event Handlers
+
 ```csharp
 // ❌ WPF Pattern
 private void Button_Click(object sender, RoutedEventArgs e)
@@ -166,6 +175,7 @@ private void UpdateText()
 ```
 
 #### Pattern 2: Data Binding
+
 ```csharp
 // ❌ WPF INotifyPropertyChanged
 private string _text;
@@ -184,26 +194,30 @@ public string Text
 private string text;
 ```
 
-**⚠️ Important Note on AOT Warnings**:
+#### ⚠️ Important Note on AOT Warnings
 
 Using `[ObservableProperty]` on **private fields** (pattern above) generates warnings **MVVMTK0045** and **MVVMTK0051** in WinRT scenarios with NativeAOT.
 
-**Option 1: Use current pattern (recommended for this project)**
+##### Option 1: Use current pattern (recommended for this project)
+
 ```csharp
 // ✅ Simple pattern - Generates AOT warnings (ignorable if not using NativeAOT)
 [ObservableProperty]
 private string text;
 ```
+
 - ✅ Simple and concise
 - ✅ Works perfectly in standard mode
 - ⚠️ Generates warnings if NativeAOT is enabled (not used in this project)
 
-**Option 2: AOT-compatible pattern (optional)**
+##### Option 2: AOT-compatible pattern (optional)
+
 ```csharp
 // ✅ AOT-compatible pattern - No warnings (C# 11+, VS 17.12+)
 [ObservableProperty]
 public partial string Text { get; set; }
 ```
+
 - ✅ NativeAOT compatible
 - ✅ No warnings
 - ⚠️ Requires C# 11+ and partial properties
@@ -211,6 +225,7 @@ public partial string Text { get; set; }
 **Decision for this project**: Use **Option 1** (private fields) since NativeAOT is not required.
 
 #### Pattern 3: Collections
+
 ```csharp
 // ❌ WPF Code-behind
 dataGrid.ItemsSource = GetItems();
@@ -227,6 +242,7 @@ public async Task LoadItemsAsync()
 ```
 
 #### Pattern 4: Dependency Properties
+
 ```csharp
 // ❌ WPF Dependency Property
 public static readonly DependencyProperty TextProperty =
@@ -325,7 +341,7 @@ using System.Management.Automation.Runspaces;
 
 #### ⚠️ ContentDialog and XamlRoot - MANDATORY
 
-**WPF → WinUI 3: XamlRoot is REQUIRED for dialogs**
+#### WPF → WinUI 3: XamlRoot is REQUIRED for dialogs
 
 ```csharp
 // ❌ WPF - MessageBox.Show()
@@ -363,6 +379,7 @@ if (result == ContentDialogResult.Primary)
 ```
 
 **Getting XamlRoot depending on context**:
+
 ```csharp
 // From a Page
 XamlRoot = this.XamlRoot;
@@ -378,6 +395,7 @@ XamlRoot = this.Content.XamlRoot;
 ```
 
 **Recommended pattern for ViewModels**:
+
 ```csharp
 // Dialog helper service
 public interface IDialogService
@@ -415,7 +433,8 @@ public class DialogService : IDialogService
 ## Architecture Decision
 
 ### Namespace & Project Structure
-```
+
+```text
 src/CCEM/
 ├── SCCM/
 │   ├── Automation/              # Migrated sccmclictr.automation library
@@ -449,6 +468,7 @@ src/CCEM/
 ```
 
 **Primary Namespace**: `CCEM.SCCM.Automation`
+
 - Future-ready for `CCEM.Intune.*` namespaces
 - Clear separation of concerns
 - Scalable architecture
@@ -460,10 +480,12 @@ src/CCEM/
 ### Status: ⏳ Not Started (0/4 tasks complete)
 
 ### 1.1 Migrate sccmclictr.automation Library
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/SCCM/Automation/`
 
 **Tasks**:
+
 1. [ ] Create new folder structure `SCCM/Automation/`
 2. [ ] Copy all .cs files from `sccmclictr/sccmclictrlib/sccmclictr.automation/`
 3. [ ] Update namespace from `sccmclictr.automation` to `CCEM.SCCM.Automation`
@@ -481,6 +503,7 @@ src/CCEM/
    - [ ] `Components`, `Policy`, `SoftwareDistribution`, etc.
 
 **Files to migrate** (~20 core classes):
+
 - [ ] SCCMAgent.cs
 - [ ] AgentActions.cs
 - [ ] AgentProperties.cs
@@ -503,25 +526,30 @@ src/CCEM/
 - [ ] Common.cs
 
 **WPF Conversion Notes**:
+
 - ⚠️ These are pure C# classes with PowerShell - no WPF dependencies expected
 - ✅ Should port cleanly to .NET 9
 - ⚠️ Check for any `System.Windows` references and remove
 
 ### 1.2 Create SCCM Services Layer
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/SCCM/Services/`
 
 **New Services**:
+
 1. [ ] **ISCCMConnectionService** - Manages SCCMAgent lifecycle
 2. [ ] **ISCCMPluginService** - Handles plugin discovery and loading
 3. [ ] **ISCCMDataService** - Provides data access for SCCM entities
 4. [ ] Register all services in `App.xaml.cs` → `ConfigureServices()`
 
 ### 1.3 Create SCCM Models
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/SCCM/Models/`
 
 **Create wrapper models** for automation library entities:
+
 - [ ] `ComponentModel.cs` - wraps automation Components
 - [ ] `ApplicationModel.cs` - wraps automation Applications
 - [ ] `UpdateModel.cs` - wraps automation Software Updates
@@ -529,15 +557,18 @@ src/CCEM/
 - [ ] `PolicyModel.cs` - wraps automation Policy
 
 **WPF Conversion**:
+
 - ✅ Use `ObservableObject` base class (CommunityToolkit.Mvvm)
 - ✅ Use `[ObservableProperty]` attributes
 - ❌ No `INotifyPropertyChanged` manual implementation
 
 ### 1.4 Create Shared Utilities
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/Shared/`
 
 **Common Services**:
+
 - [ ] `Shared/Helpers/CommandHelper.cs` - common commands
 - [ ] `Shared/Converters/` - value converters
 
@@ -548,6 +579,7 @@ src/CCEM/
 ### Status: ⏳ Not Started (0/3 tasks complete)
 
 ### 2.1 Update Navigation Structure
+
 **Status**: ⏳ Not Started
 **File**: `Assets/NavViewMenu/AppData.json`
 
@@ -557,6 +589,7 @@ src/CCEM/
 - [ ] T4 templates will auto-generate mappings
 
 ### 2.2 Create Connection UI
+
 **Status**: ⏳ Not Started
 **New File**: `Views/SCCM/ConnectionPage.xaml`
 
@@ -569,11 +602,13 @@ src/CCEM/
 - [ ] Register ViewModel in DI
 
 **WPF Conversion**:
+
 - ❌ Remove Ribbon connection panel
 - ✅ Replace with modern WinUI 3 CommandBar
 - ✅ `AutoCompleteBox` → `AutoSuggestBox`
 
 ### 2.3 Main Window Updates
+
 **Status**: ⏳ Not Started
 **File**: `MainWindow.xaml`
 
@@ -589,6 +624,7 @@ src/CCEM/
 ### Status: ⏳ Not Started (0/29 controls complete)
 
 ### Migration Pattern Template
+
 **For each control, follow this WPF → WinUI 3 conversion pattern:**
 
 1. [ ] **Create XAML Page** (`Views/SCCM/[Name]Page.xaml`)
@@ -611,6 +647,7 @@ src/CCEM/
 5. [ ] **Test** with WinUI 3 runtime
 
 ### 3.1 Core Controls (Weeks 1-2)
+
 **Status**: ⏳ Not Started (0/4 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -621,6 +658,7 @@ src/CCEM/
 | 4 | Install/Repair | `InstallRepair.xaml` | `InstallRepairPage.xaml` | ⏳ | Action buttons |
 
 ### 3.2 Inventory Controls (Weeks 3-4)
+
 **Status**: ⏳ Not Started (0/5 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -632,6 +670,7 @@ src/CCEM/
 | 9 | Exec History | `ExecHistoryGrid.xaml` | `ExecutionHistoryPage.xaml` | ⏳ | History grid |
 
 ### 3.3 Software Updates (Week 5)
+
 **Status**: ⏳ Not Started (0/3 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -641,6 +680,7 @@ src/CCEM/
 | 12 | Update Status | `SWStatusGrid.xaml` | `UpdateStatusPage.xaml` | ⏳ | Status display |
 
 ### 3.4 System Controls (Weeks 6-7)
+
 **Status**: ⏳ Not Started (0/5 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -652,6 +692,7 @@ src/CCEM/
 | 17 | Event Monitoring | `EventMonitoring.xaml` | `EventMonitoringPage.xaml` | ⏳ | Real-time events |
 
 ### 3.5 Advanced Controls (Weeks 8-9)
+
 **Status**: ⏳ Not Started (0/9 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -667,6 +708,7 @@ src/CCEM/
 | 26 | About | `About.xaml` | `AboutPage.xaml` | ⏳ | ContentDialog |
 
 ### 3.6 Special Controls
+
 **Status**: ⏳ Not Started (0/1 complete)
 
 | # | Control | Source | Target | Status | Notes |
@@ -674,6 +716,7 @@ src/CCEM/
 | 27 | Schedule Control | `ScheduleControl/*.xaml` | Custom UserControl | ⏳ | Win2D/Composition |
 
 **WPF Conversion for Special Controls**:
+
 - ⚠️ `ScheduleControl` uses WPF Canvas - need to redesign with Win2D or Composition API
 - ⚠️ Timeline visualization requires custom rendering
 
@@ -684,6 +727,7 @@ src/CCEM/
 ### Status: ⏳ Not Started (0/17 plugins complete)
 
 ### 4.1 Plugin Architecture
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/SCCM/Plugins/`
 
@@ -695,11 +739,13 @@ src/CCEM/
 - [ ] Create plugin loading mechanism
 
 **WPF Conversion**:
+
 - ❌ Remove reflection-based WPF UI extraction
 - ✅ Use proper WinUI 3 UIElement composition
 - ✅ Update namespaces from `System.Windows` to `Microsoft.UI.Xaml`
 
 ### 4.2 Migrate Priority Plugins (Weeks 10-12)
+
 **Status**: ⏳ Not Started (0/17 complete)
 
 | # | Plugin | Source | Target | Status | Priority | WPF Notes |
@@ -724,6 +770,7 @@ src/CCEM/
 
 **Plugin Migration Pattern**:
 For each plugin:
+
 1. [ ] Copy source files
 2. [ ] ✅ Convert XAML to WinUI 3 (namespaces, controls)
 3. [ ] ✅ Update code-behind to use WinUI 3 types
@@ -733,6 +780,7 @@ For each plugin:
 7. [ ] Test loading and execution
 
 ### 4.3 Plugin Integration UI
+
 **Status**: ⏳ Not Started
 
 - [ ] Add plugin buttons to CommandBar
@@ -746,9 +794,11 @@ For each plugin:
 ### Status: ⏳ Not Started (0/1 complete)
 
 ### 5.1 Agent Actions
+
 **Status**: ⏳ Not Started
 
 **WPF Ribbon → WinUI 3 CommandBar Conversion**:
+
 - [ ] ❌ Remove WPF Ribbon control
 - [ ] ✅ Create CommandBar with MenuFlyouts
 - [ ] Inventory Group (HW Inv, SW Inv, DDR)
@@ -757,6 +807,7 @@ For each plugin:
 - [ ] Create ViewModel commands for all actions
 
 **WPF Conversion**:
+
 - ❌ `RibbonButton` → ✅ `AppBarButton`
 - ❌ `RibbonSplitButton` → ✅ `AppBarButton` with `MenuFlyout`
 - ❌ `RibbonGroup` → ✅ `CommandBar` sections
@@ -768,6 +819,7 @@ For each plugin:
 ### Status: ⏳ Not Started (0/2 complete)
 
 ### 6.1 Trace Listener Integration
+
 **Status**: ⏳ Not Started
 
 - [ ] Integrate existing `MyTraceListener` with Serilog
@@ -777,10 +829,12 @@ For each plugin:
 - [ ] PowerShell command tracing
 
 **WPF Conversion**:
+
 - ❌ `RichTextBox` → ✅ `RichEditBox`
 - ✅ Use `ObservableCollection<LogEntry>` for binding
 
 ### 6.2 Developer Mode
+
 **Status**: ⏳ Not Started
 
 - [ ] Enable in AppConfig
@@ -795,6 +849,7 @@ For each plugin:
 ### Status: ⏳ Not Started (0/3 complete)
 
 ### 7.1 Unit Testing
+
 **Status**: ⏳ Not Started
 **Create**: `tests/CCEM.Tests`
 
@@ -803,6 +858,7 @@ For each plugin:
 - [ ] Test ViewModels
 
 ### 7.2 Integration Testing
+
 **Status**: ⏳ Not Started
 
 - [ ] Test with real SCCM client
@@ -811,6 +867,7 @@ For each plugin:
 - [ ] Plugin loading/unloading
 
 ### 7.3 UI Testing
+
 **Status**: ⏳ Not Started
 
 - [ ] WinAppDriver setup
@@ -820,9 +877,10 @@ For each plugin:
 
 ## Phase 8: Intune Preparation
 
-### Status: ⏳ Not Started (0/3 complete)
+**Progress:** ⏳ Not Started (0/3 complete)
 
 ### 8.1 Architecture Foundation
+
 **Status**: ⏳ Not Started
 **Target**: `src/CCEM/Intune/`
 
@@ -831,12 +889,14 @@ For each plugin:
 - [ ] Design service architecture
 
 ### 8.2 Placeholder UI
+
 **Status**: ⏳ Not Started
 
 - [ ] Create `ComingSoonPage.xaml`
 - [ ] Add to navigation
 
 ### 8.3 Mode Switcher
+
 **Status**: ⏳ Not Started
 
 - [ ] Toggle between SCCM/Intune
@@ -847,6 +907,7 @@ For each plugin:
 ## Quick Reference: Next Steps
 
 **When starting work, always**:
+
 1. ✅ Check Migration Progress Tracker for current phase
 2. ✅ Review WPF to WinUI 3 Conversion Guide
 3. ✅ Follow the migration checklist for each control
@@ -854,7 +915,8 @@ For each plugin:
 5. ✅ Test thoroughly with WinUI 3 runtime
 
 **Status Update Format**:
-```
+
+```text
 [Component Name]
 Status: ⏳ → 🔄 (In Progress)
 Started: [Date]
@@ -869,4 +931,4 @@ Notes: [Final notes, known issues]
 
 ---
 
-**End of Migration Plan**
+## End of Migration Plan
