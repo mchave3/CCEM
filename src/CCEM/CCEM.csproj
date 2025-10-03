@@ -64,7 +64,7 @@
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
-  <!-- 
+  <!--
 	Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
 	Tools extension to be activated for this project even if the Windows App SDK Nuget
 	package has not yet been restored.
@@ -88,9 +88,9 @@
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
-  <!-- 
-	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
-	Explorer "Package and Publish" context menu entry to be enabled for this project even if 
+  <!--
+	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+	Explorer "Package and Publish" context menu entry to be enabled for this project even if
 	the Windows App SDK Nuget package has not yet been restored.
   -->
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
@@ -104,4 +104,7 @@
     <!-- Check if TextTransform.exe exists before running -->
     <Exec Command="if exist &quot;$(DevEnvDir)TextTransform.exe&quot; &quot;$(DevEnvDir)TextTransform.exe&quot; &quot;%(T4Template.FullPath)&quot;" Condition="Exists('$(DevEnvDir)TextTransform.exe')" />
   </Target>
+
+  <!-- Import the targets file to remove unwanted language folders -->
+  <Import Project="RemoveLanguageFolders.targets" />
 </Project>
