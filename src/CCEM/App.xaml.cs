@@ -28,11 +28,19 @@ public partial class App : Application
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
+
+        // DevWinUI Services
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IJsonNavigationService, JsonNavigationService>();
-
-        services.AddTransient<MainViewModel>();
         services.AddSingleton<ContextMenuService>();
+
+        // SCCM Services
+        services.AddSingleton<ISCCMConnectionService, SCCMConnectionService>();
+        services.AddSingleton<ISCCMPluginService, SCCMPluginService>();
+        services.AddSingleton<ISCCMDataService, SCCMDataService>();
+
+        // ViewModels
+        services.AddTransient<MainViewModel>();
         services.AddTransient<GeneralSettingViewModel>();
         services.AddTransient<AppUpdateSettingViewModel>();
         services.AddTransient<AboutUsSettingViewModel>();

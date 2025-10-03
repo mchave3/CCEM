@@ -78,6 +78,7 @@
     <PackageReference Include="DevWinUI.ContextMenu" Version="9.0.0" />
     <PackageReference Include="DevWinUI.Controls" Version="9.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.3" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6584" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
@@ -87,6 +88,8 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.Management" Version="9.0.9" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.9" />
   </ItemGroup>
   <!--
 	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

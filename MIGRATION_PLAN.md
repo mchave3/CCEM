@@ -6,11 +6,11 @@
 
 ## 📊 Migration Progress Tracker
 
-### Overall Progress: 0% Complete
+### Overall Progress: 12.5% Complete (1/8 phases)
 
 | Phase | Status | Progress | Started | Completed |
 |-------|--------|----------|---------|-----------|
-| Phase 1: Foundation & Core Library | ⏳ Not Started | 0/4 | - | - |
+| Phase 1: Foundation & Core Library | ✅ Completed | 4/4 | 2025-10-04 | 2025-10-04 |
 | Phase 2: Navigation & UI Framework | ⏳ Not Started | 0/3 | - | - |
 | Phase 3: Control Migration (29 controls) | ⏳ Not Started | 0/29 | - | - |
 | Phase 4: Plugin System (17 plugins) | ⏳ Not Started | 0/17 | - | - |
@@ -31,9 +31,9 @@
 
 ## 🎯 Current Sprint Focus
 
-**Sprint**: Sprint 1 - Foundation
+**Sprint**: Sprint 2 - Navigation & UI
 **Target Completion**: TBD
-**Active Tasks**: Phase 1.1 - Migrate sccmclictr.automation Library
+**Active Tasks**: Phase 2.1 - Update Navigation Structure
 
 ---
 
@@ -477,100 +477,114 @@ src/CCEM/
 
 ## Phase 1: Foundation & Core Library Migration
 
-### Status: ⏳ Not Started (0/4 tasks complete)
+### Status: ✅ Completed (4/4 tasks complete) - Completed: 2025-10-04
 
 ### 1.1 Migrate sccmclictr.automation Library
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Automation/`
 
 **Tasks**:
 
-1. [ ] Create new folder structure `SCCM/Automation/`
-2. [ ] Copy all .cs files from `sccmclictr/sccmclictrlib/sccmclictr.automation/`
-3. [ ] Update namespace from `sccmclictr.automation` to `CCEM.SCCM.Automation`
-4. [ ] Update namespace in sub-namespaces:
-   - [ ] `sccmclictr.automation.functions` → `CCEM.SCCM.Automation.Functions`
-5. [ ] Port to .NET 9 (`net9.0-windows10.0.26100.0`)
-6. [ ] Update dependencies:
-   - [ ] ✅ Keep: `System.Management.Automation` (PowerShell 7+)
-   - [ ] ✅ Keep: `System.Management` (WMI)
-   - [ ] ❌ Remove: .NET Framework-specific references
-7. [ ] **WPF Conversion**: Remove any WPF-specific code
-8. [ ] Test all core classes:
-   - [ ] `SCCMAgent` (connection & runspace management)
-   - [ ] `AgentActions` (inventory, policy, etc.)
-   - [ ] `Components`, `Policy`, `SoftwareDistribution`, etc.
+1. [x] Create new folder structure `SCCM/Automation/`
+2. [x] Copy all .cs files from `sccmclictr/sccmclictrlib/sccmclictr.automation/`
+3. [x] Update namespace from `sccmclictr.automation` to `CCEM.SCCM.Automation`
+4. [x] Update namespace in sub-namespaces:
+   - [x] `sccmclictr.automation.functions` → `CCEM.SCCM.Automation.Functions`
+5. [x] Port to .NET 9 (`net9.0-windows10.0.26100.0`)
+6. [x] Update dependencies:
+   - [x] ✅ Keep: `System.Management.Automation` (PowerShell 7+)
+   - [x] ✅ Keep: `System.Management` (WMI)
+   - [x] ❌ Remove: .NET Framework-specific references
+7. [x] **WPF Conversion**: Remove any WPF-specific code
+8. [x] Test all core classes:
+   - [x] `SCCMAgent` (connection & runspace management)
+   - [x] `AgentActions` (inventory, policy, etc.)
+   - [x] `Components`, `Policy`, `SoftwareDistribution`, etc.
 
-**Files to migrate** (~20 core classes):
+**Files migrated** (23 core classes):
 
-- [ ] SCCMAgent.cs
-- [ ] AgentActions.cs
-- [ ] AgentProperties.cs
-- [ ] SoftwareDistribution.cs
-- [ ] Components.cs
-- [ ] Policy.cs
-- [ ] Inventory.cs
-- [ ] SoftwareUpdates.cs
-- [ ] Health.cs
-- [ ] Services.cs
-- [ ] Monitoring.cs
-- [ ] LocationServices.cs
-- [ ] Processes.cs
-- [ ] SWCache.cs
-- [ ] DCM.cs
-- [ ] AppV.cs
-- [ ] WSMan.cs
-- [ ] ScheduleDecoding.cs
-- [ ] BaseInit.cs
-- [ ] Common.cs
+- [x] SCCMAgent.cs
+- [x] AgentActions.cs
+- [x] AgentProperties.cs
+- [x] SoftwareDistribution.cs
+- [x] Components.cs
+- [x] Policy.cs
+- [x] Inventory.cs
+- [x] SoftwareUpdates.cs
+- [x] Health.cs
+- [x] Services.cs
+- [x] Monitoring.cs
+- [x] LocationServices.cs
+- [x] Processes.cs
+- [x] SWCache.cs
+- [x] DCM.cs
+- [x] AppV.cs
+- [x] WSMan.cs
+- [x] ScheduleDecoding.cs
+- [x] BaseInit.cs
+- [x] Common.cs
+- [x] DDRGen.cs
+- [x] Properties/Resources.Designer.cs
+- [x] Properties/Settings.Designer.cs
+
+**Build Fixes Applied**:
+- Fixed namespace reference in AgentActions.cs (sccmclictr → CCEM.SCCM.Automation)
+- Added missing Settings.Designer.cs and Settings.settings files
+- Fixed image type ambiguity in Common.cs (System.Drawing.Image vs Microsoft.UI.Xaml.Controls.Image)
+- Project builds successfully with expected nullable warnings
 
 **WPF Conversion Notes**:
 
-- ⚠️ These are pure C# classes with PowerShell - no WPF dependencies expected
-- ✅ Should port cleanly to .NET 9
-- ⚠️ Check for any `System.Windows` references and remove
+- ✅ No WPF dependencies found - pure C# classes with PowerShell
+- ✅ Ported cleanly to .NET 9
+- ✅ System.Drawing.Image types properly qualified to avoid WinUI conflicts
 
 ### 1.2 Create SCCM Services Layer
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Services/`
 
-**New Services**:
+**Services Created**:
 
-1. [ ] **ISCCMConnectionService** - Manages SCCMAgent lifecycle
-2. [ ] **ISCCMPluginService** - Handles plugin discovery and loading
-3. [ ] **ISCCMDataService** - Provides data access for SCCM entities
-4. [ ] Register all services in `App.xaml.cs` → `ConfigureServices()`
+1. [x] **ISCCMConnectionService** / **SCCMConnectionService** - Manages SCCMAgent lifecycle
+2. [x] **ISCCMPluginService** / **SCCMPluginService** - Handles plugin discovery and loading
+3. [x] **ISCCMDataService** / **SCCMDataService** - Provides data access for SCCM entities
+4. [x] Register all services in `App.xaml.cs` → `ConfigureServices()`
+
+**Build Fixes Applied**:
+- Updated SCCMConnectionService to use proper SCCMAgent constructors (no parameterless constructor)
+- Fixed SCCMDataService property access (oComponents → Client.Components)
+- All services properly registered as Singletons in DI container
 
 ### 1.3 Create SCCM Models
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Models/`
 
-**Create wrapper models** for automation library entities:
+**Models Created**:
 
-- [ ] `ComponentModel.cs` - wraps automation Components
-- [ ] `ApplicationModel.cs` - wraps automation Applications
-- [ ] `UpdateModel.cs` - wraps automation Software Updates
-- [ ] `ServiceModel.cs` - wraps automation Services
-- [ ] `PolicyModel.cs` - wraps automation Policy
+- [x] `ComponentModel.cs` - wraps automation Components
+- [x] `ApplicationModel.cs` - wraps automation Applications
+- [x] `UpdateModel.cs` - wraps automation Software Updates
+- [x] `ServiceModel.cs` - wraps automation Services
+- [x] `PolicyModel.cs` - wraps automation Policy
 
 **WPF Conversion**:
 
-- ✅ Use `ObservableObject` base class (CommunityToolkit.Mvvm)
-- ✅ Use `[ObservableProperty]` attributes
-- ❌ No `INotifyPropertyChanged` manual implementation
+- ✅ All models use `ObservableObject` base class (CommunityToolkit.Mvvm)
+- ✅ All properties use `[ObservableProperty]` attributes
+- ✅ No manual `INotifyPropertyChanged` implementation needed
 
 ### 1.4 Create Shared Utilities
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/Shared/`
 
-**Common Services**:
+**Utilities Created**:
 
-- [ ] `Shared/Helpers/CommandHelper.cs` - common commands
-- [ ] `Shared/Converters/` - value converters
+- [x] `Shared/Helpers/CommandHelper.cs` - async command execution, PowerShell support, UAC elevation
+- [x] `Shared/Converters/` - folder created for Phase 2
 
 ---
 
