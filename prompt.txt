@@ -1,0 +1,65 @@
+Tu trouveras dans le dossier sccmclictr à la racine de mon repo l'ensemble des sources d'un projet WPF qui se nomme "Client Center for Configuration Manager". Ce projet (qui fonctionne très bien l'état) WPF est actuellement en EOL depuis un peu plus de 2 ans et mon objectif est de migrer ce projet sur une structure plus récente et moderne. Je souhaite réecrire le code sur une base plus moderne (WinUI3, .Net 9). Ce projet gère uniquement du client SCCM. Mon objectif dans ma nouvelle app est d'avoir une section SCCM et une section Intune. Pour le moment nous allons nous concentrer sur la migration de ce projet. Dans un premier temps on va établire ensemble un plan de migration dans un document markdown que tu sera capable de comprendre et de suivre tout au long de la migration. Fait une analyse complète et approfondie de ce projet afin de comprendre le fonctionnement. La migration devra se faire dans le projet @src/CCEM/CCEM.csproj . Je veux uniquement que tu génère le plan de migration dans le document markdown en anglais.
+
+
+You are an experienced senior Windows desktop engineer and migration architect.
+Your task: produce a single, comprehensive, actionable migration plan (Markdown, in English) to migrate an existing WPF application to a modern WinUI 3 / .NET 9 codebase.
+
+Context
+- Repository root contains folder `sccmclictr` with all sources for a WPF project named "Client Center for Configuration Manager".
+- The WPF app is currently functional but has been EOL for a little over 2 years.
+- The current app manages only SCCM clients.
+- The long-term product will include two sections: SCCM and Intune. **For this task, focus exclusively on migrating the existing SCCM functionality.**
+- Migration must be implemented within the project path: `@src/CCEM/CCEM.csproj`.
+
+Objectives
+1. Perform a thorough, in-depth analysis of the existing WPF project to understand architecture, features, dependencies, and interop points.
+2. Produce a detailed, step-by-step migration plan (Markdown) that is actionable and can be followed during the migration.
+3. Ensure functional parity for SCCM features in the migrated WinUI3/.NET 9 application.
+4. Provide clear checklists, verification steps, and acceptance criteria for each migration phase.
+5. Identify risks, blocking issues, and mitigation strategies.
+
+Scope (explicit)
+- IN SCOPE: Analysis of the WPF project, dependency inventory, mapping WPF → WinUI3, step-by-step migration tasks, build/CI packaging, testing & validation, MVP definition for SCCM, rollback plan.
+- OUT OF SCOPE: Implementing the Intune section (only plan where to extend later), changing unrelated projects outside `@src/CCEM/CCEM.csproj`.
+
+Required contents of the Markdown migration plan (English)
+- Executive summary / migration goal (concise).
+- Assumptions (list any assumptions you make about the repo or environment).
+- Full technical inventory:
+  - Projects and key files (Views, ViewModels, Services, Models, Resources, XAML).
+  - NuGet packages and third-party libraries.
+  - Native/COM/WMI/PowerShell interop points and platform-specific code.
+  - Build scripts, CI pipelines, and packaging artifacts.
+- Compatibility & blocking issues to watch for (APIs not available in .NET 9, WinUI3 differences, Win32/COM limitations).
+- Architecture recommendations for the new app:
+  - Suggested project structure under `@src/CCEM/CCEM.csproj`.
+  - Patterns (MVVM, DI container—e.g., Microsoft.Extensions.DependencyInjection), async patterns, separation of concerns, modularity to add Intune later.
+- Detailed, phased migration strategy (each phase must be actionable and contain checklists):
+  - Phase 0 — Preparation & analysis: repo sanity checks, build & run WPF, static analysis, tests baseline, environment setup.
+  - Phase 1 — Skeleton WinUI3 project & CI: create WinUI3/.NET9 project in `@src/CCEM/CCEM.csproj` or convert in-place, CI changes, basic app shell, navigation, theming.
+  - Phase 2 — Incremental feature porting: map and port ViewModels, services, data access, move XAML UI to WinUI equivalents, replace unsupported controls, handle interop.
+  - Phase 3 — Integration, tests & validation: automated tests, functional tests for SCCM interactions, manual QA checklist.
+  - Phase 4 — Packaging & deployment: MSIX packaging, signing, installer, compatibility checks.
+  - Phase 5 — Stabilization & documentation: final QA, performance checks, docs, plan for Intune addition.
+- For each migration task include:
+  - Concrete steps (commands, file patterns to change, example `csproj` snippets).
+  - Checkboxes for verification (e.g., "✅ App builds", "✅ Feature X reproduces expected behavior").
+  - Risks and mitigation for that specific step.
+- Mapping table: old WPF components → WinUI3 counterpart (views, controls, resources).
+- Build/CI instructions: commands to build WinUI3/.NET9, example CI job changes, test runners.
+- Testing & validation plan: unit tests, integration tests, manual test cases for SCCM functionality, criteria to mark feature done.
+- Packaging & deployment details: MSIX recommendations, constraints, registry/permission considerations for SCCM client interactions.
+- Rollback & fallback plan: how to revert to the WPF version if needed, branching strategy.
+- Acceptance criteria & definition of done for the SCCM MVP (minimal deliverable that can be shipped).
+- Next steps to add Intune later (architectural hooks to make adding Intune straightforward).
+
+Formatting and constraints
+- Output **ONLY** the migration plan as a single Markdown document, in English.
+- Use clear headings, bullet lists, numbered steps, checkboxes, code blocks for commands and `csproj` snippets, and tables where useful.
+- Do **not** modify repository files—this is an analysis + plan only.
+- Do **not** include time estimates or schedules. You may rate complexity/priority (e.g., low/medium/high) but do not provide dates/durations.
+- If any point is ambiguous, list the assumption explicitly at the top of the document (do not ask questions).
+- The plan must be detailed enough that an experienced developer can follow it step-by-step to perform the migration.
+
+Final instruction to you (Claude Sonnet)
+Produce a single Markdown document (English) containing the full migration plan described above — nothing else. Begin with a short Executive Summary and a clear list of assumptions you made.
