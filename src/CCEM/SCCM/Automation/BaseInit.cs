@@ -1,9 +1,14 @@
-﻿//SCCM Client Center Automation Library (SCCMCliCtr.automation)
-//Copyright (c) 2018 by Roger Zander
-
-//This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 3 of the License, or any later version. 
-//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details. 
-//GNU General Public License: http://www.gnu.org/licenses/lgpl.html
+﻿// SCCM Client Center Automation Library (CCEM.SCCM.Automation)
+// Derived from SCCMCliCtr by Roger Zander (https://github.com/rzander/sccmclictr)
+//
+// Original work Copyright (c) 2018 Roger Zander
+// Modifications Copyright (c) 2025 Mickaël CHAVE
+//
+// Licensed under the Microsoft Public License (Ms-PL)
+// See LICENSE_Ms-PL.txt for the full license text.
+//
+// This file has been migrated from .NET Framework 4.8 to .NET 9 and adapted
+// for use in the CCEM WinUI 3 application.
 
 using System;
 using System.Collections.Generic;
