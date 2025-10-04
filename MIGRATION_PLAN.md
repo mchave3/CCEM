@@ -6,11 +6,11 @@
 
 ## 📊 Migration Progress Tracker
 
-### Overall Progress: 0% Complete
+### Overall Progress: 12.5% Complete (1/8 phases)
 
 | Phase | Status | Progress | Started | Completed |
 |-------|--------|----------|---------|-----------|
-| Phase 1: Foundation & Core Library | ⏳ Not Started | 0/4 | - | - |
+| Phase 1: Foundation & Core Library | ✅ Completed | 4/4 | 2025-10-04 | 2025-10-04 |
 | Phase 2: Navigation & UI Framework | ⏳ Not Started | 0/3 | - | - |
 | Phase 3: Control Migration (29 controls) | ⏳ Not Started | 0/29 | - | - |
 | Phase 4: Plugin System (17 plugins) | ⏳ Not Started | 0/17 | - | - |
@@ -31,9 +31,9 @@
 
 ## 🎯 Current Sprint Focus
 
-**Sprint**: Sprint 1 - Foundation
+**Sprint**: Sprint 2 - Navigation & UI
 **Target Completion**: TBD
-**Active Tasks**: Phase 1.1 - Migrate sccmclictr.automation Library
+**Active Tasks**: Phase 2.1 - Update Navigation Structure
 
 ---
 
@@ -477,100 +477,114 @@ src/CCEM/
 
 ## Phase 1: Foundation & Core Library Migration
 
-### Status: ⏳ Not Started (0/4 tasks complete)
+### Status: ✅ Completed (4/4 tasks complete) - Completed: 2025-10-04
 
 ### 1.1 Migrate sccmclictr.automation Library
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Automation/`
 
 **Tasks**:
 
-1. [ ] Create new folder structure `SCCM/Automation/`
-2. [ ] Copy all .cs files from `sccmclictr/sccmclictrlib/sccmclictr.automation/`
-3. [ ] Update namespace from `sccmclictr.automation` to `CCEM.SCCM.Automation`
-4. [ ] Update namespace in sub-namespaces:
-   - [ ] `sccmclictr.automation.functions` → `CCEM.SCCM.Automation.Functions`
-5. [ ] Port to .NET 9 (`net9.0-windows10.0.26100.0`)
-6. [ ] Update dependencies:
-   - [ ] ✅ Keep: `System.Management.Automation` (PowerShell 7+)
-   - [ ] ✅ Keep: `System.Management` (WMI)
-   - [ ] ❌ Remove: .NET Framework-specific references
-7. [ ] **WPF Conversion**: Remove any WPF-specific code
-8. [ ] Test all core classes:
-   - [ ] `SCCMAgent` (connection & runspace management)
-   - [ ] `AgentActions` (inventory, policy, etc.)
-   - [ ] `Components`, `Policy`, `SoftwareDistribution`, etc.
+1. [x] Create new folder structure `SCCM/Automation/`
+2. [x] Copy all .cs files from `sccmclictr/sccmclictrlib/sccmclictr.automation/`
+3. [x] Update namespace from `sccmclictr.automation` to `CCEM.SCCM.Automation`
+4. [x] Update namespace in sub-namespaces:
+   - [x] `sccmclictr.automation.functions` → `CCEM.SCCM.Automation.Functions`
+5. [x] Port to .NET 9 (`net9.0-windows10.0.26100.0`)
+6. [x] Update dependencies:
+   - [x] ✅ Keep: `System.Management.Automation` (PowerShell 7+)
+   - [x] ✅ Keep: `System.Management` (WMI)
+   - [x] ❌ Remove: .NET Framework-specific references
+7. [x] **WPF Conversion**: Remove any WPF-specific code
+8. [x] Test all core classes:
+   - [x] `SCCMAgent` (connection & runspace management)
+   - [x] `AgentActions` (inventory, policy, etc.)
+   - [x] `Components`, `Policy`, `SoftwareDistribution`, etc.
 
-**Files to migrate** (~20 core classes):
+**Files migrated** (23 core classes):
 
-- [ ] SCCMAgent.cs
-- [ ] AgentActions.cs
-- [ ] AgentProperties.cs
-- [ ] SoftwareDistribution.cs
-- [ ] Components.cs
-- [ ] Policy.cs
-- [ ] Inventory.cs
-- [ ] SoftwareUpdates.cs
-- [ ] Health.cs
-- [ ] Services.cs
-- [ ] Monitoring.cs
-- [ ] LocationServices.cs
-- [ ] Processes.cs
-- [ ] SWCache.cs
-- [ ] DCM.cs
-- [ ] AppV.cs
-- [ ] WSMan.cs
-- [ ] ScheduleDecoding.cs
-- [ ] BaseInit.cs
-- [ ] Common.cs
+- [x] SCCMAgent.cs
+- [x] AgentActions.cs
+- [x] AgentProperties.cs
+- [x] SoftwareDistribution.cs
+- [x] Components.cs
+- [x] Policy.cs
+- [x] Inventory.cs
+- [x] SoftwareUpdates.cs
+- [x] Health.cs
+- [x] Services.cs
+- [x] Monitoring.cs
+- [x] LocationServices.cs
+- [x] Processes.cs
+- [x] SWCache.cs
+- [x] DCM.cs
+- [x] AppV.cs
+- [x] WSMan.cs
+- [x] ScheduleDecoding.cs
+- [x] BaseInit.cs
+- [x] Common.cs
+- [x] DDRGen.cs
+- [x] Properties/Resources.Designer.cs
+- [x] Properties/Settings.Designer.cs
+
+**Build Fixes Applied**:
+- Fixed namespace reference in AgentActions.cs (sccmclictr → CCEM.SCCM.Automation)
+- Added missing Settings.Designer.cs and Settings.settings files
+- Fixed image type ambiguity in Common.cs (System.Drawing.Image vs Microsoft.UI.Xaml.Controls.Image)
+- Project builds successfully with expected nullable warnings
 
 **WPF Conversion Notes**:
 
-- ⚠️ These are pure C# classes with PowerShell - no WPF dependencies expected
-- ✅ Should port cleanly to .NET 9
-- ⚠️ Check for any `System.Windows` references and remove
+- ✅ No WPF dependencies found - pure C# classes with PowerShell
+- ✅ Ported cleanly to .NET 9
+- ✅ System.Drawing.Image types properly qualified to avoid WinUI conflicts
 
 ### 1.2 Create SCCM Services Layer
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Services/`
 
-**New Services**:
+**Services Created**:
 
-1. [ ] **ISCCMConnectionService** - Manages SCCMAgent lifecycle
-2. [ ] **ISCCMPluginService** - Handles plugin discovery and loading
-3. [ ] **ISCCMDataService** - Provides data access for SCCM entities
-4. [ ] Register all services in `App.xaml.cs` → `ConfigureServices()`
+1. [x] **ISCCMConnectionService** / **SCCMConnectionService** - Manages SCCMAgent lifecycle
+2. [x] **ISCCMPluginService** / **SCCMPluginService** - Handles plugin discovery and loading
+3. [x] **ISCCMDataService** / **SCCMDataService** - Provides data access for SCCM entities
+4. [x] Register all services in `App.xaml.cs` → `ConfigureServices()`
+
+**Build Fixes Applied**:
+- Updated SCCMConnectionService to use proper SCCMAgent constructors (no parameterless constructor)
+- Fixed SCCMDataService property access (oComponents → Client.Components)
+- All services properly registered as Singletons in DI container
 
 ### 1.3 Create SCCM Models
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/SCCM/Models/`
 
-**Create wrapper models** for automation library entities:
+**Models Created**:
 
-- [ ] `ComponentModel.cs` - wraps automation Components
-- [ ] `ApplicationModel.cs` - wraps automation Applications
-- [ ] `UpdateModel.cs` - wraps automation Software Updates
-- [ ] `ServiceModel.cs` - wraps automation Services
-- [ ] `PolicyModel.cs` - wraps automation Policy
+- [x] `ComponentModel.cs` - wraps automation Components
+- [x] `ApplicationModel.cs` - wraps automation Applications
+- [x] `UpdateModel.cs` - wraps automation Software Updates
+- [x] `ServiceModel.cs` - wraps automation Services
+- [x] `PolicyModel.cs` - wraps automation Policy
 
 **WPF Conversion**:
 
-- ✅ Use `ObservableObject` base class (CommunityToolkit.Mvvm)
-- ✅ Use `[ObservableProperty]` attributes
-- ❌ No `INotifyPropertyChanged` manual implementation
+- ✅ All models use `ObservableObject` base class (CommunityToolkit.Mvvm)
+- ✅ All properties use `[ObservableProperty]` attributes
+- ✅ No manual `INotifyPropertyChanged` implementation needed
 
 ### 1.4 Create Shared Utilities
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
 **Target**: `src/CCEM/Shared/`
 
-**Common Services**:
+**Utilities Created**:
 
-- [ ] `Shared/Helpers/CommandHelper.cs` - common commands
-- [ ] `Shared/Converters/` - value converters
+- [x] `Shared/Helpers/CommandHelper.cs` - async command execution, PowerShell support, UAC elevation
+- [x] `Shared/Converters/` - folder created for Phase 2
 
 ---
 
@@ -587,6 +601,516 @@ src/CCEM/
 - [ ] Add Intune placeholder section
 - [ ] Update existing Settings section
 - [ ] T4 templates will auto-generate mappings
+
+---
+
+## 🎨 Navigation Menu Structure
+
+### ⚖️ Decision Criteria
+
+Consider these factors when choosing:
+- **User workflow** - How do admins typically work?
+- **Scalability** - Easy to add Intune features later?
+- **Discoverability** - Can users find features easily?
+- **Visual balance** - Not too cluttered?
+
+---
+
+### 📐 Platform-First Navigation (Selected)
+
+**Concept**: Top-level split between SCCM and Intune, each with their own sub-structure
+
+**Pros**:
+- ✅ Clear separation of concerns
+- ✅ Easy to add Intune features incrementally
+- ✅ Users immediately know which platform they're managing
+- ✅ Best for orgs managing both SCCM and Intune
+
+**Cons**:
+- ⚠️ More clicks to reach specific features
+- ⚠️ Some duplicate categories (e.g., both have "Applications")
+
+```json
+{
+  "Groups": [
+    {
+      "Id": "HomeGroup",
+      "Title": "Home",
+      "Glyph": "\uE80F",
+      "Items": [
+        {
+          "Id": "Dashboard",
+          "Title": "Dashboard",
+          "Glyph": "\uE8BC",
+          "PageType": "CCEM.Views.DashboardPage",
+          "Description": "Unified overview of SCCM and Intune"
+        },
+        {
+          "Id": "QuickActions",
+          "Title": "Quick Actions",
+          "Glyph": "\uE945",
+          "PageType": "CCEM.Views.QuickActionsPage"
+        }
+      ]
+    },
+    {
+      "Id": "SCCMGroup",
+      "Title": "Configuration Manager",
+      "Glyph": "\uE950",
+      "IsExpandable": true,
+      "Items": [
+        {
+          "Id": "SCCMConnection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.SCCM.ConnectionPage"
+        },
+        {
+          "Id": "SCCMAgent",
+          "Title": "Agent Management",
+          "Glyph": "\uE713",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "Components", "Title": "Components", "PageType": "CCEM.Views.SCCM.ComponentsPage" },
+            { "Id": "Settings", "Title": "Settings", "PageType": "CCEM.Views.SCCM.AgentSettingsPage" },
+            { "Id": "InstallRepair", "Title": "Install/Repair", "PageType": "CCEM.Views.SCCM.InstallRepairPage" }
+          ]
+        },
+        {
+          "Id": "SCCMInventory",
+          "Title": "Inventory",
+          "Glyph": "\uE8F1",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "Cache", "Title": "Cache", "PageType": "CCEM.Views.SCCM.CachePage" },
+            { "Id": "Applications", "Title": "Applications", "PageType": "CCEM.Views.SCCM.ApplicationsPage" },
+            { "Id": "InstalledSoftware", "Title": "Installed Software", "PageType": "CCEM.Views.SCCM.InstalledSoftwarePage" }
+          ]
+        },
+        {
+          "Id": "SCCMUpdates",
+          "Title": "Software Updates",
+          "Glyph": "\uE895",
+          "HasSubItems": true
+        },
+        {
+          "Id": "SCCMSystem",
+          "Title": "System",
+          "Glyph": "\uE770",
+          "HasSubItems": true
+        },
+        {
+          "Id": "SCCMTools",
+          "Title": "Tools",
+          "Glyph": "\uE90F",
+          "HasSubItems": true,
+          "IsDynamic": true
+        }
+      ]
+    },
+    {
+      "Id": "IntuneGroup",
+      "Title": "Intune",
+      "Glyph": "\uE753",
+      "IsExpandable": true,
+      "Items": [
+        {
+          "Id": "IntuneConnection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.Intune.ConnectionPage"
+        },
+        {
+          "Id": "IntuneDevices",
+          "Title": "Devices",
+          "Glyph": "\uE977",
+          "HasSubItems": true,
+          "SubItems": [
+            { "Id": "AllDevices", "Title": "All Devices", "PageType": "CCEM.Views.Intune.DevicesPage" },
+            { "Id": "Compliance", "Title": "Compliance", "PageType": "CCEM.Views.Intune.CompliancePage" }
+          ]
+        },
+        {
+          "Id": "IntuneApps",
+          "Title": "Applications",
+          "Glyph": "\uE8B7",
+          "HasSubItems": true
+        },
+        {
+          "Id": "IntunePolicies",
+          "Title": "Policies",
+          "Glyph": "\uE8CB",
+          "HasSubItems": true
+        }
+      ]
+    }
+  ],
+  "FooterItems": [
+    {
+      "Id": "Settings",
+      "Title": "Settings",
+      "Glyph": "\uE713",
+      "PageType": "CCEM.Views.SettingsPage"
+    },
+    {
+      "Id": "About",
+      "Title": "About",
+      "Glyph": "\uE946",
+      "PageType": "CCEM.Views.AboutPage"
+    }
+  ]
+}
+```
+
+---
+
+### Implementation Details
+
+**Selected Structure**: Platform-First Navigation
+
+**DevWinUI NavigationView Layout**:
+
+```json
+{
+  "Groups": [
+    {
+      "Id": "DashboardGroup",
+      "Title": "Dashboard",
+      "Glyph": "\uE80F",
+      "Items": [
+        {
+          "Id": "Connection",
+          "Title": "Connection",
+          "Glyph": "\uE703",
+          "PageType": "CCEM.Views.SCCM.ConnectionPage",
+          "Description": "Connect to SCCM client"
+        },
+        {
+          "Id": "Overview",
+          "Title": "Overview",
+          "Glyph": "\uE8BC",
+          "PageType": "CCEM.Views.SCCM.OverviewPage",
+          "Description": "Client status overview"
+        }
+      ]
+    },
+    {
+      "Id": "AgentGroup",
+      "Title": "Agent Management",
+      "Glyph": "\uE950",
+      "Items": [
+        {
+          "Id": "Components",
+          "Title": "Components",
+          "Glyph": "\uE9F9",
+          "PageType": "CCEM.Views.SCCM.ComponentsPage"
+        },
+        {
+          "Id": "Settings",
+          "Title": "Settings",
+          "Glyph": "\uE713",
+          "PageType": "CCEM.Views.SCCM.AgentSettingsPage"
+        },
+        {
+          "Id": "InstallRepair",
+          "Title": "Install/Repair",
+          "Glyph": "\uE90F",
+          "PageType": "CCEM.Views.SCCM.InstallRepairPage"
+        },
+        {
+          "Id": "InstallAgent",
+          "Title": "Install Agent",
+          "Glyph": "\uE896",
+          "PageType": "CCEM.Views.SCCM.InstallAgentPage"
+        }
+      ]
+    },
+    {
+      "Id": "InventoryGroup",
+      "Title": "Inventory",
+      "Glyph": "\uE8F1",
+      "Items": [
+        {
+          "Id": "Cache",
+          "Title": "Cache",
+          "Glyph": "\uE895",
+          "PageType": "CCEM.Views.SCCM.CachePage"
+        },
+        {
+          "Id": "Applications",
+          "Title": "Applications",
+          "Glyph": "\uE8B7",
+          "PageType": "CCEM.Views.SCCM.ApplicationsPage"
+        },
+        {
+          "Id": "InstalledSoftware",
+          "Title": "Installed Software",
+          "Glyph": "\uE74C",
+          "PageType": "CCEM.Views.SCCM.InstalledSoftwarePage"
+        },
+        {
+          "Id": "Advertisements",
+          "Title": "Advertisements",
+          "Glyph": "\uE789",
+          "PageType": "CCEM.Views.SCCM.AdvertisementsPage"
+        },
+        {
+          "Id": "ExecutionHistory",
+          "Title": "Execution History",
+          "Glyph": "\uE81C",
+          "PageType": "CCEM.Views.SCCM.ExecutionHistoryPage"
+        }
+      ]
+    },
+    {
+      "Id": "SoftwareUpdatesGroup",
+      "Title": "Software Updates",
+      "Glyph": "\uE895",
+      "Items": [
+        {
+          "Id": "Updates",
+          "Title": "Updates",
+          "Glyph": "\uE777",
+          "PageType": "CCEM.Views.SCCM.UpdatesPage"
+        },
+        {
+          "Id": "AllUpdates",
+          "Title": "All Updates",
+          "Glyph": "\uE8FD",
+          "PageType": "CCEM.Views.SCCM.AllUpdatesPage"
+        },
+        {
+          "Id": "UpdateStatus",
+          "Title": "Update Status",
+          "Glyph": "\uE7BA",
+          "PageType": "CCEM.Views.SCCM.UpdateStatusPage"
+        }
+      ]
+    },
+    {
+      "Id": "SystemGroup",
+      "Title": "System Management",
+      "Glyph": "\uE770",
+      "Items": [
+        {
+          "Id": "Services",
+          "Title": "Services",
+          "Glyph": "\uE950",
+          "PageType": "CCEM.Views.SCCM.ServicesPage"
+        },
+        {
+          "Id": "Processes",
+          "Title": "Processes",
+          "Glyph": "\uE9D9",
+          "PageType": "CCEM.Views.SCCM.ProcessesPage"
+        },
+        {
+          "Id": "Logs",
+          "Title": "Logs",
+          "Glyph": "\uE8A5",
+          "PageType": "CCEM.Views.SCCM.LogsPage"
+        },
+        {
+          "Id": "LogViewer",
+          "Title": "Log Viewer",
+          "Glyph": "\uE8A5",
+          "PageType": "CCEM.Views.SCCM.LogViewerPage"
+        },
+        {
+          "Id": "EventMonitoring",
+          "Title": "Event Monitoring",
+          "Glyph": "\uE7C1",
+          "PageType": "CCEM.Views.SCCM.EventMonitoringPage"
+        }
+      ]
+    },
+    {
+      "Id": "AdvancedGroup",
+      "Title": "Advanced",
+      "Glyph": "\uE9E9",
+      "Items": [
+        {
+          "Id": "ServiceWindows",
+          "Title": "Service Windows",
+          "Glyph": "\uE787",
+          "PageType": "CCEM.Views.SCCM.ServiceWindowsPage"
+        },
+        {
+          "Id": "Variables",
+          "Title": "Variables",
+          "Glyph": "\uE8CB",
+          "PageType": "CCEM.Views.SCCM.VariablesPage"
+        },
+        {
+          "Id": "Power",
+          "Title": "Power Management",
+          "Glyph": "\uE945",
+          "PageType": "CCEM.Views.SCCM.PowerPage"
+        },
+        {
+          "Id": "WMIBrowser",
+          "Title": "WMI Browser",
+          "Glyph": "\uE8B7",
+          "PageType": "CCEM.Views.SCCM.WMIBrowserPage"
+        },
+        {
+          "Id": "Evaluation",
+          "Title": "Evaluation",
+          "Glyph": "\uE9D5",
+          "PageType": "CCEM.Views.SCCM.EvaluationPage"
+        },
+        {
+          "Id": "ImportApp",
+          "Title": "Import Application",
+          "Glyph": "\uE8B5",
+          "PageType": "CCEM.Views.SCCM.ImportAppPage"
+        }
+      ]
+    },
+    {
+      "Id": "PluginsGroup",
+      "Title": "Tools & Plugins",
+      "Glyph": "\uE90F",
+      "Visibility": "Dynamic",
+      "Items": [
+        {
+          "Id": "RDP",
+          "Title": "Remote Desktop",
+          "Glyph": "\uE8AF",
+          "PluginId": "CCEM.SCCM.Plugins.RDP"
+        },
+        {
+          "Id": "CompMgmt",
+          "Title": "Computer Management",
+          "Glyph": "\uE7F8",
+          "PluginId": "CCEM.SCCM.Plugins.ComputerManagement"
+        },
+        {
+          "Id": "RemoteTools",
+          "Title": "Remote Tools",
+          "Glyph": "\uE90A",
+          "PluginId": "CCEM.SCCM.Plugins.RemoteTools"
+        },
+        {
+          "Id": "ResourceExplorer",
+          "Title": "Resource Explorer",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.ResourceExplorer"
+        },
+        {
+          "Id": "StatusMessageViewer",
+          "Title": "Status Message Viewer",
+          "Glyph": "\uE8F2",
+          "PluginId": "CCEM.SCCM.Plugins.StatusMessageViewer"
+        },
+        {
+          "Id": "Explorer",
+          "Title": "File Explorer",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.FileExplorer"
+        },
+        {
+          "Id": "Regedit",
+          "Title": "Registry Editor",
+          "Glyph": "\uE8B7",
+          "PluginId": "CCEM.SCCM.Plugins.RegistryEditor"
+        },
+        {
+          "Id": "MSInfo32",
+          "Title": "System Information",
+          "Glyph": "\uE946",
+          "PluginId": "CCEM.SCCM.Plugins.SystemInfo"
+        },
+        {
+          "Id": "MSRA",
+          "Title": "Remote Assistance",
+          "Glyph": "\uE8AF",
+          "PluginId": "CCEM.SCCM.Plugins.RemoteAssistance"
+        },
+        {
+          "Id": "PSScripts",
+          "Title": "PowerShell Scripts",
+          "Glyph": "\uE756",
+          "PluginId": "CCEM.SCCM.Plugins.PowerShellScripts"
+        }
+      ]
+    },
+    {
+      "Id": "IntuneGroup",
+      "Title": "Intune",
+      "Glyph": "\uE753",
+      "Visibility": "ComingSoon",
+      "Items": [
+        {
+          "Id": "IntuneOverview",
+          "Title": "Coming Soon",
+          "Glyph": "\uE823",
+          "PageType": "CCEM.Views.Intune.ComingSoonPage"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Navigation Structure Explanation**:
+
+1. **Dashboard Group** - Points d'entrée principaux
+   - Connection: Gestion de la connexion client SCCM
+   - Overview: Vue d'ensemble du statut client
+
+2. **Agent Management** - Gestion de l'agent SCCM
+   - Components: Composants de l'agent
+   - Settings: Paramètres de l'agent
+   - Install/Repair: Installation/réparation
+   - Install Agent: Assistant d'installation
+
+3. **Inventory Group** - Inventaire et applications
+   - Cache: Gestion du cache
+   - Applications: Applications déployées
+   - Installed Software: Logiciels installés
+   - Advertisements: Déploiements
+   - Execution History: Historique d'exécution
+
+4. **Software Updates** - Mises à jour logicielles
+   - Updates: Mises à jour disponibles
+   - All Updates: Toutes les mises à jour
+   - Update Status: Statut des mises à jour
+
+5. **System Management** - Gestion système
+   - Services: Services Windows
+   - Processes: Processus en cours
+   - Logs: Fichiers de logs
+   - Log Viewer: Visualiseur de logs
+   - Event Monitoring: Surveillance des événements
+
+6. **Advanced Group** - Fonctionnalités avancées
+   - Service Windows: Fenêtres de maintenance
+   - Variables: Variables de collection
+   - Power Management: Gestion de l'alimentation
+   - WMI Browser: Navigateur WMI
+   - Evaluation: Règles d'évaluation
+   - Import Application: Import d'applications
+
+7. **Plugins Group** - Outils et extensions
+   - Dynamiquement peuplé par les plugins chargés
+   - RDP, Computer Management, Remote Tools, etc.
+
+8. **Intune Group** - Préparation future
+   - Coming Soon placeholder
+
+```csharp
+// In App.xaml.cs - Load navigation
+private void LoadNavigationMenu()
+{
+    var json = File.ReadAllText("Assets/NavViewMenu/AppData.json");
+    var navData = JsonSerializer.Deserialize<NavigationData>(json);
+
+    // DevWinUI NavigationView binding
+    MainWindow.NavigationView.MenuItemsSource = navData.Groups;
+    MainWindow.NavigationView.FooterMenuItemsSource = navData.FooterItems;
+}
+```
 
 ### 2.2 Create Connection UI
 

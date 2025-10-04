@@ -1,21 +1,79 @@
-MIT License
+# License
 
-Copyright (c) 2025 Mickaël CHAVE
+CCEM (Client Center for Endpoint Manager) uses a dual licensing structure to respect the original work from the SCCMCliCtr project while allowing new contributions under the MIT license.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## Summary
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- **All code in this repository not listed below**: MIT License (see `LICENSE_MIT.txt`)
+- **Third-party code and derived works**: See `THIRD_PARTY_NOTICES.md` for individual licenses
+  - **SCCMCliCtr-derived code** (`src/CCEM/SCCM/Automation/`): Microsoft Public License (Ms-PL) - see `LICENSE_Ms-PL.txt`
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+---
+
+## Dual License Structure
+
+### 1. MIT License
+
+**Applies to:**
+All content in this repository, excluding:
+- Code derived from third-party projects (documented in `THIRD_PARTY_NOTICES.md`)
+- External dependencies and libraries
+
+**Copyright:** © 2025 Mickaël CHAVE
+
+**Full license text:** See `LICENSE_MIT.txt`
+
+---
+
+### 2. Microsoft Public License (Ms-PL) - Derived Code from SCCMCliCtr
+
+**Applies to:**
+- SCCM Automation Library (`src/CCEM/SCCM/Automation/`)
+- Code migrated from the original SCCMCliCtr project by Roger Zander
+
+**Original project:** [rzander/sccmclictr](https://github.com/rzander/sccmclictr)
+
+**Original copyright:** © 2018 Roger Zander
+
+**Full license text:** See `LICENSE_Ms-PL.txt`
+
+**Important note:** The original SCCMCliCtr project contains an inconsistency between its LICENSE.md file (Ms-PL) and source code headers (LGPL v3+). We have chosen to respect the Ms-PL license as declared in the official GitHub repository LICENSE file.
+
+---
+
+## Attribution
+
+This project is based on the **Client Center for Configuration Manager** (SCCMCliCtr) by Roger Zander, which provided the foundation for SCCM client management automation.
+
+**Original project:**
+- Repository: https://github.com/rzander/sccmclictr
+- Author: Roger Zander
+- License: Microsoft Public License (Ms-PL)
+
+**CCEM enhancements:**
+- Modern .NET 9 application with WinUI 3 UI
+- New architecture with MVVM and dependency injection
+- Future Intune support
+- Enhanced UI/UX with DevWinUI
+
+---
+
+## For Contributors
+
+When contributing to this project:
+
+1. **New code and contributions**: Contribute under the MIT license
+2. **Modifications to existing SCCM.Automation code**: Must remain under Ms-PL
+3. **All contributions**: Must respect both license terms
+
+For detailed third-party attributions, see `THIRD_PARTY_NOTICES.md`.
+
+---
+
+## Questions?
+
+If you have questions about licensing:
+- Open an issue on the GitHub repository
+- Contact the maintainer
+
+**Thank you to Roger Zander** for creating and maintaining SCCMCliCtr, making this modernization possible!
