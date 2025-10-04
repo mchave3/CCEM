@@ -24,6 +24,8 @@
     <Version>1.0.0</Version>
     <!--Remove git hash from assembly informational version in .NET >= 8, Example: false = 1.0.0, true = 1.0.0+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Specify which language folders to keep (all others will be removed) -->
+    <ExcludedLanguages>en-US;fr-FR</ExcludedLanguages>
   </PropertyGroup>
   <!-- Publish Properties -->
   <PropertyGroup>
