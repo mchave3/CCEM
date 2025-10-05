@@ -2,14 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/Ghost1372/DevWinUI/refs/heads/main/tools/AppData.Schema.json",
   "Groups": [
     {
-      "UniqueId": "HomeHeader",
-      "Title": "HOME",
-      "IsSpecialSection": false,
-      "IsNavigationViewItemHeader": true,
-      "HideGroup": false,
-      "Items": []
-    },
-    {
       "UniqueId": "Home",
       "Title": "Home",
       "ShowItemsWithoutGroup": true,
@@ -33,7 +25,7 @@
     },
     {
       "UniqueId": "SCCMHeader",
-      "Title": "CONFIGURATION MANAGER",
+      "Title": "Configuration Manager",
       "IsSpecialSection": false,
       "IsNavigationViewItemHeader": true,
       "HideGroup": false,
@@ -269,7 +261,7 @@
     },
     {
       "UniqueId": "IntuneHeader",
-      "Title": "INTUNE",
+      "Title": "Intune",
       "IsSpecialSection": false,
       "IsNavigationViewItemHeader": true,
       "HideGroup": false,
@@ -277,7 +269,7 @@
     },
     {
       "UniqueId": "IntuneGroup",
-      "Title": "Intune",
+      "Title": "Device Management",
       "IconGlyph": "\uE753",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
