@@ -272,13 +272,5 @@
         }
       ]
     }
-  ],
-  "FooterItems": [
-    {
-      "UniqueId": "CCEM.Views.SettingsPage",
-      "Title": "Settings",
-      "Glyph": "\uE713",
-      "Description": "Application settings"
-    }
   ]
 }
