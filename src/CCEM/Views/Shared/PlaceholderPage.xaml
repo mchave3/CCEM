@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="CCEM.Views.Shared.PlaceholderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="32">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="12"
+                    Width="480">
+            <FontIcon x:Name="GlyphIcon"
+                      FontSize="48"
+                      HorizontalAlignment="Center"
+                      Glyph="&#xE823;"
+                      Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+            <TextBlock x:Name="TitleText"
+                       Text="Coming soon"
+                       Style="{ThemeResource HeaderTextBlockStyle}"
+                       TextAlignment="Center" />
+            <TextBlock x:Name="DescriptionText"
+                       Text="This area is being prepared for migration."
+                       TextAlignment="Center"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+    </Grid>
+</Page>

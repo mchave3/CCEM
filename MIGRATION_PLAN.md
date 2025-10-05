@@ -6,12 +6,12 @@
 
 ## 📊 Migration Progress Tracker
 
-### Overall Progress: 12.5% Complete (1/8 phases)
+### Overall Progress: 25% Complete (2/8 phases)
 
 | Phase | Status | Progress | Started | Completed |
 |-------|--------|----------|---------|-----------|
 | Phase 1: Foundation & Core Library | ✅ Completed | 4/4 | 2025-10-04 | 2025-10-04 |
-| Phase 2: Navigation & UI Framework | ⏳ Not Started | 0/3 | - | - |
+| Phase 2: Navigation & UI Framework | ✅ Completed | 3/3 | 2025-10-05 | 2025-10-05 |
 | Phase 3: Control Migration (29 controls) | ⏳ Not Started | 0/29 | - | - |
 | Phase 4: Plugin System (17 plugins) | ⏳ Not Started | 0/17 | - | - |
 | Phase 5: Ribbon Actions Migration | ⏳ Not Started | 0/1 | - | - |
@@ -33,7 +33,7 @@
 
 **Sprint**: Sprint 2 - Navigation & UI
 **Target Completion**: TBD
-**Active Tasks**: Phase 2.1 - Update Navigation Structure
+**Active Tasks**: Phase 3.1 - Core Control Migration planning
 
 ---
 
@@ -590,17 +590,24 @@ src/CCEM/
 
 ## Phase 2: Navigation & UI Framework
 
-### Status: ⏳ Not Started (0/3 tasks complete)
+### Status: ✅ Completed (3/3 tasks complete)
 
 ### 2.1 Update Navigation Structure
 
-**Status**: ⏳ Not Started
+**Status**: ✅ Completed
+**Started**: 2025-10-05
+**Completed**: 2025-10-05
 **File**: `Assets/NavViewMenu/AppData.json`
 
-- [ ] Add SCCM section with navigation items
-- [ ] Add Intune placeholder section
-- [ ] Update existing Settings section
-- [ ] T4 templates will auto-generate mappings
+- [x] Add SCCM section with navigation items
+- [x] Add Intune placeholder section
+- [x] Update existing Settings section
+- [x] T4 templates will auto-generate mappings
+
+**Notes**:
+- Replaced the legacy single-node menu with platform-first SCCM/Intune groupings.
+- Added placeholder routing tokens mapped to `Views/Shared/PlaceholderPage` for in-progress pages.
+- Updated `NavigationPageMappings` and `BreadcrumbPageMappings` manually to align with the new structure.
 
 ---
 
@@ -1114,32 +1121,41 @@ private void LoadNavigationMenu()
 
 ### 2.2 Create Connection UI
 
-**Status**: ⏳ Not Started
-**New File**: `Views/SCCM/ConnectionPage.xaml`
+**Status**: ✅ Completed
+**Started**: 2025-10-05
+**Completed**: 2025-10-05
+**New Files**: `Views/SCCM/ConnectionPage.xaml`, `Views/SCCM/ConnectionPage.xaml.cs`, `ViewModels/SCCM/ConnectionViewModel.cs`
 
-- [ ] Create XAML page with WinUI 3 controls
-- [ ] ✅ Use `AutoSuggestBox` (not WPF AutoCompleteBox)
-- [ ] ✅ Use `Button` for Connect/Disconnect
-- [ ] ✅ Use `CommandBar` for connection actions
-- [ ] ✅ Use `TeachingTip` for connection options
-- [ ] Create `ConnectionViewModel.cs`
-- [ ] Register ViewModel in DI
+- [x] Create XAML page with WinUI 3 controls
+- [x] ✅ Use `AutoSuggestBox` (not WPF AutoCompleteBox)
+- [x] ✅ Use `Button` for Connect/Disconnect
+- [x] ✅ Use `CommandBar` for connection actions
+- [x] ✅ Use `TeachingTip` for connection options
+- [x] Create `ConnectionViewModel.cs`
+- [x] Register ViewModel in DI
 
 **WPF Conversion**:
 
-- ❌ Remove Ribbon connection panel
-- ✅ Replace with modern WinUI 3 CommandBar
+- ❌ Remove Ribbon connection panel → ✅ Replaced with WinUI `CommandBar`
 - ✅ `AutoCompleteBox` → `AutoSuggestBox`
+- ✅ Added InfoBar-driven status messaging and credential TeachingTip.
 
 ### 2.3 Main Window Updates
 
-**Status**: ⏳ Not Started
-**File**: `MainWindow.xaml`
+**Status**: ✅ Completed
+**Started**: 2025-10-05
+**Completed**: 2025-10-05
+**Files**: `MainWindow.xaml`, `MainWindow.xaml.cs`, `ViewModels/MainViewModel.cs`
 
-- [ ] Keep existing DevWinUI `NavigationView`
-- [ ] Add `CommandBar` for global actions
-- [ ] Add connection status indicator
-- [ ] Add plugin menu items dynamically
+- [x] Keep existing DevWinUI `NavigationView`
+- [x] Add `CommandBar` for global actions
+- [x] Add connection status indicator
+- [x] Add plugin menu items dynamically
+
+**Notes**:
+- Injected global connection commands and a live status indicator into the navigation header.
+- Built a dynamic plugin flyout backed by `SCCMPluginService` seed data.
+- Updated `SCCMPluginService` to expose representative shortcuts for the new menu.
 
 ---
 

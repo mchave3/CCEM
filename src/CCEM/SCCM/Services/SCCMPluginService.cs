@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace CCEM.SCCM.Services;
 
 /// <summary>
@@ -9,6 +13,11 @@ public class SCCMPluginService : ISCCMPluginService
     private readonly Dictionary<string, object> _loadedPlugins = new();
 
     public IReadOnlyList<string> AvailableCategories => _pluginsByCategory.Keys.ToList();
+
+    public SCCMPluginService()
+    {
+        SeedBuiltInShortcuts();
+    }
 
     /// <summary>
     /// Loads plugins from the specified directory
@@ -43,5 +52,30 @@ public class SCCMPluginService : ISCCMPluginService
         // In Phase 3, this will execute the plugin with the provided parameters
         await Task.CompletedTask;
         return null;
+    }
+    private void SeedBuiltInShortcuts()
+    {
+        RegisterPlugin("Remote tools", "Remote Desktop");
+        RegisterPlugin("Remote tools", "Remote Assistance");
+        RegisterPlugin("Remote tools", "Computer Management");
+        RegisterPlugin("Diagnostics", "Resource Explorer");
+        RegisterPlugin("Diagnostics", "Status Message Viewer");
+        RegisterPlugin("Diagnostics", "System Information");
+        RegisterPlugin("Automation", "PowerShell Scripts");
+        RegisterPlugin("Automation", "Enable PS Remoting");
+    }
+
+    private void RegisterPlugin(string category, string pluginName)
+    {
+        if (!_pluginsByCategory.TryGetValue(category, out var list))
+        {
+            list = new List<string>();
+            _pluginsByCategory[category] = list;
+        }
+
+        if (!list.Contains(pluginName, StringComparer.OrdinalIgnoreCase))
+        {
+            list.Add(pluginName);
+        }
     }
 }

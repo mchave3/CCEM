@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="CCEM.Views.SCCM.ConnectionPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:CCEM.ViewModels.SCCM"
+    mc:Ignorable="d"
+    NavigationCacheMode="Enabled"
+    DataContext="{x:Bind ViewModel, Mode=OneWay}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:ConnectionViewModel, IsDesignTimeCreatable=False}">
+
+    <Grid Padding="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Spacing="8">
+            <TextBlock Text="Configuration Manager Connection"
+                       Style="{ThemeResource TitleTextBlockStyle}" />
+            <TextBlock Text="Connect to a local or remote Configuration Manager client and monitor the connection status."
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <InfoBar Grid.Row="1"
+                 Margin="0,16,0,0"
+                 IsOpen="{Binding IsStatusVisible, Mode=TwoWay}"
+                 Severity="{Binding StatusSeverity}"
+                 Title="{Binding StatusTitle}"
+                 Message="{Binding StatusMessage}"
+                 IsClosable="True" />
+
+        <Grid Grid.Row="2" Margin="0,24,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="8">
+                <TextBlock Text="Target device" FontWeight="SemiBold" />
+                <AutoSuggestBox x:Name="HostnameBox"
+                                Text="{Binding TargetHost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ItemsSource="{Binding RecentHosts}"
+                                PlaceholderText="Hostname or FQDN"
+                                QueryIcon="Find"
+                                SuggestionChosen="HostnameBox_SuggestionChosen" />
+            </StackPanel>
+
+            <ProgressRing Grid.Row="0"
+                          Grid.Column="1"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"
+                          IsActive="{Binding IsBusy}"
+                          Width="32"
+                          Height="32" />
+
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,16,0,0" Spacing="8">
+                <TextBlock Text="Connection summary" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding ConnectionSummary}" />
+            </StackPanel>
+
+            <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="0,24,0,0" DefaultLabelPosition="Right">
+                <AppBarButton Icon="Contact"
+                              Label="Connect"
+                              Command="{Binding ConnectCommand}" />
+                <AppBarButton Icon="Disconnect"
+                              Label="Disconnect"
+                              Command="{Binding DisconnectCommand}" />
+                <AppBarSeparator />
+                <AppBarButton x:Name="OptionsButton"
+                              Label="Options"
+                              Click="OptionsButton_Click"
+                              ToolTipService.ToolTip="Show advanced connection options">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+            </CommandBar>
+
+            <TeachingTip x:Name="ConnectionOptionsTip"
+                         Title="Connection options"
+                         Subtitle="Configure credentials and credential caching"
+                         PreferredPlacement="Bottom"
+                         Target="{Binding ElementName=OptionsButton}"
+                         IsLightDismissEnabled="True">
+                <StackPanel Width="280" Spacing="12">
+                    <ToggleSwitch Header="Use alternate credentials"
+                                   IsOn="{Binding UseAlternateCredentials, Mode=TwoWay}" />
+                    <TextBox Header="User name"
+                             Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="domain\\user"
+                             IsEnabled="{Binding UseAlternateCredentials}" />
+                    <PasswordBox x:Name="PasswordBox"
+                                 Header="Password"
+                                 PlaceholderText="Enter password"
+                                 PasswordChanged="PasswordBox_PasswordChanged"
+                                 IsEnabled="{Binding UseAlternateCredentials}" />
+                    <ToggleSwitch Header="Remember this device"
+                                   IsOn="{Binding RememberHost, Mode=TwoWay}" />
+                </StackPanel>
+            </TeachingTip>
+        </Grid>
+    </Grid>
+</Page>

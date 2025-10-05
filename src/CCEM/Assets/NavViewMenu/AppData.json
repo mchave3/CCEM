@@ -1,20 +1,276 @@
-﻿{
+{
   "$schema": "https://raw.githubusercontent.com/Ghost1372/DevWinUI/refs/heads/main/tools/AppData.Schema.json",
   "Groups": [
     {
-      "UniqueId": "CCEM",
-      "Title": "CCEM",
-      "ImagePath": "ms-appx:///Assets/AppIcon.png",
+      "UniqueId": "Group.Home",
+      "Title": "Home",
+      "IconGlyph": "E80F",
       "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": true,
-      "IsExpanded": false,
+      "IsExpanded": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.HomeLandingPage",
-          "Title": "CCEM",
-          "Subtitle": "CCEM",
-          "ImagePath": "ms-appx:///Assets/AppIcon.png",
-          "HideItem": true
+          "Title": "Dashboard",
+          "Subtitle": "Unified overview of SCCM and Intune",
+          "IconGlyph": "E8BC"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.Connection",
+      "Title": "Connection",
+      "IconGlyph": "E703",
+      "IsSpecialSection": false,
+      "IsExpanded": true,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.SCCM.ConnectionPage",
+          "Title": "Client connection",
+          "Subtitle": "Connect to Configuration Manager clients",
+          "IconGlyph": "E8A7"
+        },
+        {
+          "UniqueId": "SCCM.Overview",
+          "Title": "Client overview",
+          "Subtitle": "Client status summary",
+          "IconGlyph": "E8BC",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_OVERVIEW"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.Agent",
+      "Title": "Agent management",
+      "IconGlyph": "E950",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "SCCM.Components",
+          "Title": "Components",
+          "IconGlyph": "E9F9",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_COMPONENTS"
+        },
+        {
+          "UniqueId": "SCCM.AgentSettings",
+          "Title": "Agent settings",
+          "IconGlyph": "E713",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_AGENT_SETTINGS"
+        },
+        {
+          "UniqueId": "SCCM.InstallRepair",
+          "Title": "Install/Repair",
+          "IconGlyph": "E90F",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_INSTALL_REPAIR"
+        },
+        {
+          "UniqueId": "SCCM.InstallAgent",
+          "Title": "Install agent",
+          "IconGlyph": "E896",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_INSTALL_AGENT"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.Inventory",
+      "Title": "Inventory",
+      "IconGlyph": "E8F1",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "SCCM.Cache",
+          "Title": "Cache",
+          "IconGlyph": "E895",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_CACHE"
+        },
+        {
+          "UniqueId": "SCCM.Applications",
+          "Title": "Applications",
+          "IconGlyph": "E8B7",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_APPLICATIONS"
+        },
+        {
+          "UniqueId": "SCCM.InstalledSoftware",
+          "Title": "Installed software",
+          "IconGlyph": "E74C",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_INSTALLED_SOFTWARE"
+        },
+        {
+          "UniqueId": "SCCM.Advertisements",
+          "Title": "Advertisements",
+          "IconGlyph": "E789",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_ADVERTISEMENTS"
+        },
+        {
+          "UniqueId": "SCCM.ExecutionHistory",
+          "Title": "Execution history",
+          "IconGlyph": "E81C",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_EXECUTION_HISTORY"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.Updates",
+      "Title": "Software updates",
+      "IconGlyph": "E895",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "SCCM.Updates",
+          "Title": "Updates",
+          "IconGlyph": "E777",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_UPDATES"
+        },
+        {
+          "UniqueId": "SCCM.AllUpdates",
+          "Title": "All updates",
+          "IconGlyph": "E8FD",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_ALL_UPDATES"
+        },
+        {
+          "UniqueId": "SCCM.UpdateStatus",
+          "Title": "Update status",
+          "IconGlyph": "E7BA",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_UPDATE_STATUS"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.System",
+      "Title": "System management",
+      "IconGlyph": "E770",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "SCCM.Services",
+          "Title": "Services",
+          "IconGlyph": "E950",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_SERVICES"
+        },
+        {
+          "UniqueId": "SCCM.Processes",
+          "Title": "Processes",
+          "IconGlyph": "E9D9",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_PROCESSES"
+        },
+        {
+          "UniqueId": "SCCM.Logs",
+          "Title": "Logs",
+          "IconGlyph": "E8A5",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_LOGS"
+        },
+        {
+          "UniqueId": "SCCM.LogViewer",
+          "Title": "Log viewer",
+          "IconGlyph": "E8A5",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_LOG_VIEWER"
+        },
+        {
+          "UniqueId": "SCCM.EventMonitoring",
+          "Title": "Event monitoring",
+          "IconGlyph": "E7C1",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_EVENT_MONITORING"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.SCCM.Advanced",
+      "Title": "Advanced",
+      "IconGlyph": "E9E9",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "SCCM.ServiceWindows",
+          "Title": "Service windows",
+          "IconGlyph": "E787",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_SERVICE_WINDOWS"
+        },
+        {
+          "UniqueId": "SCCM.Variables",
+          "Title": "Variables",
+          "IconGlyph": "E8CB",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_VARIABLES"
+        },
+        {
+          "UniqueId": "SCCM.Power",
+          "Title": "Power management",
+          "IconGlyph": "E945",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_POWER"
+        },
+        {
+          "UniqueId": "SCCM.WMIBrowser",
+          "Title": "WMI browser",
+          "IconGlyph": "E8B7",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_WMI_BROWSER"
+        },
+        {
+          "UniqueId": "SCCM.Evaluation",
+          "Title": "Evaluation",
+          "IconGlyph": "E9D5",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_EVALUATION"
+        },
+        {
+          "UniqueId": "SCCM.ImportApp",
+          "Title": "Import application",
+          "IconGlyph": "E8B5",
+          "SectionId": "CCEM.Views.Shared.PlaceholderPage",
+          "Parameter": "SCCM_IMPORT_APP"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.Intune",
+      "Title": "Intune",
+      "IconGlyph": "E753",
+      "IsSpecialSection": false,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.Intune.ComingSoonPage",
+          "Title": "Coming soon",
+          "Subtitle": "Microsoft Intune workspace",
+          "IconGlyph": "E823"
+        }
+      ]
+    },
+    {
+      "UniqueId": "Group.Settings",
+      "Title": "Settings",
+      "IconGlyph": "E713",
+      "IsSpecialSection": true,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.SettingsPage",
+          "Title": "Settings",
+          "IconGlyph": "E713",
+          "IsFooterNavigationViewItem": true
+        },
+        {
+          "UniqueId": "CCEM.Views.AboutUsSettingPage",
+          "Title": "About",
+          "IconGlyph": "E946",
+          "IsFooterNavigationViewItem": true
         }
       ]
     }
