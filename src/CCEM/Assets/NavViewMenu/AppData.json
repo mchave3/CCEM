@@ -4,26 +4,23 @@
     {
       "UniqueId": "HomeHeader",
       "Title": "HOME",
-      "IsSpecialSection": true,
+      "IsSpecialSection": false,
       "IsNavigationViewItemHeader": true,
-      "Order": true,
+      "HideGroup": false,
       "Items": []
     },
     {
-      "UniqueId": "HomeGroup",
+      "UniqueId": "Home",
       "Title": "Home",
-      "IsSpecialSection": true,
       "ShowItemsWithoutGroup": true,
-      "IsExpanded": true,
-      "HideGroup": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.HomeLandingPage",
           "Title": "Home",
           "Subtitle": "Welcome to Client Center for Endpoint Manager",
           "IconGlyph": "\uE80F",
-          "Description": "Home page with overview and quick actions"
+          "Description": "Home page with overview and quick actions",
+          "HideItem": true
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ConnectionPage",
@@ -40,7 +37,6 @@
       "IsSpecialSection": false,
       "IsNavigationViewItemHeader": true,
       "HideGroup": false,
-      "Order": true,
       "Items": []
     },
     {
@@ -50,7 +46,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ComponentsPage",
@@ -89,7 +84,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.CachePage",
@@ -135,7 +129,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.UpdatesPage",
@@ -167,7 +160,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ServicesPage",
@@ -213,7 +205,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ServiceWindowsPage",
@@ -266,7 +257,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.PluginsPage",
@@ -283,7 +273,6 @@
       "IsSpecialSection": false,
       "IsNavigationViewItemHeader": true,
       "HideGroup": false,
-      "Order": true,
       "Items": []
     },
     {
@@ -293,7 +282,6 @@
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
-      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.Intune.ComingSoonPage",
