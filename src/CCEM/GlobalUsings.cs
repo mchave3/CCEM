@@ -1,6 +1,7 @@
 ﻿global using CCEM.Common;
 global using CCEM.SCCM.Automation;
 global using CCEM.SCCM.Models;
+global using CCEM.ViewModels.SCCM;
 global using CCEM.SCCM.Services;
 global using CCEM.Shared.Helpers;
 global using CCEM.ViewModels;

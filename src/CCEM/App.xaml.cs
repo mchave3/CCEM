@@ -45,6 +45,9 @@ public partial class App : Application
         services.AddTransient<AppUpdateSettingViewModel>();
         services.AddTransient<AboutUsSettingViewModel>();
 
+        // SCCM ViewModels
+        services.AddTransient<ViewModels.SCCM.ConnectionViewModel>();
+
         return services.BuildServiceProvider();
     }
 

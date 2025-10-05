@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.SCCM.ConnectionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:dev="using:DevWinUI"
+      xmlns:local="using:CCEM"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.SCCM"
+      dev:BreadcrumbNavigator.IsHeaderVisible="True"
+      mc:Ignorable="d">
+
+    <ScrollView Margin="{ThemeResource ContentPageMargin}"
+                Padding="{ThemeResource ContentPagePadding}"
+                VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10"
+                    dev:PanelAttach.ChildrenTransitions="Default"
+                    Spacing="16">
+
+            <!--  Connection Status Banner  -->
+            <InfoBar x:Name="StatusInfoBar"
+                     Title="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                     IsClosable="False"
+                     IsOpen="{x:Bind ViewModel.ShowStatusMessage, Mode=OneWay}"
+                     Severity="{x:Bind ViewModel.StatusSeverity, Mode=OneWay}" />
+
+            <!--  Connection Settings  -->
+            <dev:SettingsExpander Description="Connect to a local or remote SCCM client"
+                                  Header="SCCM Client Connection"
+                                  HeaderIcon="{dev:FontIcon GlyphCode=E703}">
+                <dev:SettingsExpander.Items>
+                    <!--  Computer Name  -->
+                    <dev:SettingsCard Description="Enter computer name or select from history (leave empty for local connection)"
+                                      Header="Computer Name">
+                        <AutoSuggestBox x:Name="HostnameBox"
+                                        MinWidth="300"
+                                        HorizontalAlignment="Right"
+                                        ItemsSource="{x:Bind ViewModel.ConnectionHistory, Mode=OneWay}"
+                                        PlaceholderText="localhost"
+                                        QueryIcon="Find"
+                                        Text="{x:Bind ViewModel.Hostname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </dev:SettingsCard>
+
+                    <!--  Authentication  -->
+                    <dev:SettingsExpander Description="Optional credentials for remote connection"
+                                          Header="Authentication"
+                                          HeaderIcon="{dev:FontIcon GlyphCode=E8D7}"
+                                          IsExpanded="False">
+                        <dev:SettingsExpander.Items>
+                            <dev:SettingsCard Header="Username">
+                                <TextBox MinWidth="300"
+                                         HorizontalAlignment="Right"
+                                         PlaceholderText="domain\username"
+                                         Text="{x:Bind ViewModel.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </dev:SettingsCard>
+                            <dev:SettingsCard Header="Password">
+                                <PasswordBox MinWidth="300"
+                                             HorizontalAlignment="Right"
+                                             Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText="Password" />
+                            </dev:SettingsCard>
+                        </dev:SettingsExpander.Items>
+                    </dev:SettingsExpander>
+                </dev:SettingsExpander.Items>
+            </dev:SettingsExpander>
+
+            <!--  Connection Actions  -->
+            <dev:SettingsCard Description="Connect or disconnect from SCCM client"
+                              Header="Actions"
+                              HeaderIcon="{dev:FontIcon GlyphCode=E768}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Command="{x:Bind ViewModel.ConnectCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanConnect, Mode=OneWay}"
+                            Style="{ThemeResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="16" Glyph="&#xE703;" />
+                            <TextBlock Text="Connect" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{x:Bind ViewModel.DisconnectCommand}"
+                            IsEnabled="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="16" Glyph="&#xE711;" />
+                            <TextBlock Text="Disconnect" />
+                        </StackPanel>
+                    </Button>
+                    <ProgressRing Width="24"
+                                  Height="24"
+                                  IsActive="{x:Bind ViewModel.IsConnecting, Mode=OneWay}" />
+                </StackPanel>
+            </dev:SettingsCard>
+
+            <!--  Connection Information  -->
+            <dev:SettingsExpander Description="Current connection information"
+                                  Header="Connection Details"
+                                  HeaderIcon="{dev:FontIcon GlyphCode=E946}"
+                                  IsExpanded="{x:Bind ViewModel.IsConnected, Mode=OneWay}">
+                <dev:SettingsExpander.Items>
+                    <dev:SettingsCard Header="Status">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="16"
+                                      Foreground="{x:Bind ViewModel.StatusColor, Mode=OneWay}"
+                                      Glyph="{x:Bind ViewModel.StatusIcon, Mode=OneWay}" />
+                            <TextBlock Text="{x:Bind ViewModel.ConnectionStatusText, Mode=OneWay}" />
+                        </StackPanel>
+                    </dev:SettingsCard>
+                    <dev:SettingsCard Header="Computer Name">
+                        <TextBlock Text="{x:Bind ViewModel.ConnectedHostname, Mode=OneWay}" />
+                    </dev:SettingsCard>
+                    <dev:SettingsCard Header="Agent Version">
+                        <TextBlock Text="{x:Bind ViewModel.AgentVersion, Mode=OneWay}" />
+                    </dev:SettingsCard>
+                    <dev:SettingsCard Header="Site Code">
+                        <TextBlock Text="{x:Bind ViewModel.SiteCode, Mode=OneWay}" />
+                    </dev:SettingsCard>
+                </dev:SettingsExpander.Items>
+            </dev:SettingsExpander>
+
+            <!--  Connection History  -->
+            <dev:SettingsExpander Description="Recent connections"
+                                  Header="Connection History"
+                                  HeaderIcon="{dev:FontIcon GlyphCode=E81C}"
+                                  IsExpanded="False">
+                <Button Command="{x:Bind ViewModel.ClearHistoryCommand}"
+                        Content="Clear History"
+                        IsEnabled="{x:Bind ViewModel.HasConnectionHistory, Mode=OneWay}" />
+                <dev:SettingsExpander.Items>
+                    <dev:SettingsCard ContentAlignment="Vertical">
+                        <ListView ItemsSource="{x:Bind ViewModel.ConnectionHistory, Mode=OneWay}"
+                                  MaxHeight="200"
+                                  SelectionMode="Single">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{x:Bind}" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </dev:SettingsCard>
+                </dev:SettingsExpander.Items>
+            </dev:SettingsExpander>
+
+        </StackPanel>
+    </ScrollView>
+</Page>

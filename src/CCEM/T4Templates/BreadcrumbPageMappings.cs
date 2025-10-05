@@ -14,6 +14,7 @@ public partial class BreadcrumbPageMappings
     public static Dictionary<Type, BreadcrumbPageConfig> PageDictionary = new()
     {
         {typeof(CCEM.Views.SettingsPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.SCCM.ConnectionPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
         {typeof(CCEM.Views.AboutUsSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
         {typeof(CCEM.Views.AppUpdateSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
         {typeof(CCEM.Views.GeneralSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},

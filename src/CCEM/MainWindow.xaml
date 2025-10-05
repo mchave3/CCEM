@@ -31,14 +31,36 @@
                            Source="ms-appx:///Assets/AppIcon.png" />
             </TitleBar.LeftHeader>
             <TitleBar.RightHeader>
-                <Button x:Name="ThemeButton"
-                        Height="32"
-                        Margin="0,0,4,0"
-                        Click="ThemeButton_Click"
-                        Content="{dev:FontIcon GlyphCode=E793,
-                                               FontSize=16}"
-                        Style="{ThemeResource SubtleButtonStyle}"
-                        ToolTipService.ToolTip="Toggle Theme" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <!--  Connection Status Indicator  -->
+                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="8,4">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon x:Name="ConnectionStatusIcon"
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      Glyph="&#xE894;" />
+                            <TextBlock x:Name="ConnectionStatusText"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Text="Not Connected"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--  Theme Toggle Button  -->
+                    <Button x:Name="ThemeButton"
+                            Height="32"
+                            Margin="0,0,4,0"
+                            Click="ThemeButton_Click"
+                            Content="{dev:FontIcon GlyphCode=E793,
+                                                   FontSize=16}"
+                            Style="{ThemeResource SubtleButtonStyle}"
+                            ToolTipService.ToolTip="Toggle Theme" />
+                </StackPanel>
             </TitleBar.RightHeader>
         </TitleBar>
         <NavigationView x:Name="NavView"

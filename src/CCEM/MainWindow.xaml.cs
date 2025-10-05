@@ -1,13 +1,22 @@
-﻿using Microsoft.UI.Windowing;
+﻿using CCEM.SCCM.Services;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace CCEM.Views;
 
 public sealed partial class MainWindow : Window
 {
     public MainViewModel ViewModel { get; }
+
+    private readonly ISCCMConnectionService _connectionService;
+
     public MainWindow()
     {
         ViewModel = App.GetService<MainViewModel>();
+        _connectionService = App.GetService<ISCCMConnectionService>();
+
         this.InitializeComponent();
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -22,6 +31,41 @@ public sealed partial class MainWindow : Window
                 .ConfigureJsonFile("Assets/NavViewMenu/AppData.json")
                 .ConfigureTitleBar(AppTitleBar)
                 .ConfigureBreadcrumbBar(BreadCrumbNav, BreadcrumbPageMappings.PageDictionary);
+        }
+
+        // Subscribe to connection status changes
+        _connectionService.ConnectionStatusChanged += OnConnectionStatusChanged;
+
+        // Initialize connection status
+        UpdateConnectionStatus();
+    }
+
+    /// <summary>
+    /// Handles connection status changes
+    /// </summary>
+    private void OnConnectionStatusChanged(object? sender, ConnectionStatusChangedEventArgs e)
+    {
+        DispatcherQueue.TryEnqueue(UpdateConnectionStatus);
+    }
+
+    /// <summary>
+    /// Updates the connection status indicator in the title bar
+    /// </summary>
+    private void UpdateConnectionStatus()
+    {
+        if (_connectionService.IsConnected)
+        {
+            ConnectionStatusIcon.Glyph = "\uE8FB"; // CheckMark
+            ConnectionStatusIcon.Foreground = new SolidColorBrush(Colors.Green);
+            ConnectionStatusText.Text = $"Connected: {_connectionService.ConnectedHostname}";
+            ConnectionStatusText.Foreground = new SolidColorBrush(Colors.Green);
+        }
+        else
+        {
+            ConnectionStatusIcon.Glyph = "\uE894"; // StatusCircleRing
+            ConnectionStatusIcon.Foreground = new SolidColorBrush(Colors.Gray);
+            ConnectionStatusText.Text = "Not Connected";
+            ConnectionStatusText.Foreground = new SolidColorBrush(Colors.Gray);
         }
     }
 
