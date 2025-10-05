@@ -2,65 +2,82 @@
   "$schema": "https://raw.githubusercontent.com/Ghost1372/DevWinUI/refs/heads/main/tools/AppData.Schema.json",
   "Groups": [
     {
-      "UniqueId": "DashboardGroup",
-      "Title": "Dashboard",
-      "ImagePath": "ms-appx:///Assets/Fluent/Home.png",
-      "Glyph": "\uE80F",
-      "IsSpecialSection": false,
+      "UniqueId": "HomeHeader",
+      "Title": "HOME",
+      "IsSpecialSection": true,
+      "IsNavigationViewItemHeader": true,
+      "Order": true,
+      "Items": []
+    },
+    {
+      "UniqueId": "HomeGroup",
+      "Title": "Home",
+      "IsSpecialSection": true,
       "ShowItemsWithoutGroup": true,
       "IsExpanded": true,
+      "HideGroup": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.HomeLandingPage",
           "Title": "Home",
           "Subtitle": "Welcome to Client Center for Endpoint Manager",
-          "ImagePath": "ms-appx:///Assets/AppIcon.png",
-          "Glyph": "\uE80F",
+          "IconGlyph": "\uE80F",
           "Description": "Home page with overview and quick actions"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ConnectionPage",
           "Title": "Connection",
           "Subtitle": "Connect to SCCM client",
-          "Glyph": "\uE703",
+          "IconGlyph": "\uE703",
           "Description": "Manage SCCM client connections"
         }
       ]
     },
     {
+      "UniqueId": "SCCMHeader",
+      "Title": "CONFIGURATION MANAGER",
+      "IsSpecialSection": false,
+      "IsNavigationViewItemHeader": true,
+      "HideGroup": false,
+      "Order": true,
+      "Items": []
+    },
+    {
       "UniqueId": "AgentGroup",
       "Title": "Agent Management",
-      "Glyph": "\uE950",
+      "IconGlyph": "\uE950",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ComponentsPage",
           "Title": "Components",
           "Subtitle": "SCCM Agent Components",
-          "Glyph": "\uE9F9",
+          "IconGlyph": "\uE9F9",
           "Description": "View and manage SCCM agent components"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.AgentSettingsPage",
           "Title": "Settings",
           "Subtitle": "Agent Configuration",
-          "Glyph": "\uE713",
+          "IconGlyph": "\uE713",
           "Description": "Configure SCCM agent settings"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.InstallRepairPage",
           "Title": "Install/Repair",
           "Subtitle": "Install or repair agent",
-          "Glyph": "\uE90F",
+          "IconGlyph": "\uE90F",
           "Description": "Install or repair SCCM client agent"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.InstallAgentPage",
           "Title": "Install Agent",
           "Subtitle": "Agent installation wizard",
-          "Glyph": "\uE896",
+          "IconGlyph": "\uE896",
           "Description": "Install SCCM client agent wizard"
         }
       ]
@@ -68,44 +85,45 @@
     {
       "UniqueId": "InventoryGroup",
       "Title": "Inventory",
-      "Glyph": "\uE8F1",
+      "IconGlyph": "\uE8F1",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.CachePage",
           "Title": "Cache",
           "Subtitle": "Client cache management",
-          "Glyph": "\uE895",
+          "IconGlyph": "\uE895",
           "Description": "View and manage SCCM client cache"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ApplicationsPage",
           "Title": "Applications",
           "Subtitle": "Deployed applications",
-          "Glyph": "\uE8B7",
+          "IconGlyph": "\uE8B7",
           "Description": "View deployed applications"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.InstalledSoftwarePage",
           "Title": "Installed Software",
           "Subtitle": "Software inventory",
-          "Glyph": "\uE74C",
+          "IconGlyph": "\uE74C",
           "Description": "View installed software inventory"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.AdvertisementsPage",
           "Title": "Advertisements",
           "Subtitle": "Deployment packages",
-          "Glyph": "\uE789",
+          "IconGlyph": "\uE789",
           "Description": "View deployment advertisements"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ExecutionHistoryPage",
           "Title": "Execution History",
           "Subtitle": "Deployment execution history",
-          "Glyph": "\uE81C",
+          "IconGlyph": "\uE81C",
           "Description": "View deployment execution history"
         }
       ]
@@ -113,30 +131,31 @@
     {
       "UniqueId": "SoftwareUpdatesGroup",
       "Title": "Software Updates",
-      "Glyph": "\uE895",
+      "IconGlyph": "\uE895",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.UpdatesPage",
           "Title": "Updates",
           "Subtitle": "Available updates",
-          "Glyph": "\uE777",
+          "IconGlyph": "\uE777",
           "Description": "View available software updates"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.AllUpdatesPage",
           "Title": "All Updates",
           "Subtitle": "Complete update list",
-          "Glyph": "\uE8FD",
+          "IconGlyph": "\uE8FD",
           "Description": "View all software updates"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.UpdateStatusPage",
           "Title": "Update Status",
           "Subtitle": "Update installation status",
-          "Glyph": "\uE7BA",
+          "IconGlyph": "\uE7BA",
           "Description": "View software update installation status"
         }
       ]
@@ -144,44 +163,45 @@
     {
       "UniqueId": "SystemGroup",
       "Title": "System Management",
-      "Glyph": "\uE770",
+      "IconGlyph": "\uE770",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ServicesPage",
           "Title": "Services",
           "Subtitle": "Windows services",
-          "Glyph": "\uE950",
+          "IconGlyph": "\uE950",
           "Description": "Manage Windows services"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ProcessesPage",
           "Title": "Processes",
           "Subtitle": "Running processes",
-          "Glyph": "\uE9D9",
+          "IconGlyph": "\uE9D9",
           "Description": "View running processes"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.LogsPage",
           "Title": "Logs",
           "Subtitle": "SCCM log files",
-          "Glyph": "\uE8A5",
+          "IconGlyph": "\uE8A5",
           "Description": "View SCCM log files"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.LogViewerPage",
           "Title": "Log Viewer",
           "Subtitle": "Real-time log viewer",
-          "Glyph": "\uE8A5",
+          "IconGlyph": "\uE8A5",
           "Description": "View logs in real-time"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.EventMonitoringPage",
           "Title": "Event Monitoring",
           "Subtitle": "System event monitoring",
-          "Glyph": "\uE7C1",
+          "IconGlyph": "\uE7C1",
           "Description": "Monitor system events"
         }
       ]
@@ -189,51 +209,52 @@
     {
       "UniqueId": "AdvancedGroup",
       "Title": "Advanced",
-      "Glyph": "\uE9E9",
+      "IconGlyph": "\uE9E9",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.ServiceWindowsPage",
           "Title": "Service Windows",
           "Subtitle": "Maintenance windows",
-          "Glyph": "\uE787",
+          "IconGlyph": "\uE787",
           "Description": "View and manage service windows"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.VariablesPage",
           "Title": "Variables",
           "Subtitle": "Collection variables",
-          "Glyph": "\uE8CB",
+          "IconGlyph": "\uE8CB",
           "Description": "Manage collection variables"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.PowerPage",
           "Title": "Power Management",
           "Subtitle": "Power settings",
-          "Glyph": "\uE945",
+          "IconGlyph": "\uE945",
           "Description": "Manage power settings"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.WMIBrowserPage",
           "Title": "WMI Browser",
           "Subtitle": "WMI namespace browser",
-          "Glyph": "\uE8B7",
+          "IconGlyph": "\uE8B7",
           "Description": "Browse WMI namespaces"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.EvaluationPage",
           "Title": "Evaluation",
           "Subtitle": "CCM evaluation rules",
-          "Glyph": "\uE9D5",
+          "IconGlyph": "\uE9D5",
           "Description": "View CCM evaluation rules"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.ImportAppPage",
           "Title": "Import Application",
           "Subtitle": "Import application wizard",
-          "Glyph": "\uE8B5",
+          "IconGlyph": "\uE8B5",
           "Description": "Import application wizard"
         }
       ]
@@ -241,33 +262,44 @@
     {
       "UniqueId": "PluginsGroup",
       "Title": "Tools & Plugins",
-      "Glyph": "\uE90F",
+      "IconGlyph": "\uE90F",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.SCCM.PluginsPage",
           "Title": "Plugins",
           "Subtitle": "Manage plugins",
-          "Glyph": "\uE90F",
+          "IconGlyph": "\uE90F",
           "Description": "Manage and configure plugins (Coming in Phase 4)"
         }
       ]
     },
     {
+      "UniqueId": "IntuneHeader",
+      "Title": "INTUNE",
+      "IsSpecialSection": false,
+      "IsNavigationViewItemHeader": true,
+      "HideGroup": false,
+      "Order": true,
+      "Items": []
+    },
+    {
       "UniqueId": "IntuneGroup",
       "Title": "Intune",
-      "Glyph": "\uE753",
+      "IconGlyph": "\uE753",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
+      "Order": true,
       "Items": [
         {
           "UniqueId": "CCEM.Views.Intune.ComingSoonPage",
           "Title": "Coming Soon",
           "Subtitle": "Intune support in Phase 8",
-          "Glyph": "\uE823",
+          "IconGlyph": "\uE823",
           "Description": "Intune management features coming soon"
         }
       ]
