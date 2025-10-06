@@ -32,13 +32,169 @@
       "Items": []
     },
     {
-      "UniqueId": "AgentGroup",
-      "Title": "Agent Management",
-      "IconGlyph": "\uE950",
+      "UniqueId": "SCCMSoftwareDistributionGroup",
+      "Title": "Software Distribution",
+      "IconGlyph": "\uE7B8",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": false,
       "IsExpanded": false,
       "Items": [
+        {
+          "UniqueId": "CCEM.Views.SCCM.ApplicationsPage",
+          "Title": "Applications",
+          "Subtitle": "Deployed applications",
+          "IconGlyph": "\uE7B8",
+          "Description": "View deployed applications"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.AdvertisementsPage",
+          "Title": "Advertisements",
+          "Subtitle": "Deployment packages",
+          "IconGlyph": "\uE81C",
+          "Description": "View deployment advertisements"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.SoftwareSummaryPage",
+          "Title": "Software Summary",
+          "Subtitle": "Overview of software distribution",
+          "IconGlyph": "\uE81C",
+          "Description": "View software distribution summary"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.ExecutionHistoryPage",
+          "Title": "Execution History",
+          "Subtitle": "Deployment execution history",
+          "IconGlyph": "\uE81C",
+          "Description": "View deployment execution history"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.MaintenanceWindowsPage",
+          "Title": "Maintenance Windows",
+          "Subtitle": "Manage maintenance windows",
+          "IconGlyph": "\uEC92",
+          "Description": "View and manage maintenance windows"
+        }
+      ]
+    },
+    {
+      "UniqueId": "SCCMInventoryGroup",
+      "Title": "Inventory",
+      "IconGlyph": "\uE8F1",
+      "IsSpecialSection": false,
+      "ShowItemsWithoutGroup": false,
+      "IsExpanded": false,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.SCCM.PendingUpdatesPage",
+          "Title": "Pending Updates",
+          "Subtitle": "Updates waiting for installation",
+          "IconGlyph": "\uEA6A",
+          "Description": "View pending updates"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.AllUpdatesPage",
+          "Title": "All Updates",
+          "Subtitle": "All available updates",
+          "IconGlyph": "\uE895",
+          "Description": "View all available updates"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.InstalledSoftwarePage",
+          "Title": "Installed Software",
+          "Subtitle": "Software inventory",
+          "IconGlyph": "\uE7B8",
+          "Description": "View installed software inventory"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.VariablesPage",
+          "Title": "Variables",
+          "Subtitle": "Collection variables",
+          "IconGlyph": "\uE713",
+          "Description": "View collection variables"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.InventoryDataPage",
+          "Title": "Inventory Data",
+          "Subtitle": "Detailed inventory data",
+          "IconGlyph": "\uE713",
+          "Description": "View detailed inventory data"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.DCMBaselinePage",
+          "Title": "DCM Baselines",
+          "Subtitle": "Desired Configuration Management baselines",
+          "IconGlyph": "\uE713",
+          "Description": "View DCM baselines"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.PowerSettingsPage",
+          "Title": "Power Settings",
+          "Subtitle": "Power configuration",
+          "IconGlyph": "\uE945",
+          "Description": "View power settings"
+        }
+      ]
+    },
+    {
+      "UniqueId": "SCCMMonitoringGroup",
+      "Title": "Monitoring",
+      "IconGlyph": "\uE7F4",
+      "IsSpecialSection": false,
+      "ShowItemsWithoutGroup": false,
+      "IsExpanded": false,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.SCCM.ServicesPage",
+          "Title": "Services",
+          "Subtitle": "Windows services",
+          "IconGlyph": "\uE713",
+          "Description": "Manage Windows services"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.CMServicesPage",
+          "Title": "CM Services",
+          "Subtitle": "Configuration Manager services",
+          "IconGlyph": "\uE713",
+          "Description": "Manage Configuration Manager services"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.ProcessesPage",
+          "Title": "Processes",
+          "Subtitle": "Running processes",
+          "IconGlyph": "\uE9F5",
+          "Description": "View running processes"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.EventMonitoringPage",
+          "Title": "Event Monitoring",
+          "Subtitle": "System event monitoring",
+          "IconGlyph": "\uF763",
+          "Description": "Monitor system events"
+        },
+        {
+          "UniqueId": "CCEM.Views.SCCM.LogsPage",
+          "Title": "Logs",
+          "Subtitle": "SCCM log files",
+          "IconGlyph": "\uF000",
+          "Description": "View SCCM log files"
+        }
+      ]
+    },
+    {
+      "UniqueId": "SCCMAgentSettingsGroup",
+      "Title": "Agent Settings",
+      "IconGlyph": "\uE713",
+      "IsSpecialSection": false,
+      "ShowItemsWithoutGroup": false,
+      "IsExpanded": false,
+      "Items": [
+        {
+          "UniqueId": "CCEM.Views.SCCM.AgentSettingsPage",
+          "Title": "Settings",
+          "Subtitle": "View and modify agent settings",
+          "IconGlyph": "\uE713",
+          "Description": "View and modify SCCM agent settings"
+        },
         {
           "UniqueId": "CCEM.Views.SCCM.ComponentsPage",
           "Title": "Components",
@@ -47,11 +203,11 @@
           "Description": "View and manage SCCM agent components"
         },
         {
-          "UniqueId": "CCEM.Views.SCCM.AgentSettingsPage",
-          "Title": "Settings",
-          "Subtitle": "Agent Configuration",
-          "IconGlyph": "\uE713",
-          "Description": "Configure SCCM agent settings"
+          "UniqueId": "CCEM.Views.SCCM.CachePage",
+          "Title": "Cache",
+          "Subtitle": "Client cache management",
+          "IconGlyph": "\uE895",
+          "Description": "View and manage SCCM client cache"
         },
         {
           "UniqueId": "CCEM.Views.SCCM.InstallRepairPage",
@@ -61,201 +217,11 @@
           "Description": "Install or repair SCCM client agent"
         },
         {
-          "UniqueId": "CCEM.Views.SCCM.InstallAgentPage",
-          "Title": "Install Agent",
-          "Subtitle": "Agent installation wizard",
-          "IconGlyph": "\uE896",
-          "Description": "Install SCCM client agent wizard"
-        }
-      ]
-    },
-    {
-      "UniqueId": "InventoryGroup",
-      "Title": "Inventory",
-      "IconGlyph": "\uE8F1",
-      "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": false,
-      "IsExpanded": false,
-      "Items": [
-        {
-          "UniqueId": "CCEM.Views.SCCM.CachePage",
-          "Title": "Cache",
-          "Subtitle": "Client cache management",
-          "IconGlyph": "\uE895",
-          "Description": "View and manage SCCM client cache"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.ApplicationsPage",
-          "Title": "Applications",
-          "Subtitle": "Deployed applications",
-          "IconGlyph": "\uE8B7",
-          "Description": "View deployed applications"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.InstalledSoftwarePage",
-          "Title": "Installed Software",
-          "Subtitle": "Software inventory",
-          "IconGlyph": "\uE74C",
-          "Description": "View installed software inventory"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.AdvertisementsPage",
-          "Title": "Advertisements",
-          "Subtitle": "Deployment packages",
-          "IconGlyph": "\uE789",
-          "Description": "View deployment advertisements"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.ExecutionHistoryPage",
-          "Title": "Execution History",
-          "Subtitle": "Deployment execution history",
-          "IconGlyph": "\uE81C",
-          "Description": "View deployment execution history"
-        }
-      ]
-    },
-    {
-      "UniqueId": "SoftwareUpdatesGroup",
-      "Title": "Software Updates",
-      "IconGlyph": "\uE895",
-      "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": false,
-      "IsExpanded": false,
-      "Items": [
-        {
-          "UniqueId": "CCEM.Views.SCCM.UpdatesPage",
-          "Title": "Updates",
-          "Subtitle": "Available updates",
-          "IconGlyph": "\uE777",
-          "Description": "View available software updates"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.AllUpdatesPage",
-          "Title": "All Updates",
-          "Subtitle": "Complete update list",
-          "IconGlyph": "\uE8FD",
-          "Description": "View all software updates"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.UpdateStatusPage",
-          "Title": "Update Status",
-          "Subtitle": "Update installation status",
-          "IconGlyph": "\uE7BA",
-          "Description": "View software update installation status"
-        }
-      ]
-    },
-    {
-      "UniqueId": "SystemGroup",
-      "Title": "System Management",
-      "IconGlyph": "\uE770",
-      "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": false,
-      "IsExpanded": false,
-      "Items": [
-        {
-          "UniqueId": "CCEM.Views.SCCM.ServicesPage",
-          "Title": "Services",
-          "Subtitle": "Windows services",
-          "IconGlyph": "\uE950",
-          "Description": "Manage Windows services"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.ProcessesPage",
-          "Title": "Processes",
-          "Subtitle": "Running processes",
-          "IconGlyph": "\uE9D9",
-          "Description": "View running processes"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.LogsPage",
-          "Title": "Logs",
-          "Subtitle": "SCCM log files",
-          "IconGlyph": "\uE8A5",
-          "Description": "View SCCM log files"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.LogViewerPage",
-          "Title": "Log Viewer",
-          "Subtitle": "Real-time log viewer",
-          "IconGlyph": "\uE8A5",
-          "Description": "View logs in real-time"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.EventMonitoringPage",
-          "Title": "Event Monitoring",
-          "Subtitle": "System event monitoring",
-          "IconGlyph": "\uE7C1",
-          "Description": "Monitor system events"
-        }
-      ]
-    },
-    {
-      "UniqueId": "AdvancedGroup",
-      "Title": "Advanced",
-      "IconGlyph": "\uE9E9",
-      "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": false,
-      "IsExpanded": false,
-      "Items": [
-        {
-          "UniqueId": "CCEM.Views.SCCM.ServiceWindowsPage",
-          "Title": "Service Windows",
-          "Subtitle": "Maintenance windows",
-          "IconGlyph": "\uE787",
-          "Description": "View and manage service windows"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.VariablesPage",
-          "Title": "Variables",
-          "Subtitle": "Collection variables",
-          "IconGlyph": "\uE8CB",
-          "Description": "Manage collection variables"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.PowerPage",
-          "Title": "Power Management",
-          "Subtitle": "Power settings",
-          "IconGlyph": "\uE945",
-          "Description": "Manage power settings"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.WMIBrowserPage",
-          "Title": "WMI Browser",
-          "Subtitle": "WMI namespace browser",
-          "IconGlyph": "\uE8B7",
-          "Description": "Browse WMI namespaces"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.EvaluationPage",
-          "Title": "Evaluation",
-          "Subtitle": "CCM evaluation rules",
-          "IconGlyph": "\uE9D5",
-          "Description": "View CCM evaluation rules"
-        },
-        {
-          "UniqueId": "CCEM.Views.SCCM.ImportAppPage",
-          "Title": "Import Application",
-          "Subtitle": "Import application wizard",
-          "IconGlyph": "\uE8B5",
-          "Description": "Import application wizard"
-        }
-      ]
-    },
-    {
-      "UniqueId": "PluginsGroup",
-      "Title": "Tools & Plugins",
-      "IconGlyph": "\uE90F",
-      "IsSpecialSection": false,
-      "ShowItemsWithoutGroup": false,
-      "IsExpanded": false,
-      "Items": [
-        {
-          "UniqueId": "CCEM.Views.SCCM.PluginsPage",
-          "Title": "Plugins",
-          "Subtitle": "Manage plugins",
-          "IconGlyph": "\uE90F",
-          "Description": "Manage and configure plugins (Coming in Phase 4)"
+          "UniqueId": "CCEM.Views.SCCM.ClientHealthPage",
+          "Title": "Client Health",
+          "Subtitle": "Client health status",
+          "IconGlyph": "\uE7EF",
+          "Description": "View SCCM client health status"
         }
       ]
     },
