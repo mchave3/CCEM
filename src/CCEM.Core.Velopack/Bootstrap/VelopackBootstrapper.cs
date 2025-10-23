@@ -1,3 +1,4 @@
+using CCEM.Core.Logger;
 using Velopack;
 
 namespace CCEM.Core.Velopack.Bootstrap;
@@ -12,6 +13,8 @@ public static class VelopackBootstrapper
     /// </summary>
     public static void Initialize()
     {
+        LoggerSetup.Logger?.Information("Initializing Velopack bootstrapper.");
         VelopackApp.Build().Run();
+        LoggerSetup.Logger?.Information("Velopack bootstrapper initialized successfully.");
     }
 }
