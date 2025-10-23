@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  VELOPACK_APP_ID: ccem
+  VELOPACK_APP_ID: CCEM
   VELOPACK_PUBLISH_DIR: publish
   VPK_OUTPUT_DIR: Releases
 
@@ -77,8 +77,7 @@ jobs:
             --channel stable `
             --framework net8.0-x64-desktop,webview2 `
             --packTitle "Client Center for Configuration Manager" `
-            --icon "src/CCEM/Assets/AppIcon.ico" `
-            --splashImage "src/CCEM/Assets/AppIcon.png"
+            --icon "src/CCEM/Assets/AppIcon.ico"
 
       - name: Upload release to GitHub
         run: |
