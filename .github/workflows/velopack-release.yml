@@ -33,9 +33,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore src/CCEM/CCEM.csproj
 
-      - name: Restore workloads
-        run: dotnet workload restore src/CCEM/CCEM.csproj
-
       - name: Get version from project
         id: get-version
         run: |
@@ -57,7 +54,7 @@ jobs:
           fi
 
       - name: Publish application
-        run: dotnet publish src/CCEM/CCEM.csproj -c Release -r win-x64 --self-contained true -o $env:VELOPACK_PUBLISH_DIR
+        run: dotnet publish src/CCEM/CCEM.csproj -c Release -r win-x64 -o $env:VELOPACK_PUBLISH_DIR
 
       - name: Install Velopack CLI
         run: |
@@ -75,7 +72,7 @@ jobs:
           }
 
       - name: Create Velopack package
-        run: vpk pack -u $env:VELOPACK_APP_ID -v ${{ steps.get-version.outputs.version }} -p $env:VELOPACK_PUBLISH_DIR --channel stable
+        run: vpk pack -u $env:VELOPACK_APP_ID -v ${{ steps.get-version.outputs.version }} -p $env:VELOPACK_PUBLISH_DIR --channel stable --framework net8.0-x64-desktop,webview2
 
       - name: Upload release to GitHub
         run: |
