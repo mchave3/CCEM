@@ -10,16 +10,21 @@ namespace CCEM.Core.Velopack.Services;
 public sealed class VelopackUpdateService : IVelopackUpdateService
 {
     private readonly VelopackUpdateConfiguration _configuration;
+    private readonly Func<VelopackUpdateConfiguration, VelopackChannel, UpdateManager> _managerFactory;
     private VelopackChannel _channel = VelopackChannel.Stable;
 
     /// <summary>
     /// Creates a new update service using the supplied Velopack configuration.
     /// </summary>
     /// <param name="configuration">Provides repository and authentication settings.</param>
+    /// <param name="managerFactory">Optional factory used to create <see cref="UpdateManager"/> instances.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="configuration"/> is null.</exception>
-    public VelopackUpdateService(VelopackUpdateConfiguration configuration)
+    public VelopackUpdateService(
+        VelopackUpdateConfiguration configuration,
+        Func<VelopackUpdateConfiguration, VelopackChannel, UpdateManager>? managerFactory = null)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _managerFactory = managerFactory ?? CreateDefaultManager;
     }
 
     /// <inheritdoc />
@@ -125,17 +130,24 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
 
     private UpdateManager CreateManager()
     {
-        var includePrerelease = _channel == VelopackChannel.Nightly;
+        return _managerFactory(_configuration, _channel);
+    }
+
+    private static UpdateManager CreateDefaultManager(
+        VelopackUpdateConfiguration configuration,
+        VelopackChannel channel)
+    {
+        var includePrerelease = channel == VelopackChannel.Nightly;
 
         var source = new GithubSource(
-            _configuration.RepositoryUrl,
-            _configuration.AccessToken ?? string.Empty,
+            configuration.RepositoryUrl,
+            configuration.AccessToken ?? string.Empty,
             includePrerelease,
             downloader: null);
 
         var options = new UpdateOptions
         {
-            ExplicitChannel = _channel switch
+            ExplicitChannel = channel switch
             {
                 VelopackChannel.Stable => "stable",
                 VelopackChannel.Nightly => "nightly",

@@ -5,29 +5,11 @@ using System.Reflection;
 using System.Threading;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
+using CCEM.Core.Velopack.Tests.TestInfrastructure;
 using Velopack;
-using Velopack.Locators;
 using Velopack.Sources;
 
-namespace CCEM.Core.Velopack.Tests;
-
-public sealed class VelopackUpdateConfigurationTests
-{
-    [Fact]
-    public void Constructor_Throws_WhenRepositoryUrlIsNullOrWhitespace()
-    {
-        Assert.Throws<ArgumentException>(() => new VelopackUpdateConfiguration(" "));
-    }
-
-    [Fact]
-    public void Constructor_SetsRepositoryUrl()
-    {
-        const string repositoryUrl = "https://github.com/example/repo";
-        var configuration = new VelopackUpdateConfiguration(repositoryUrl);
-
-        Assert.Equal(repositoryUrl, configuration.RepositoryUrl);
-    }
-}
+namespace CCEM.Core.Velopack.Tests.Unit;
 
 public sealed class VelopackUpdateServiceTests
 {
@@ -147,12 +129,20 @@ public sealed class VelopackUpdateServiceTests
 
     private static VelopackUpdateService CreateService()
     {
-        EnsureTestLocator();
+        var packagesDir = Path.Combine(
+            Path.GetTempPath(),
+            "CCEM.Core.Velopack.Tests",
+            "Unit",
+            Guid.NewGuid().ToString("N"));
+
+        var locator = VelopackTestContext.ConfigureTestLocator("1.0.0", packagesDir);
 
         var configuration = new VelopackUpdateConfiguration("https://github.com/example/repo")
         {
             AccessToken = "token"
         };
+
+        _ = locator;
 
         return new VelopackUpdateService(configuration);
     }
@@ -229,39 +219,4 @@ public sealed class VelopackUpdateServiceTests
 
         throw new InvalidOperationException($"Unable to read member '{memberName}' on '{instanceType.FullName}'.");
     }
-
-    private static void EnsureTestLocator()
-    {
-        if (_locatorInitialized)
-        {
-            return;
-        }
-
-        lock (LocatorInitLock)
-        {
-            if (_locatorInitialized)
-            {
-                return;
-            }
-
-            var packagesDir = Directory.CreateDirectory(
-                Path.Combine(Path.GetTempPath(), "CCEM.Core.Velopack.Tests", Guid.NewGuid().ToString()));
-
-            var locator = new TestVelopackLocator(
-                appId: "ccem.tests",
-                version: "1.0.0",
-                packagesDir: packagesDir.FullName,
-                logger: null);
-
-            var setLocatorMethod = typeof(VelopackLocator).GetMethod(
-                "SetCurrentLocator",
-                BindingFlags.Static | BindingFlags.NonPublic);
-
-            setLocatorMethod!.Invoke(null, new object[] { locator });
-            _locatorInitialized = true;
-        }
-    }
-
-    private static readonly object LocatorInitLock = new();
-    private static bool _locatorInitialized;
 }
