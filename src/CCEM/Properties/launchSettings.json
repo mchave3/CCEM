@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CCEM (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "CCEM (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
