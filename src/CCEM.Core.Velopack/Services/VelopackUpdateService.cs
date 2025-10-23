@@ -125,7 +125,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
                 VelopackChannel.Nightly => "nightly",
                 _ => null
             },
-            AllowVersionDowngrade = _channel == VelopackChannel.Stable
+            AllowVersionDowngrade = true
         };
 
         return new UpdateManager(source, options, locator: null);
