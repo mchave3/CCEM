@@ -13,7 +13,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
     private readonly VelopackUpdateConfiguration _configuration;
     private readonly Func<VelopackUpdateConfiguration, VelopackChannel, UpdateManager> _managerFactory;
     private readonly IAppLogger? _logger;
-    private VelopackChannel _channel = VelopackChannel.Stable;
+    private VelopackChannel _channel;
 
     /// <summary>
     /// Creates a new update service using the supplied Velopack configuration.
@@ -24,13 +24,15 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
     public VelopackUpdateService(
         VelopackUpdateConfiguration configuration,
         Func<VelopackUpdateConfiguration, VelopackChannel, UpdateManager>? managerFactory = null,
-        IAppLogger? logger = null)
+        IAppLogger? logger = null,
+        VelopackChannel initialChannel = VelopackChannel.Stable)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _managerFactory = managerFactory ?? CreateDefaultManager;
         _logger = logger;
+        _channel = initialChannel;
 
-        Logger?.Debug("Initialized VelopackUpdateService for repository {RepositoryUrl} with default channel {Channel}", _configuration.RepositoryUrl, _channel);
+        Logger?.Debug("Initialized VelopackUpdateService for repository {RepositoryUrl} with channel {Channel}", _configuration.RepositoryUrl, _channel);
     }
 
     /// <inheritdoc />
