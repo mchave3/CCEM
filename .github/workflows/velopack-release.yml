@@ -1,0 +1,94 @@
+name: Velopack Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  VELOPACK_APP_ID: ccem
+  VELOPACK_PUBLISH_DIR: publish
+  VPK_OUTPUT_DIR: Releases
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore src/CCEM/CCEM.csproj
+
+      - name: Restore workloads
+        run: dotnet workload restore src/CCEM/CCEM.csproj
+
+      - name: Get version from project
+        id: get-version
+        run: |
+          [xml]$project = Get-Content "src/CCEM/CCEM.csproj"
+          $version = $project.Project.PropertyGroup.Version | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1
+          if (-not $version) { throw "Unable to locate <Version> in src/CCEM/CCEM.csproj." }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Determine release tag
+        id: release-tag
+        shell: bash
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish application
+        run: dotnet publish src/CCEM/CCEM.csproj -c Release -r win-x64 --self-contained true -o $env:VELOPACK_PUBLISH_DIR
+
+      - name: Install Velopack CLI
+        run: |
+          dotnet tool install --global vpk
+          $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
+          $toolPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Download previous release (optional)
+        continue-on-error: true
+        run: |
+          try {
+            vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+          } catch {
+            Write-Host "No previous release available. Continuing with a fresh package."
+          }
+
+      - name: Create Velopack package
+        run: vpk pack -u $env:VELOPACK_APP_ID -v ${{ steps.get-version.outputs.version }} -p $env:VELOPACK_PUBLISH_DIR --channel stable
+
+      - name: Upload release to GitHub
+        run: |
+          vpk upload github `
+            --repoUrl https://github.com/${{ github.repository }} `
+            --token ${{ secrets.GITHUB_TOKEN }} `
+            --publish `
+            --releaseName "CCEM ${{ steps.get-version.outputs.version }}" `
+            --tag ${{ steps.release-tag.outputs.tag }}
+
+      - name: Upload Velopack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: velopack-packages
+          path: Releases
+          if-no-files-found: error
