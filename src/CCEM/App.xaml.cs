@@ -94,16 +94,14 @@ public partial class App : Application
             await menuService.SaveAsync(menu);
         }
 
-        if (Settings.UseDeveloperMode)
+        ConfigureLogger(new LoggerConfigurationOptions
         {
-            ConfigureLogger(new LoggerConfigurationOptions
-            {
-                Version = ProcessInfoHelper.Version,
-                LogDirectoryPath = Constants.LogDirectoryPath,
-                LogFilePath = Constants.LogFilePath,
-                MinimumLevel = LogLevel.Debug
-            });
-        }
+            Version = ProcessInfoHelper.Version,
+            LogDirectoryPath = Constants.LogDirectoryPath,
+            LogFilePath = Constants.LogFilePath,
+            MinimumLevel = Settings.UseDeveloperMode ? LogLevel.Debug : LogLevel.Information,
+            EnableDebugSink = Settings.UseDeveloperMode
+        });
 
         UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
     }
