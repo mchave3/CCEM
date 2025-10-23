@@ -33,47 +33,58 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
             updateInfo);
     }
 
-    public async Task DownloadUpdatesAsync(UpdateInfo updateInfo, Action<int>? progress = null, CancellationToken cancellationToken = default)
+    public async Task DownloadUpdatesAsync(VelopackUpdateCheckResult update, Action<int>? progress = null, CancellationToken cancellationToken = default)
     {
-        if (updateInfo is null)
+        if (update is null)
         {
-            throw new ArgumentNullException(nameof(updateInfo));
+            throw new ArgumentNullException(nameof(update));
+        }
+
+        if (update.UpdateInfo is null)
+        {
+            throw new InvalidOperationException("There is no update information available to download.");
         }
 
         var manager = CreateManager();
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        await manager.DownloadUpdatesAsync(updateInfo, progress, cancellationToken).ConfigureAwait(false);
+        await manager.DownloadUpdatesAsync(update.UpdateInfo, progress, cancellationToken).ConfigureAwait(false);
     }
 
-    public void ApplyUpdatesAndRestart(UpdateInfo updateInfo, string[]? restartArgs = null)
+    public void ApplyUpdatesAndRestart(VelopackUpdateCheckResult update, string[]? restartArgs = null)
     {
-        if (updateInfo is null)
+        if (update is null)
         {
-            throw new ArgumentNullException(nameof(updateInfo));
+            throw new ArgumentNullException(nameof(update));
         }
 
-        var targetRelease = updateInfo.TargetFullRelease ?? throw new InvalidOperationException("The update information does not contain a target release.");
+        if (update.TargetRelease is null)
+        {
+            throw new InvalidOperationException("The update information does not contain a target release.");
+        }
 
         var manager = CreateManager();
-        manager.ApplyUpdatesAndRestart(targetRelease, restartArgs);
+        manager.ApplyUpdatesAndRestart(update.TargetRelease, restartArgs);
     }
 
-    public async Task WaitExitThenApplyUpdatesAsync(UpdateInfo updateInfo, bool silent = false, bool restart = true, string[]? restartArgs = null, CancellationToken cancellationToken = default)
+    public async Task WaitExitThenApplyUpdatesAsync(VelopackUpdateCheckResult update, bool silent = false, bool restart = true, string[]? restartArgs = null, CancellationToken cancellationToken = default)
     {
-        if (updateInfo is null)
+        if (update is null)
         {
-            throw new ArgumentNullException(nameof(updateInfo));
+            throw new ArgumentNullException(nameof(update));
         }
 
-        var targetRelease = updateInfo.TargetFullRelease ?? throw new InvalidOperationException("The update information does not contain a target release.");
+        if (update.TargetRelease is null)
+        {
+            throw new InvalidOperationException("The update information does not contain a target release.");
+        }
 
         var manager = CreateManager();
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        await manager.WaitExitThenApplyUpdatesAsync(targetRelease, silent, restart, restartArgs).ConfigureAwait(false);
+        await manager.WaitExitThenApplyUpdatesAsync(update.TargetRelease, silent, restart, restartArgs).ConfigureAwait(false);
     }
 
     public bool IsRunningInstalledVersion()

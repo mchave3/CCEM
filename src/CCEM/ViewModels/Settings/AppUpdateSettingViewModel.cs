@@ -70,7 +70,7 @@ public partial class AppUpdateSettingViewModel : ObservableObject
 
             _lastCheckResult = await _updateService.CheckForUpdatesAsync();
 
-            if (_lastCheckResult.IsUpdateAvailable && _lastCheckResult.TargetRelease is not null)
+            if (_lastCheckResult.IsUpdateAvailable)
             {
                 IsUpdateAvailable = true;
                 _changeLog = _lastCheckResult.ReleaseNotesMarkdown ?? "Release notes are not available.";
@@ -102,7 +102,7 @@ public partial class AppUpdateSettingViewModel : ObservableObject
             return;
         }
 
-        if (_lastCheckResult?.UpdateInfo is null)
+        if (_lastCheckResult is null || !_lastCheckResult.IsUpdateAvailable)
         {
             await Launcher.LaunchUriAsync(new Uri(LatestReleaseUrl));
             return;
@@ -114,9 +114,9 @@ public partial class AppUpdateSettingViewModel : ObservableObject
 
         try
         {
-            await _updateService.DownloadUpdatesAsync(_lastCheckResult.UpdateInfo);
+            await _updateService.DownloadUpdatesAsync(_lastCheckResult);
             LoadingStatus = "Restarting to finish the update...";
-            _updateService.ApplyUpdatesAndRestart(_lastCheckResult.UpdateInfo);
+            _updateService.ApplyUpdatesAndRestart(_lastCheckResult);
         }
         catch (Exception ex)
         {

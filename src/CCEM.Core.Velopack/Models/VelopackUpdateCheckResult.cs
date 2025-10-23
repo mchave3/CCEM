@@ -28,6 +28,6 @@ public sealed class VelopackUpdateCheckResult
     public string? ReleaseNotesMarkdown { get; }
     public string? ReleaseNotesHtml { get; }
     public bool IsDowngrade { get; }
-    public UpdateInfo? UpdateInfo { get; }
-    public VelopackAsset? TargetRelease => UpdateInfo?.TargetFullRelease;
+    internal UpdateInfo? UpdateInfo { get; }
+    internal VelopackAsset? TargetRelease => UpdateInfo?.TargetFullRelease;
 }
