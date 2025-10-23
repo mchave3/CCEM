@@ -80,6 +80,7 @@ jobs:
       - name: Upload release to GitHub
         run: |
           vpk upload github `
+            --channel stable `
             --repoUrl https://github.com/${{ github.repository }} `
             --token ${{ secrets.GITHUB_TOKEN }} `
             --publish `
