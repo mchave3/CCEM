@@ -1,5 +1,6 @@
 using System.IO;
 using Serilog;
+using Serilog.Events;
 
 namespace CCEM.Core.Logger;
 
@@ -26,7 +27,8 @@ public static class LoggerSetup
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        var loggerConfiguration = new LoggerConfiguration();
+        var loggerConfiguration = new LoggerConfiguration()
+            .MinimumLevel.Is(MapLogEventLevel(options.MinimumLevel));
 
         if (!string.IsNullOrWhiteSpace(options.Version))
         {
@@ -87,5 +89,17 @@ public static class LoggerSetup
             LogRollingInterval.Hour => RollingInterval.Hour,
             LogRollingInterval.Minute => RollingInterval.Minute,
             _ => RollingInterval.Day
+        };
+
+    private static LogEventLevel MapLogEventLevel(LogLevel level) =>
+        level switch
+        {
+            LogLevel.Verbose => LogEventLevel.Verbose,
+            LogLevel.Debug => LogEventLevel.Debug,
+            LogLevel.Information => LogEventLevel.Information,
+            LogLevel.Warning => LogEventLevel.Warning,
+            LogLevel.Error => LogEventLevel.Error,
+            LogLevel.Fatal => LogEventLevel.Fatal,
+            _ => LogEventLevel.Information
         };
 }

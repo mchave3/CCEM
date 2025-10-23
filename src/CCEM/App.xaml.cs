@@ -61,6 +61,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new MainWindow();
+        MainWindow.Closed += (_, _) => CloseAndFlush();
 
         MainWindow.Title = MainWindow.AppWindow.Title = ProcessInfoHelper.ProductNameAndVersion;
         MainWindow.AppWindow.SetIcon("Assets/AppIcon.ico");
@@ -99,7 +100,8 @@ public partial class App : Application
             {
                 Version = ProcessInfoHelper.Version,
                 LogDirectoryPath = Constants.LogDirectoryPath,
-                LogFilePath = Constants.LogFilePath
+                LogFilePath = Constants.LogFilePath,
+                MinimumLevel = LogLevel.Debug
             });
         }
 

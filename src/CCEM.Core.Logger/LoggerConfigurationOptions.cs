@@ -36,6 +36,11 @@ public sealed class LoggerConfigurationOptions
     public bool EnableDebugSink { get; init; } = true;
 
     /// <summary>
+    /// Minimum level forwarded to the configured logging sinks.
+    /// </summary>
+    public LogLevel MinimumLevel { get; init; } = LogLevel.Information;
+
+    /// <summary>
     /// Creates the log directory when the directory path is provided.
     /// </summary>
     public bool CreateLogDirectory { get; init; } = true;
