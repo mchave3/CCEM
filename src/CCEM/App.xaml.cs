@@ -1,6 +1,6 @@
-using CCEM.Core.Velopack.Bootstrap;
-using CCEM.Core.Velopack.Models;
+﻿using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
+using Velopack;
 
 namespace CCEM;
 
@@ -28,7 +28,9 @@ public partial class App : Application
         ConfigureApplicationLogger();
         UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
 
-        VelopackBootstrapper.Initialize();
+        Logger?.Information("Initializing Velopack bootstrapper...");
+        VelopackApp.Build().Run();
+        Logger?.Information("Velopack bootstrapper initialized.");
         Services = ConfigureServices();
         this.InitializeComponent();
     }
