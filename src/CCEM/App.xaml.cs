@@ -38,7 +38,15 @@ public partial class App : Application
         services.AddSingleton<IVelopackUpdateService>(_ =>
         {
             var configuration = new VelopackUpdateConfiguration("https://github.com/mchave3/CCEM");
-            return new VelopackUpdateService(configuration);
+            var updateService = new VelopackUpdateService(configuration);
+            if (!Enum.TryParse(Settings.UpdateChannel, ignoreCase: true, out VelopackChannel channel))
+            {
+                channel = VelopackChannel.Stable;
+                Settings.UpdateChannel = channel.ToString();
+            }
+
+            updateService.SetChannel(channel);
+            return updateService;
         });
 
         services.AddTransient<MainViewModel>();

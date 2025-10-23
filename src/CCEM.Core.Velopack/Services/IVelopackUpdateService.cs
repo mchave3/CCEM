@@ -11,4 +11,6 @@ public interface IVelopackUpdateService
     Task WaitExitThenApplyUpdatesAsync(VelopackUpdateCheckResult update, bool silent = false, bool restart = true, string[]? restartArgs = null, CancellationToken cancellationToken = default);
     bool IsRunningInstalledVersion();
     string? GetCurrentlyInstalledVersion();
+    VelopackChannel CurrentChannel { get; }
+    void SetChannel(VelopackChannel channel);
 }

@@ -7,6 +7,7 @@ namespace CCEM.Core.Velopack.Services;
 public sealed class VelopackUpdateService : IVelopackUpdateService
 {
     private readonly VelopackUpdateConfiguration _configuration;
+    private VelopackChannel _channel = VelopackChannel.Stable;
 
     public VelopackUpdateService(VelopackUpdateConfiguration configuration)
     {
@@ -99,23 +100,33 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
         return manager.CurrentVersion?.ToString();
     }
 
+    public VelopackChannel CurrentChannel => _channel;
+
+    public void SetChannel(VelopackChannel channel)
+    {
+        _channel = channel;
+    }
+
     private UpdateManager CreateManager()
     {
+        var includePrerelease = _channel == VelopackChannel.Nightly;
+
         var source = new GithubSource(
             _configuration.RepositoryUrl,
             _configuration.AccessToken ?? string.Empty,
-            _configuration.IncludePrerelease,
+            includePrerelease,
             downloader: null);
 
-        UpdateOptions? options = null;
-        if (!string.IsNullOrWhiteSpace(_configuration.ExplicitChannel) || _configuration.AllowVersionDowngrade)
+        var options = new UpdateOptions
         {
-            options = new UpdateOptions
+            ExplicitChannel = _channel switch
             {
-                ExplicitChannel = _configuration.ExplicitChannel,
-                AllowVersionDowngrade = _configuration.AllowVersionDowngrade
-            };
-        }
+                VelopackChannel.Stable => "stable",
+                VelopackChannel.Nightly => "nightly",
+                _ => null
+            },
+            AllowVersionDowngrade = _channel == VelopackChannel.Stable
+        };
 
         return new UpdateManager(source, options, locator: null);
     }

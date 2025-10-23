@@ -14,7 +14,4 @@ public sealed class VelopackUpdateConfiguration
 
     public string RepositoryUrl { get; }
     public string? AccessToken { get; init; }
-    public bool IncludePrerelease { get; init; }
-    public string? ExplicitChannel { get; init; }
-    public bool AllowVersionDowngrade { get; init; }
 }
