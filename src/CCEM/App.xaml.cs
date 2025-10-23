@@ -25,6 +25,9 @@ public partial class App : Application
 
     public App()
     {
+        ConfigureApplicationLogger();
+        UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
+
         VelopackBootstrapper.Initialize();
         Services = ConfigureServices();
         this.InitializeComponent();
@@ -93,16 +96,17 @@ public partial class App : Application
 
             await menuService.SaveAsync(menu);
         }
+    }
 
+    private static void ConfigureApplicationLogger()
+    {
         ConfigureLogger(new LoggerConfigurationOptions
         {
             Version = ProcessInfoHelper.Version,
             LogDirectoryPath = Constants.LogDirectoryPath,
             LogFilePath = Constants.LogFilePath,
             MinimumLevel = Settings.UseDeveloperMode ? LogLevel.Debug : LogLevel.Information,
-            EnableDebugSink = Settings.UseDeveloperMode
+            EnableDebugSink = true
         });
-
-        UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
     }
 }
