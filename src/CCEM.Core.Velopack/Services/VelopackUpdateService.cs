@@ -4,16 +4,25 @@ using Velopack.Sources;
 
 namespace CCEM.Core.Velopack.Services;
 
+/// <summary>
+/// Provides Velopack-based update management including discovery, download, and installation workflows.
+/// </summary>
 public sealed class VelopackUpdateService : IVelopackUpdateService
 {
     private readonly VelopackUpdateConfiguration _configuration;
     private VelopackChannel _channel = VelopackChannel.Stable;
 
+    /// <summary>
+    /// Creates a new update service using the supplied Velopack configuration.
+    /// </summary>
+    /// <param name="configuration">Provides repository and authentication settings.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="configuration"/> is null.</exception>
     public VelopackUpdateService(VelopackUpdateConfiguration configuration)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
+    /// <inheritdoc />
     public async Task<VelopackUpdateCheckResult> CheckForUpdatesAsync(CancellationToken cancellationToken = default)
     {
         var manager = CreateManager();
@@ -34,6 +43,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
             updateInfo);
     }
 
+    /// <inheritdoc />
     public async Task DownloadUpdatesAsync(VelopackUpdateCheckResult update, Action<int>? progress = null, CancellationToken cancellationToken = default)
     {
         if (update is null)
@@ -53,6 +63,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
         await manager.DownloadUpdatesAsync(update.UpdateInfo, progress, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public void ApplyUpdatesAndRestart(VelopackUpdateCheckResult update, string[]? restartArgs = null)
     {
         if (update is null)
@@ -69,6 +80,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
         manager.ApplyUpdatesAndRestart(update.TargetRelease, restartArgs);
     }
 
+    /// <inheritdoc />
     public async Task WaitExitThenApplyUpdatesAsync(VelopackUpdateCheckResult update, bool silent = false, bool restart = true, string[]? restartArgs = null, CancellationToken cancellationToken = default)
     {
         if (update is null)
@@ -88,20 +100,24 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
         await manager.WaitExitThenApplyUpdatesAsync(update.TargetRelease, silent, restart, restartArgs).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public bool IsRunningInstalledVersion()
     {
         var manager = CreateManager();
         return manager.IsInstalled;
     }
 
+    /// <inheritdoc />
     public string? GetCurrentlyInstalledVersion()
     {
         var manager = CreateManager();
         return manager.CurrentVersion?.ToString();
     }
 
+    /// <inheritdoc />
     public VelopackChannel CurrentChannel => _channel;
 
+    /// <inheritdoc />
     public void SetChannel(VelopackChannel channel)
     {
         _channel = channel;
