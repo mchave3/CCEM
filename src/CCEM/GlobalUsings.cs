@@ -1,4 +1,5 @@
-﻿global using CCEM.Common;
+global using CCEM.Common;
+global using CCEM.Core.Logger;
 global using CCEM.ViewModels;
 global using CCEM.Views;
 global using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,5 +10,6 @@ global using Microsoft.UI;
 global using Microsoft.UI.Xaml;
 global using Microsoft.UI.Xaml.Controls;
 global using Microsoft.UI.Xaml.Navigation;
+global using Serilog;
 global using static CCEM.Common.AppHelper;
-global using static CCEM.Common.LoggerSetup;
+global using static CCEM.Core.Logger.LoggerSetup;

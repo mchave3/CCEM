@@ -95,7 +95,12 @@ public partial class App : Application
 
         if (Settings.UseDeveloperMode)
         {
-            ConfigureLogger();
+            ConfigureLogger(new LoggerConfigurationOptions
+            {
+                Version = ProcessInfoHelper.Version,
+                LogDirectoryPath = Constants.LogDirectoryPath,
+                LogFilePath = Constants.LogFilePath
+            });
         }
 
         UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
