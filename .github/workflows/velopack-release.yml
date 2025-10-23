@@ -76,7 +76,7 @@ jobs:
           vpk pack -u $env:VELOPACK_APP_ID -v ${{ steps.get-version.outputs.version }} -p $env:VELOPACK_PUBLISH_DIR `
             --channel stable `
             --framework net8.0-x64-desktop,webview2 `
-            --packTitle "Client Center for Configuration Manager" `
+            --packTitle "Client Center for Endpoint Manager" `
             --icon "src/CCEM/Assets/AppIcon.ico"
 
       - name: Upload release to GitHub
