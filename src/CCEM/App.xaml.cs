@@ -1,4 +1,8 @@
-﻿namespace CCEM;
+using CCEM.Core.Velopack.Bootstrap;
+using CCEM.Core.Velopack.Models;
+using CCEM.Core.Velopack.Services;
+
+namespace CCEM;
 
 public partial class App : Application
 {
@@ -21,6 +25,7 @@ public partial class App : Application
 
     public App()
     {
+        VelopackBootstrapper.Initialize();
         Services = ConfigureServices();
         this.InitializeComponent();
     }
@@ -30,6 +35,11 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IJsonNavigationService, JsonNavigationService>();
+        services.AddSingleton<IVelopackUpdateService>(_ =>
+        {
+            var configuration = new VelopackUpdateConfiguration("https://github.com/mchave3/CCEM");
+            return new VelopackUpdateService(configuration);
+        });
 
         services.AddTransient<MainViewModel>();
         services.AddSingleton<ContextMenuService>();
@@ -83,4 +93,3 @@ public partial class App : Application
         UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
     }
 }
-

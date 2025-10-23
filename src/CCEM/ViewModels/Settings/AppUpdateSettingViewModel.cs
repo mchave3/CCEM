@@ -1,103 +1,153 @@
-﻿using Windows.System;
+using CCEM.Core.Velopack.Models;
+using CCEM.Core.Velopack.Services;
+using Windows.System;
 
 namespace CCEM.ViewModels;
 
 public partial class AppUpdateSettingViewModel : ObservableObject
 {
-    [ObservableProperty]
-    public string currentVersion;
+    private const string LatestReleaseUrl = "https://github.com/mchave3/CCEM/releases/latest";
+
+    private readonly IVelopackUpdateService _updateService;
+    private readonly bool _updatesSupported;
+    private VelopackUpdateCheckResult? _lastCheckResult;
+    private string _changeLog = string.Empty;
 
     [ObservableProperty]
-    public string lastUpdateCheck;
+    private string currentVersion;
 
     [ObservableProperty]
-    public bool isUpdateAvailable;
+    private string lastUpdateCheck;
 
     [ObservableProperty]
-    public bool isLoading;
+    private bool isUpdateAvailable;
 
     [ObservableProperty]
-    public bool isCheckButtonEnabled = true;
+    private bool isLoading;
 
     [ObservableProperty]
-    public string loadingStatus = "Status";
+    private bool isCheckButtonEnabled = true;
 
-    private string ChangeLog = string.Empty;
+    [ObservableProperty]
+    private string loadingStatus = "Status";
 
-    public AppUpdateSettingViewModel()
+    public AppUpdateSettingViewModel(IVelopackUpdateService updateService)
     {
+        _updateService = updateService ?? throw new ArgumentNullException(nameof(updateService));
+
         CurrentVersion = $"Current Version {ProcessInfoHelper.VersionWithPrefix}";
         LastUpdateCheck = Settings.LastUpdateCheck;
+
+        _updatesSupported = _updateService.IsRunningInstalledVersion();
+        if (_updatesSupported)
+        {
+            LoadingStatus = "Press the button to check for updates.";
+        }
+        else
+        {
+            LoadingStatus = "Updates are only available when CCEM is installed.";
+            IsCheckButtonEnabled = false;
+        }
     }
 
     [RelayCommand]
     private async Task CheckForUpdateAsync()
     {
+        if (!_updatesSupported)
+        {
+            return;
+        }
+
         IsLoading = true;
         IsUpdateAvailable = false;
         IsCheckButtonEnabled = false;
-        LoadingStatus = "Checking for new version";
-        if (NetworkHelper.IsNetworkAvailable())
+        LoadingStatus = "Checking for new version...";
+
+        try
         {
-            try
+            LastUpdateCheck = DateTime.Now.ToShortDateString();
+            Settings.LastUpdateCheck = LastUpdateCheck;
+
+            _lastCheckResult = await _updateService.CheckForUpdatesAsync();
+
+            if (_lastCheckResult.IsUpdateAvailable && _lastCheckResult.TargetRelease is not null)
             {
-                //Todo: Fix UserName and Repo
-                string username = "";
-                string repo = "";
-                LastUpdateCheck = DateTime.Now.ToShortDateString();
-                Settings.LastUpdateCheck = DateTime.Now.ToShortDateString();
-                var update = await UpdateHelper.CheckUpdateAsync(username, repo, new Version(ProcessInfoHelper.Version));
-                if (update.StableRelease.IsExistNewVersion)
-                {
-                    IsUpdateAvailable = true;
-                    ChangeLog = update.StableRelease.Changelog;
-                    LoadingStatus = $"We found a new version {update.StableRelease.TagName} Created at {update.StableRelease.CreatedAt} and Published at {update.StableRelease.PublishedAt}";
-                }
-                else if (update.PreRelease.IsExistNewVersion)
-                {
-                    IsUpdateAvailable = true;
-                    ChangeLog = update.PreRelease.Changelog;
-                    LoadingStatus = $"We found a new PreRelease Version {update.PreRelease.TagName} Created at {update.PreRelease.CreatedAt} and Published at {update.PreRelease.PublishedAt}";
-                }
-                else
-                {
-                    LoadingStatus = "You are using latest version";
-                }
+                IsUpdateAvailable = true;
+                _changeLog = _lastCheckResult.ReleaseNotesMarkdown ?? "Release notes are not available.";
+                LoadingStatus = $"Version {_lastCheckResult.AvailableVersion} is ready to install.";
             }
-            catch (Exception ex)
+            else
             {
-                LoadingStatus = ex.Message;
-                IsLoading = false;
-                IsCheckButtonEnabled = true;
+                _changeLog = string.Empty;
+                LoadingStatus = "You are using the latest version.";
             }
         }
-        else
+        catch (Exception ex)
         {
-            LoadingStatus = "Error Connection";
+            LoadingStatus = ex.Message;
         }
-        IsLoading = false;
-        IsCheckButtonEnabled = true;
+        finally
+        {
+            IsLoading = false;
+            IsCheckButtonEnabled = true;
+        }
     }
 
     [RelayCommand]
     private async Task GoToUpdateAsync()
     {
-        //Todo: Change Uri
-        await Launcher.LaunchUriAsync(new Uri("https://github.com/Ghost1372/DevWinUI/releases"));
+        if (!_updatesSupported)
+        {
+            await Launcher.LaunchUriAsync(new Uri(LatestReleaseUrl));
+            return;
+        }
+
+        if (_lastCheckResult?.UpdateInfo is null)
+        {
+            await Launcher.LaunchUriAsync(new Uri(LatestReleaseUrl));
+            return;
+        }
+
+        IsLoading = true;
+        IsCheckButtonEnabled = false;
+        LoadingStatus = "Downloading update...";
+
+        try
+        {
+            await _updateService.DownloadUpdatesAsync(_lastCheckResult.UpdateInfo);
+            LoadingStatus = "Restarting to finish the update...";
+            _updateService.ApplyUpdatesAndRestart(_lastCheckResult.UpdateInfo);
+        }
+        catch (Exception ex)
+        {
+            LoadingStatus = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            IsCheckButtonEnabled = true;
+        }
     }
 
     [RelayCommand]
     private async Task GetReleaseNotesAsync()
     {
-        ContentDialog dialog = new ContentDialog()
+        if (!_updatesSupported || string.IsNullOrWhiteSpace(_changeLog))
         {
-            Title = "Release Note",
+            await Launcher.LaunchUriAsync(new Uri(LatestReleaseUrl));
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Release Notes",
             CloseButtonText = "Close",
             Content = new ScrollViewer
             {
                 Content = new TextBlock
                 {
-                    Text = ChangeLog,
+                    Text = _changeLog,
+                    TextWrapping = TextWrapping.Wrap,
                     Margin = new Thickness(10)
                 },
                 Margin = new Thickness(10)
