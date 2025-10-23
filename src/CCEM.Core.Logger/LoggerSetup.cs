@@ -4,23 +4,25 @@ using Serilog;
 namespace CCEM.Core.Logger;
 
 /// <summary>
-/// Provides a single entry point to configure Serilog for the application.
+/// Provides a single entry point to configure Serilog for the application while keeping
+/// Serilog details internal to this assembly.
 /// </summary>
 public static class LoggerSetup
 {
     private static readonly object SyncRoot = new();
+    private static ILogger? _serilogLogger;
+    private static IAppLogger? _adapter;
 
     /// <summary>
-    /// Gets the configured <see cref="ILogger"/> instance when available.
+    /// Gets the configured logger adapter, or null when logging has not been configured.
     /// </summary>
-    public static ILogger? Logger { get; private set; }
+    public static IAppLogger? Logger => _adapter;
 
     /// <summary>
-    /// Configures Serilog using the supplied options and optional configuration hook.
+    /// Configures the underlying Serilog logger using the supplied options.
     /// </summary>
     /// <param name="options">User supplied logging options.</param>
-    /// <param name="configure">Optional hook for additional sink/enricher configuration.</param>
-    public static void ConfigureLogger(LoggerConfigurationOptions options, Action<LoggerConfiguration>? configure = null)
+    public static void ConfigureLogger(LoggerConfigurationOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -41,7 +43,7 @@ public static class LoggerSetup
 
             loggerConfiguration = loggerConfiguration.WriteTo.File(
                 path: options.LogFilePath,
-                rollingInterval: options.RollingInterval,
+                rollingInterval: MapRollingInterval(options.RollingInterval),
                 retainedFileCountLimit: options.RetainedFileCountLimit,
                 rollOnFileSizeLimit: options.RollOnFileSizeLimit,
                 shared: options.Shared
@@ -53,12 +55,12 @@ public static class LoggerSetup
             loggerConfiguration = loggerConfiguration.WriteTo.Debug();
         }
 
-        configure?.Invoke(loggerConfiguration);
-
         lock (SyncRoot)
         {
-            (Logger as IDisposable)?.Dispose();
-            Logger = loggerConfiguration.CreateLogger();
+            (_serilogLogger as IDisposable)?.Dispose();
+
+            _serilogLogger = loggerConfiguration.CreateLogger();
+            _adapter = new SerilogAppLogger(_serilogLogger);
         }
     }
 
@@ -69,8 +71,21 @@ public static class LoggerSetup
     {
         lock (SyncRoot)
         {
-            (Logger as IDisposable)?.Dispose();
-            Logger = null;
+            (_serilogLogger as IDisposable)?.Dispose();
+            _serilogLogger = null;
+            _adapter = null;
         }
     }
+
+    private static RollingInterval MapRollingInterval(LogRollingInterval interval) =>
+        interval switch
+        {
+            LogRollingInterval.Infinite => RollingInterval.Infinite,
+            LogRollingInterval.Year => RollingInterval.Year,
+            LogRollingInterval.Month => RollingInterval.Month,
+            LogRollingInterval.Day => RollingInterval.Day,
+            LogRollingInterval.Hour => RollingInterval.Hour,
+            LogRollingInterval.Minute => RollingInterval.Minute,
+            _ => RollingInterval.Day
+        };
 }

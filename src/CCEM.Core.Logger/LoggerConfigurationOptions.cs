@@ -1,5 +1,3 @@
-using Serilog;
-
 namespace CCEM.Core.Logger;
 
 /// <summary>
@@ -25,7 +23,7 @@ public sealed class LoggerConfigurationOptions
     /// <summary>
     /// Determines how frequently the file sink rolls the log file.
     /// </summary>
-    public RollingInterval RollingInterval { get; init; } = RollingInterval.Day;
+    public LogRollingInterval RollingInterval { get; init; } = LogRollingInterval.Day;
 
     /// <summary>
     /// Controls whether the file sink is added.
