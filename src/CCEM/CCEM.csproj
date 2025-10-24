@@ -74,9 +74,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="DevWinUI" Version="9.2.0" />
+    <PackageReference Include="DevWinUI" Version="9.3.0" />
     <PackageReference Include="DevWinUI.ContextMenu" Version="9.0.0" />
-    <PackageReference Include="DevWinUI.Controls" Version="9.2.0" />
+    <PackageReference Include="DevWinUI.Controls" Version="9.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
     <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6584" />
