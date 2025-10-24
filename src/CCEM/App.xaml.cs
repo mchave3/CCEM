@@ -25,12 +25,10 @@ public partial class App : Application
 
     public App()
     {
-        ConfigureApplicationLogger();
-        UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
-
-        Logger?.Information("Initializing Velopack bootstrapper...");
         VelopackApp.Build().Run();
-        Logger?.Information("Velopack bootstrapper initialized.");
+        ConfigureApplicationLogger();
+        
+        UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
         Services = ConfigureServices();
         this.InitializeComponent();
     }
