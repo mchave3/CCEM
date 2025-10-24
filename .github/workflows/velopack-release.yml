@@ -16,8 +16,7 @@ env:
 
 jobs:
   release:
-    # runs-on: windows-latest
-    runs-on: self-hosted
+    runs-on: windows-latest
     defaults:
       run:
         shell: pwsh
