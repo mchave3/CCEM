@@ -108,11 +108,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Restore & Build (baseline)
-        run: |
-          dotnet restore $env:PROJECT_PATH -r win-x64
-          dotnet build $env:PROJECT_PATH -c Release -r win-x64 -p:Platform=x64
-
       - name: Calculate version (SemVer per channel)
         id: calculate-version
         run: |
@@ -173,6 +168,10 @@ jobs:
             Set-Content $p $c -Encoding utf8
           }
 
+      - name: Build
+        run: |
+          dotnet build $env:PROJECT_PATH -c Release -r win-x64 -p:Platform=x64
+
       - name: Publish (unpackaged) for Velopack
         run: |
           if (Test-Path $env:PUBLISH_DIR) { Remove-Item $env:PUBLISH_DIR -Recurse -Force }
@@ -221,14 +220,6 @@ jobs:
             -c "${{ inputs.release-channel }}" `
             --packTitle "$env:VELOPACK_TITLE" `
             --icon "$env:VELOPACK_ICON"
-
-      - name: Upload artifacts (unpackaged)
-        uses: actions/upload-artifact@v4
-        with:
-          name: publish-unpackaged
-          path: ${{ env.PUBLISH_DIR }}/**
-          if-no-files-found: warn
-          retention-days: 7
 
       - name: Upload artifacts (Velopack)
         uses: actions/upload-artifact@v4
