@@ -1,0 +1,95 @@
+name: Build Nightly Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+env:
+  SOURCE_BRANCH: develop
+
+permissions:
+  contents: write
+
+jobs:
+  check_changes:
+    name: Check pending changes
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      has_changes: ${{ steps.detect.outputs.has_changes }}
+      latest_tag: ${{ steps.detect.outputs.latest_tag }}
+    steps:
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_BRANCH }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Detect changes since last nightly tag
+        id: detect
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $latestTag = git tag --list 'v????-*' --sort=-creatordate | Select-Object -First 1
+
+          if ([string]::IsNullOrWhiteSpace($latestTag)) {
+            $hasChanges = 'true'
+            Write-Host "No previous nightly tag found. Proceeding with build."
+          } else {
+            git diff --quiet $latestTag HEAD
+            if ($LASTEXITCODE -eq 0) {
+              $hasChanges = 'false'
+              Write-Host "No changes detected on develop since $latestTag."
+            } else {
+              $hasChanges = 'true'
+              Write-Host "Changes detected on develop since $latestTag."
+            }
+          }
+
+          "has_changes=$hasChanges" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "latest_tag=$latestTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+          if ($hasChanges -ne 'true') {
+            if ([string]::IsNullOrWhiteSpace($latestTag)) {
+              $reason = "no new commits on '$($env:SOURCE_BRANCH)' since the previous nightly run."
+            } else {
+              $reason = "no new commits on '$($env:SOURCE_BRANCH)' since $latestTag."
+            }
+
+            @"
+### Nightly build skipped
+
+- Reason: $reason
+"@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          }
+
+  derive_version:
+    name: Derive release version
+    needs: check_changes
+    if: ${{ needs.check_changes.outputs.has_changes == 'true' }}
+    uses: ./.github/workflows/partials/versioning.yml
+    with:
+      release_type: nightly
+
+  build_and_publish:
+    name: Build and publish release
+    needs:
+      - check_changes
+      - derive_version
+    if: ${{ needs.check_changes.outputs.has_changes == 'true' }}
+    uses: ./.github/workflows/partials/build-and-publish.yml
+    with:
+      branch: ${{ env.SOURCE_BRANCH }}
+      version: ${{ needs.derive_version.outputs.version }}
+      msix_version: ${{ needs.derive_version.outputs.msix_version }}
+      tag: ${{ needs.derive_version.outputs.tag }}
+      channel: ${{ needs.derive_version.outputs.channel }}
+      prerelease: true
+      release_name: ${{ needs.derive_version.outputs.release_name }}
+      make_latest: "false"
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}

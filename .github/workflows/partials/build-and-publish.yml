@@ -1,0 +1,199 @@
+name: Build and Publish Velopack Package
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: Source branch to check out
+        required: true
+        type: string
+      version:
+        description: Short release version (YYMM.n or YYMM-BUILD)
+        required: true
+        type: string
+      msix_version:
+        description: MSIX formatted version string
+        required: true
+        type: string
+      tag:
+        description: Git tag to create
+        required: true
+        type: string
+      channel:
+        description: Velopack channel name
+        required: true
+        type: string
+      prerelease:
+        description: Flag indicating if the GitHub release is a pre-release
+        required: true
+        type: boolean
+      release_name:
+        description: Title for the GitHub release
+        required: true
+        type: string
+      make_latest:
+        description: Determines if the GitHub release should be marked as the latest
+        required: true
+        type: string
+    secrets:
+      github_token:
+        required: true
+    outputs:
+      version:
+        description: Short version string generated for the release
+        value: ${{ jobs.build.outputs.version }}
+      msix_version:
+        description: MSIX compatible version written to project files
+        value: ${{ jobs.build.outputs.msix_version }}
+      tag:
+        description: Git tag created for this release
+        value: ${{ jobs.build.outputs.tag }}
+      channel:
+        description: Velopack channel used during packaging
+        value: ${{ jobs.build.outputs.channel }}
+      release_url:
+        description: URL of the created GitHub release
+        value: ${{ jobs.build.outputs.release_url }}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      msix_version: ${{ steps.metadata.outputs.msix_version }}
+      tag: ${{ steps.metadata.outputs.tag }}
+      channel: ${{ steps.metadata.outputs.channel }}
+      release_url: ${{ steps.create-release.outputs.url }}
+    env:
+      VELOPACK_APP_ID: CCEM
+      VELOPACK_PUBLISH_DIR: publish
+      VPK_OUTPUT_DIR: Releases
+      PROJECT_PATH: src/CCEM/CCEM.csproj
+      MANIFEST_PATH: src/CCEM/Package.appxmanifest
+      ASSEMBLY_INFO_PATH: src/SharedAssemblyInfo.cs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore and build solution
+        run: |
+          dotnet restore $env:PROJECT_PATH
+          dotnet build $env:PROJECT_PATH -c Release
+
+      - name: Inject version into manifests
+        run: |
+          $msixVersion = "${{ inputs.msix_version }}"
+          $manifestPath = $env:MANIFEST_PATH
+
+          if (-not (Test-Path $manifestPath)) {
+            throw "Unable to locate Package.appxmanifest at $manifestPath"
+          }
+
+          [xml]$manifest = Get-Content $manifestPath
+          $manifest.Package.Identity.Version = $msixVersion
+          $manifest.Save($manifestPath)
+
+          $assemblyInfoPath = $env:ASSEMBLY_INFO_PATH
+          if (-not (Test-Path $assemblyInfoPath)) {
+            throw "Unable to locate SharedAssemblyInfo.cs at $assemblyInfoPath"
+          }
+
+          $assemblyContent = Get-Content -Raw $assemblyInfoPath
+          $assemblyContent = $assemblyContent -replace 'AssemblyVersion\(".*?"\)', "AssemblyVersion(`"$msixVersion`")"
+          $assemblyContent = $assemblyContent -replace 'AssemblyFileVersion\(".*?"\)', "AssemblyFileVersion(`"$msixVersion`")"
+          $assemblyContent = $assemblyContent -replace 'AssemblyInformationalVersion\(".*?"\)', "AssemblyInformationalVersion(`"$msixVersion`")"
+
+          [System.IO.File]::WriteAllText($assemblyInfoPath, $assemblyContent, [System.Text.Encoding]::UTF8)
+
+      - name: Install Velopack CLI
+        run: |
+          dotnet tool install --global vpk
+          $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
+          $toolPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build Velopack package
+        run: |
+          if (Test-Path $env:VELOPACK_PUBLISH_DIR) {
+            Remove-Item -Path $env:VELOPACK_PUBLISH_DIR -Recurse -Force
+          }
+          if (Test-Path $env:VPK_OUTPUT_DIR) {
+            Remove-Item -Path $env:VPK_OUTPUT_DIR -Recurse -Force
+          }
+          dotnet publish $env:PROJECT_PATH -c Release -r win-x64 -o $env:VELOPACK_PUBLISH_DIR
+          vpk pack -u $env:VELOPACK_APP_ID `
+            -v "${{ inputs.version }}" `
+            -p $env:VELOPACK_PUBLISH_DIR `
+            --channel "${{ inputs.channel }}" `
+            --framework net8.0-x64-desktop,webview2 `
+            --packTitle "Client Center for Endpoint Manager" `
+            --icon "src/CCEM/Assets/AppIcon.ico"
+
+      - name: Create or update Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          $tagName = "${{ inputs.tag }}"
+          git rev-parse -q --verify "refs/tags/$tagName" > $null 2>&1
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Tag $tagName already exists. Skipping creation."
+          } else {
+            git tag -a $tagName -m "Release ${{ inputs.release_name }}"
+            git push origin $tagName
+          }
+
+      - name: Create GitHub release
+        id: create-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.release_name }}
+          prerelease: ${{ inputs.prerelease }}
+          make_latest: ${{ inputs.make_latest }}
+          allow_updates: true
+          generate_release_notes: true
+          files: |
+            Releases/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+
+      - name: Upload Velopack artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.channel }}-velopack-${{ inputs.version }}
+          path: Releases
+          if-no-files-found: error
+
+      - name: Capture workflow outputs
+        id: metadata
+        run: |
+          @"
+version=${{ inputs.version }}
+msix_version=${{ inputs.msix_version }}
+tag=${{ inputs.tag }}
+channel=${{ inputs.channel }}
+"@ | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+          @"
+| Key | Value |
+| --- | --- |
+| Version | ${{ inputs.version }} |
+| MSIX Version | ${{ inputs.msix_version }} |
+| Channel | ${{ inputs.channel }} |
+| Tag | ${{ inputs.tag }} |
+| Release URL | ${{ steps.create-release.outputs.url }} |
+"@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append

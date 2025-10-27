@@ -1,0 +1,33 @@
+name: Build Stable Release
+
+on:
+  workflow_dispatch:
+
+env:
+  SOURCE_BRANCH: main
+
+permissions:
+  contents: write
+
+jobs:
+  derive_version:
+    name: Derive release version
+    uses: ./.github/workflows/partials/versioning.yml
+    with:
+      release_type: stable
+
+  build_and_publish:
+    name: Build and publish release
+    needs: derive_version
+    uses: ./.github/workflows/partials/build-and-publish.yml
+    with:
+      branch: ${{ env.SOURCE_BRANCH }}
+      version: ${{ needs.derive_version.outputs.version }}
+      msix_version: ${{ needs.derive_version.outputs.msix_version }}
+      tag: ${{ needs.derive_version.outputs.tag }}
+      channel: ${{ needs.derive_version.outputs.channel }}
+      prerelease: false
+      release_name: ${{ needs.derive_version.outputs.release_name }}
+      make_latest: "true"
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
