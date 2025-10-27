@@ -1,4 +1,4 @@
-name: Reusable Build And Release
+name: Reusable Build & Release
 
 on:
   workflow_call:
@@ -12,11 +12,11 @@ on:
         required: true
         type: string
       release-type:
-        description: Release flavour controlling version scheme (stable or nightly)
+        description: Versioning scheme (stable | nightly)
         required: true
         type: string
       release-title-prefix:
-        description: Prefix used when composing the GitHub release title
+        description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Nightly")
         required: true
         type: string
     secrets:
@@ -27,183 +27,278 @@ on:
         description: Short version identifier (YYMM.n or YYMM-BUILD)
         value: ${{ jobs.build.outputs.version }}
       msix-version:
-        description: MSIX compliant version string
+        description: 4-part MSIX version (e.g., 25.10.1.0 or 25.10.0.7)
         value: ${{ jobs.build.outputs.msix-version }}
       tag-name:
-        description: Git tag assigned to the release
+        description: Git tag created
         value: ${{ jobs.build.outputs.tag-name }}
-      channel:
-        description: Velopack channel used for publishing
-        value: ${{ jobs.build.outputs.channel }}
       release-url:
-        description: URL of the GitHub release created for this build
+        description: URL of the GitHub Release
         value: ${{ jobs.build.outputs.release-url }}
 
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.release-type }}
+  cancel-in-progress: true
+
 env:
+  # Tooling
+  DOTNET_VERSION: '8.0.x'
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+  # Project paths (adapter si besoin)
   PROJECT_PATH: src/CCEM/CCEM.csproj
   MANIFEST_PATH: src/CCEM/Package.appxmanifest
   SHARED_ASSEMBLY_INFO_PATH: src/SharedAssemblyInfo.cs
-  VELOPACK_APP_ID: CCEM
-  VELOPACK_PUBLISH_DIR: publish
+
+  # Build & Artifacts
+  PUBLISH_DIR: publish
+  ARTIFACTS_DIR: artifacts
+  MSIX_DIR: artifacts/MSIX
   VELOPACK_OUTPUT_DIR: Releases
+
+  # Velopack
+  VELOPACK_APP_ID: CCEM
+  VELOPACK_TITLE: Client Center for Endpoint Manager
+  VELOPACK_FRAMEWORKS: net8.0-x64-desktop,webview2
+  VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
+
+  # Release body templates
+  RELEASE_BODY_NIGHTLY_TEMPLATE: .github/workflows/nightly-body-template.md
+  RELEASE_BODY_STABLE_TEMPLATE: .github/workflows/release-body-template.md
 
 jobs:
   build:
-    name: Build And Release Package
+    name: Build & Release
     runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
     outputs:
       version: ${{ steps.calculate-version.outputs.version }}
       msix-version: ${{ steps.calculate-version.outputs.msix-version }}
       tag-name: ${{ steps.calculate-version.outputs.tag-name }}
-      channel: ${{ inputs.release-channel }}
       release-url: ${{ steps.release-url.outputs.release-url }}
-    defaults:
-      run:
-        shell: pwsh
 
     steps:
-      - name: Step 1 - Checkout source
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.source-branch }}
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Step 2 - Setup .NET SDK
+      - name: Ensure tags
+        run: git fetch --force --tags
+
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Step 3 - Restore and build solution
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore & Build (baseline)
         run: |
           dotnet restore $env:PROJECT_PATH
           dotnet build $env:PROJECT_PATH -c Release /warnaserror
 
-      - name: Step 4 - Generate version numbers
+      - name: Calculate version (YYMM.n or YYMM-BUILD)
         id: calculate-version
         run: |
           $releaseType = "${{ inputs.release-type }}".ToLowerInvariant()
-          if ($releaseType -notin @("stable", "nightly")) {
-            throw "Unsupported release type '$releaseType'. Expected 'stable' or 'nightly'."
-          }
+          $now = [DateTime]::UtcNow
+          $yy = $now.ToString("yy")
+          $MM = $now.ToString("MM")
+          $yymm = "$yy$MM"
 
-          $now = Get-Date
-          $yearTwoDigits = $now.ToString("yy")
-          $monthTwoDigits = $now.ToString("MM")
-          $yearMonth = "$yearTwoDigits$monthTwoDigits"
+          $tags = (git tag) | Where-Object { $_ -match "^v\d{4}([\.-]\d+)?$" }
+          $max = 0
+          foreach ($t in $tags) {
+            if ($releaseType -eq "stable" -and $t -match "^v$yymm\.(\d+)$") { $max=[math]::Max($max,[int]$Matches[1]) }
+            elseif ($releaseType -eq "nightly" -and $t -match "^v$yymm-(\d+)$") { $max=[math]::Max($max,[int]$Matches[1]) }
+          }
+          $seq = $max + 1
 
           if ($releaseType -eq "stable") {
-            $pattern = "v$yearMonth.*"
+            $version     = "$yymm.$seq"           # ex: 2510.1
+            $msixVersion = "$yy.$MM.$seq.0"       # ex: 25.10.1.0
           } else {
-            $pattern = "v$yearMonth-*"
+            $version     = "$yymm-$seq"           # ex: 2510-3
+            $msixVersion = "$yy.$MM.0.$seq"       # ex: 25.10.0.3
           }
 
-          git fetch --tags --force | Out-Null
-          $existingTags = git tag --list $pattern
-          $maxSequence = 0
+          "version=$version"           | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "msix-version=$msixVersion"  | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag-name=v$version"         | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "release-name=${{ inputs.release-title-prefix }} $version" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "source-commit=$(git rev-parse HEAD)" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-          foreach ($tag in $existingTags) {
-            if ($releaseType -eq "stable" -and $tag -match "^v$yearMonth\.(\d+)$") {
-              $candidate = [int]$Matches[1]
-            } elseif ($releaseType -eq "nightly" -and $tag -match "^v$yearMonth-(\d+)$") {
-              $candidate = [int]$Matches[1]
-            } else {
-              continue
-            }
-            if ($candidate -gt $maxSequence) {
-              $maxSequence = $candidate
-            }
-          }
-
-          $nextSequence = $maxSequence + 1
-
-          if ($releaseType -eq "stable") {
-            $version = "$yearMonth.$nextSequence"
-            $msixVersion = "$yearTwoDigits.$monthTwoDigits.$nextSequence.0"
-          } else {
-            $version = "$yearMonth-$nextSequence"
-            $msixVersion = "$yearTwoDigits.$monthTwoDigits.0.$nextSequence"
-          }
-
-          $tagName = "v$version"
-          $releaseTitlePrefix = "${{ inputs.release-title-prefix }}"
-          $releaseName = "$releaseTitlePrefix $version"
-          $sourceCommit = (git rev-parse HEAD).Trim()
-
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "msix-version=$msixVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "tag-name=$tagName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "release-name=$releaseName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-          "source-commit=$sourceCommit" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-          Write-Host "Release name: $releaseName"
-          Write-Host "Velopack channel: ${{ inputs.release-channel }}"
-
-      - name: Step 5 - Inject version numbers
+      - name: Update versions (AppxManifest & SharedAssemblyInfo.cs)
         run: |
           $msixVersion = "${{ steps.calculate-version.outputs.msix-version }}"
-          if ([string]::IsNullOrWhiteSpace($msixVersion)) {
-            throw "MSIX version was not calculated."
+
+          if (Test-Path $env:MANIFEST_PATH) {
+            [xml]$m = Get-Content $env:MANIFEST_PATH
+            $m.Package.Identity.Version = $msixVersion
+            $m.Save((Resolve-Path $env:MANIFEST_PATH))
           }
 
-          # Update Package.appxmanifest
-          [xml]$manifest = Get-Content -Path $env:MANIFEST_PATH
-          $manifest.Package.Identity.Version = $msixVersion
-          $manifest.Save((Resolve-Path $env:MANIFEST_PATH))
-
-          # Update SharedAssemblyInfo.cs
-          $assemblyInfoPath = Resolve-Path $env:SHARED_ASSEMBLY_INFO_PATH
-          $assemblyContent = Get-Content -Path $assemblyInfoPath -Raw
-          $patterns = @(
-            'AssemblyVersion\(".*?"\)',
-            'AssemblyFileVersion\(".*?"\)',
-            'AssemblyInformationalVersion\(".*?"\)'
-          )
-          foreach ($pattern in $patterns) {
-            $assemblyContent = [regex]::Replace(
-              $assemblyContent,
-              $pattern,
-              { param($match) $match.Value.Split("(")[0] + "(\"$msixVersion\")" }
-            )
+          if (Test-Path $env:SHARED_ASSEMBLY_INFO_PATH) {
+            $p = Resolve-Path $env:SHARED_ASSEMBLY_INFO_PATH
+            $c = Get-Content $p -Raw
+            $c = [regex]::Replace($c,'AssemblyVersion\(".*?"\)',"AssemblyVersion(`"$msixVersion`")")
+            $c = [regex]::Replace($c,'AssemblyFileVersion\(".*?"\)',"AssemblyFileVersion(`"$msixVersion`")")
+            $c = [regex]::Replace($c,'AssemblyInformationalVersion\(".*?"\)',"AssemblyInformationalVersion(`"$msixVersion`")")
+            Set-Content $p $c -Encoding utf8
           }
-          Set-Content -Path $assemblyInfoPath -Value $assemblyContent -Encoding utf8
 
-      - name: Step 6 - Build Velopack package
-        env:
-          CHANNEL_NAME: ${{ inputs.release-channel }}
+      - name: Publish (unpackaged) for Velopack
         run: |
-          dotnet publish $env:PROJECT_PATH -c Release -r win-x64 -o $env:VELOPACK_PUBLISH_DIR --self-contained false
+          if (Test-Path $env:PUBLISH_DIR) { Remove-Item $env:PUBLISH_DIR -Recurse -Force }
+          dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained false -o $env:PUBLISH_DIR
 
-          if (-not (Test-Path -Path (Join-Path $env:USERPROFILE ".dotnet\tools\vpk.exe"))) {
+      - name: Build MSIX (best effort)
+        continue-on-error: true
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:MSIX_DIR | Out-Null
+          $done=$false
+
+          try {
+            dotnet publish $env:PROJECT_PATH -c Release -o $env:MSIX_DIR -p:WindowsPackageType=MSIX
+            $done=$true
+          } catch { }
+
+          if (-not $done) {
+            $wapproj = Get-ChildItem -Recurse -Filter *.wapproj | Select-Object -First 1
+            if ($wapproj) {
+              msbuild $wapproj.FullName /restore /t:Rebuild `
+                /p:Configuration=Release `
+                /p:GenerateAppxPackageOnBuild=true `
+                /p:AppxBundle=Never `
+                /p:UapAppxPackageBuildMode=SideLoadOnly
+              Get-ChildItem -Recurse -Include *.msix,*.msixbundle | Copy-Item -Destination $env:MSIX_DIR -Force
+              $done=$true
+            }
+          }
+          if ($done) { Write-Host "MSIX artifacts in $env:MSIX_DIR" } else { Write-Host "MSIX build skipped" }
+
+      - name: Install/Update Velopack (vpk) & pack
+        run: |
+          if (-not (Test-Path (Join-Path $env:USERPROFILE ".dotnet\tools\vpk.exe"))) {
             dotnet tool install --global vpk
           } else {
             dotnet tool update --global vpk
           }
+          (Join-Path $env:USERPROFILE ".dotnet\tools") | Out-File $env:GITHUB_PATH -Append -Encoding utf8
 
-          $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
-          $toolPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
+          if (Test-Path $env:VELOPACK_OUTPUT_DIR) { Remove-Item $env:VELOPACK_OUTPUT_DIR -Recurse -Force }
           vpk pack `
             -u $env:VELOPACK_APP_ID `
             -v "${{ steps.calculate-version.outputs.version }}" `
-            -p $env:VELOPACK_PUBLISH_DIR `
-            --channel $env:CHANNEL_NAME `
-            --framework net8.0-x64-desktop,webview2 `
-            --packTitle "Client Center for Endpoint Manager" `
-            --icon "src/CCEM/Assets/AppIcon.ico"
+            -p $env:PUBLISH_DIR `
+            -o $env:VELOPACK_OUTPUT_DIR `
+            -c "${{ inputs.release-channel }}" `
+            --framework $env:VELOPACK_FRAMEWORKS `
+            --packTitle "$env:VELOPACK_TITLE" `
+            --icon "$env:VELOPACK_ICON"
 
-      - name: Upload Velopack artifacts
+      - name: Upload artifacts (unpackaged)
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-unpackaged
+          path: ${{ env:PUBLISH_DIR }}/**
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload artifacts (Velopack)
         uses: actions/upload-artifact@v4
         with:
           name: velopack-${{ inputs.release-channel }}-${{ steps.calculate-version.outputs.version }}
-          path: ${{ env.VELOPACK_OUTPUT_DIR }}
+          path: ${{ env:VELOPACK_OUTPUT_DIR }}/**
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
 
-      - name: Step 7 - Create Git tag and release
-        id: publish-release
+      - name: Upload artifacts (MSIX)
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix
+          path: ${{ env:MSIX_DIR }}/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Calculate hashes & generate FILES_TABLE
+        id: files-table
+        shell: pwsh
+        run: |
+          $repo = "${{ github.repository }}"
+          $ver = "${{ steps.calculate-version.outputs.version }}"
+          $rows = @()
+
+          $collect = @()
+          if (Test-Path $env:VELOPACK_OUTPUT_DIR) { $collect += Get-ChildItem -Path $env:VELOPACK_OUTPUT_DIR -File -Recurse }
+          if (Test-Path $env:MSIX_DIR) { $collect += Get-ChildItem -Path $env:MSIX_DIR -File -Recurse }
+
+          foreach ($f in ($collect | Sort-Object Name)) {
+            $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+            $dl = "https://github.com/$repo/releases/download/v$ver/$($f.Name)"
+            $badge = "https://img.shields.io/github/downloads/$repo/v$ver/$($f.Name)?style=flat-square&label=&color=blue"
+            $rows += "|[$($f.Name)]($dl)|``$hash``|<picture>![$($f.Name)]($badge)</picture>|"
+          }
+
+          $table = @"
+          ## Files
+          |Files|Hash (SHA256)|Downloads|
+          |---|---|---|
+          $($rows -join "`n")
+          "@
+
+          # Multiline output
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "files_table<<EOF"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value $table
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
+
+      - name: Generate release body from template
+        id: release-body
+        shell: pwsh
+        run: |
+          $isNightly = ("${{ inputs.release-type }}" -eq "nightly")
+          $tpl = if ($isNightly) { $env:RELEASE_BODY_NIGHTLY_TEMPLATE } else { $env:RELEASE_BODY_STABLE_TEMPLATE }
+          $tplContent = Get-Content -Path $tpl -Raw
+          $notes = ""  # injecter des notes si besoin
+          $body = $tplContent
+
+          # Tes templates attendent {FILES_TABLE} et éventuellement {RELEASE_NOTES}
+          # nightly-body-template.md : {FILES_TABLE}  :contentReference[oaicite:0]{index=0}
+          # release-body-template.md : {RELEASE_NOTES}, {FILES_TABLE}  :contentReference[oaicite:1]{index=1}
+          if ([string]::IsNullOrEmpty($notes)) {
+            $body = $body -replace '\{RELEASE_NOTES\}\r?\n\r?\n',''
+            $body = $body -replace '\{RELEASE_NOTES\}',''
+          } else {
+            $body = $body -replace '\{RELEASE_NOTES\}',$notes
+          }
+          $body = $body -replace '\{FILES_TABLE\}',"${{ steps.files-table.outputs.files_table }}"
+
+          $out = "generated-release-body.md"
+          $body | Out-File -FilePath $out -Encoding UTF8 -NoNewline
+          "body_path=$out" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Create Git tag & GitHub Release
+        id: gh-release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.calculate-version.outputs.tag-name }}
@@ -212,29 +307,13 @@ jobs:
           prerelease: ${{ inputs.release-type == 'nightly' }}
           files: |
             ${{ env.VELOPACK_OUTPUT_DIR }}/**
+            ${{ env.MSIX_DIR }}/**
+          body_path: ${{ steps.release-body.outputs.body_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Summarize build outcome
-        if: success()
-        run: |
-          $summary = @()
-          $summary += "### Build summary"
-          $summary += ""
-          $summary += "* Version: `${{ steps.calculate-version.outputs.version }}`"
-          $summary += "* MSIX Version: `${{ steps.calculate-version.outputs.msix-version }}`"
-          $summary += "* Git Tag: `${{ steps.calculate-version.outputs.tag-name }}`"
-          $summary += "* Velopack Channel: `${{ inputs.release-channel }}`"
-          $summary += "* Release Title: `${{ steps.calculate-version.outputs.release-name }}`"
-          $summary += ""
-          $summary += "Velopack packages uploaded to the GitHub release."
-          $summary -join [Environment]::NewLine | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
-
-      - name: Capture release URL
-        if: success()
+      - name: Release URL
         id: release-url
         run: |
-          $releaseUrl = "https://github.com/${{ github.repository }}/releases/tag/${{ steps.calculate-version.outputs.tag-name }}"
-          "release-url=$releaseUrl" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-*** End Patch
+          $url = "https://github.com/${{ github.repository }}/releases/tag/${{ steps.calculate-version.outputs.tag-name }}"
+          "release-url=$url" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8

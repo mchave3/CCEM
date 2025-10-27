@@ -1,4 +1,4 @@
-name: Build Stable Release
+name: 🚀 Build Stable
 
 on:
   workflow_dispatch:
@@ -6,14 +6,15 @@ on:
 permissions:
   contents: write
 
+# Environment variables
 env:
   SOURCE_BRANCH: main
   VELOPACK_CHANNEL: stable
   RELEASE_TITLE_PREFIX: CCEM
 
 jobs:
-  stable-release:
-    name: Build Stable Release
+  stable:
+    name: Stable
     uses: ./.github/workflows/build-and-release.yml
     with:
       source-branch: ${{ env.SOURCE_BRANCH }}

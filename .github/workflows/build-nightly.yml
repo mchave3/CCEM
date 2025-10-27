@@ -1,21 +1,22 @@
-name: Build Nightly Release
+name: 🌙 Build Nightly
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 2 * * *' # 02:00 UTC daily
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# Environment variables
 env:
   SOURCE_BRANCH: develop
   VELOPACK_CHANNEL: nightly
   RELEASE_TITLE_PREFIX: 'CCEM Nightly'
 
 jobs:
-  nightly-release:
-    name: Build Nightly Release
+  nightly:
+    name: Nightly
     uses: ./.github/workflows/build-and-release.yml
     with:
       source-branch: ${{ env.SOURCE_BRANCH }}
