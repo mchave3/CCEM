@@ -8,19 +8,13 @@ on:
 permissions:
   contents: write
 
-# Environment variables
-env:
-  SOURCE_BRANCH: develop
-  VELOPACK_CHANNEL: nightly
-  RELEASE_TITLE_PREFIX: 'CCEM Nightly'
-
 jobs:
   nightly:
     name: Nightly
     uses: ./.github/workflows/build-and-release.yml
     with:
-      source-branch: ${{ env.SOURCE_BRANCH }}
-      release-channel: ${{ env.VELOPACK_CHANNEL }}
+      source-branch: develop
+      release-channel: nightly
       release-type: nightly
-      release-title-prefix: ${{ env.RELEASE_TITLE_PREFIX }}
+      release-title-prefix: 'CCEM Nightly'
     secrets: inherit
