@@ -111,8 +111,8 @@ jobs:
 
       - name: Restore & Build (baseline)
         run: |
-          dotnet restore $env:PROJECT_PATH
-          dotnet build $env:PROJECT_PATH -c Release
+          dotnet restore $env:PROJECT_PATH -r win-x64
+          dotnet build $env:PROJECT_PATH -c Release -r win-x64 -p:Platform=x64
 
       - name: Calculate version (YYMM.n or YYMM-BUILD)
         id: calculate-version
