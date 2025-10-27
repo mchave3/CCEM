@@ -166,7 +166,7 @@ jobs:
       - name: Publish (unpackaged) for Velopack
         run: |
           if (Test-Path $env:PUBLISH_DIR) { Remove-Item $env:PUBLISH_DIR -Recurse -Force }
-          dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained false -o $env:PUBLISH_DIR
+          dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o $env:PUBLISH_DIR
 
       - name: Build MSIX (best effort)
         continue-on-error: true
