@@ -221,7 +221,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: publish-unpackaged
-          path: ${{ env:PUBLISH_DIR }}/**
+          path: ${{ env.PUBLISH_DIR }}/**
           if-no-files-found: warn
           retention-days: 7
 
@@ -229,7 +229,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: velopack-${{ inputs.release-channel }}-${{ steps.calculate-version.outputs.version }}
-          path: ${{ env:VELOPACK_OUTPUT_DIR }}/**
+          path: ${{ env.VELOPACK_OUTPUT_DIR }}/**
           if-no-files-found: error
           retention-days: 14
 
@@ -237,7 +237,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: msix
-          path: ${{ env:MSIX_DIR }}/**
+          path: ${{ env.MSIX_DIR }}/**
           if-no-files-found: warn
           retention-days: 14
 
