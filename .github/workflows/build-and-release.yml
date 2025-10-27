@@ -45,12 +45,12 @@ env:
   DOTNET_VERSION: '8.0.x'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
-  # Project paths (adapter si besoin)
+  # Project paths (adapte si besoin)
   PROJECT_PATH: src/CCEM/CCEM.csproj
   MANIFEST_PATH: src/CCEM/Package.appxmanifest
   SHARED_ASSEMBLY_INFO_PATH: src/SharedAssemblyInfo.cs
 
-  # Build & Artifacts
+  # Build & artifacts
   PUBLISH_DIR: publish
   ARTIFACTS_DIR: artifacts
   MSIX_DIR: artifacts/MSIX
@@ -62,9 +62,9 @@ env:
   VELOPACK_FRAMEWORKS: net8.0-x64-desktop,webview2
   VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
 
-  # Release body templates
-  RELEASE_BODY_NIGHTLY_TEMPLATE: .github/workflows/nightly-body-template.md
-  RELEASE_BODY_STABLE_TEMPLATE: .github/workflows/release-body-template.md
+  # Release body templates (chemin racine du repo)
+  RELEASE_BODY_NIGHTLY_TEMPLATE: nightly-body-template.md
+  RELEASE_BODY_STABLE_TEMPLATE: release-body-template.md
 
 jobs:
   build:
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source-branch }}
           fetch-depth: 0
@@ -132,11 +132,11 @@ jobs:
           $seq = $max + 1
 
           if ($releaseType -eq "stable") {
-            $version     = "$yymm.$seq"           # ex: 2510.1
-            $msixVersion = "$yy.$MM.$seq.0"       # ex: 25.10.1.0
+            $version     = "$yymm.$seq"           # 2510.1
+            $msixVersion = "$yy.$MM.$seq.0"       # 25.10.1.0
           } else {
-            $version     = "$yymm-$seq"           # ex: 2510-3
-            $msixVersion = "$yy.$MM.0.$seq"       # ex: 25.10.0.3
+            $version     = "$yymm-$seq"           # 2510-3
+            $msixVersion = "$yy.$MM.0.$seq"       # 25.10.0.3
           }
 
           "version=$version"           | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -264,7 +264,6 @@ jobs:
           $($rows -join "`n")
           "@
 
-          # Multiline output
           Add-Content -Path $env:GITHUB_OUTPUT -Value "files_table<<EOF"
           Add-Content -Path $env:GITHUB_OUTPUT -Value $table
           Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
@@ -276,12 +275,8 @@ jobs:
           $isNightly = ("${{ inputs.release-type }}" -eq "nightly")
           $tpl = if ($isNightly) { $env:RELEASE_BODY_NIGHTLY_TEMPLATE } else { $env:RELEASE_BODY_STABLE_TEMPLATE }
           $tplContent = Get-Content -Path $tpl -Raw
-          $notes = ""  # injecter des notes si besoin
+          $notes = ""  # inject notes if needed
           $body = $tplContent
-
-          # Tes templates attendent {FILES_TABLE} et éventuellement {RELEASE_NOTES}
-          # nightly-body-template.md : {FILES_TABLE}  :contentReference[oaicite:0]{index=0}
-          # release-body-template.md : {RELEASE_NOTES}, {FILES_TABLE}  :contentReference[oaicite:1]{index=1}
           if ([string]::IsNullOrEmpty($notes)) {
             $body = $body -replace '\{RELEASE_NOTES\}\r?\n\r?\n',''
             $body = $body -replace '\{RELEASE_NOTES\}',''
@@ -306,11 +301,19 @@ jobs:
             ${{ env.VELOPACK_OUTPUT_DIR }}/**
             ${{ env.MSIX_DIR }}/**
           body_path: ${{ steps.release-body.outputs.body_path }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release URL
         id: release-url
         run: |
           $url = "https://github.com/${{ github.repository }}/releases/tag/${{ steps.calculate-version.outputs.tag-name }}"
           "release-url=$url" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Summary
+        if: always()
+        run: |
+          Write-Host "## Release Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* Version: `${{ steps.calculate-version.outputs.version }}`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* MSIX: `${{ steps.calculate-version.outputs.msix-version }}`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* Channel: `${{ inputs.release-channel }}`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* Tag: `${{ steps.calculate-version.outputs.tag-name }}`" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* Release: ${{ steps.release-url.outputs.release-url }}" >> $env:GITHUB_STEP_SUMMARY
