@@ -62,8 +62,8 @@ env:
   VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
 
   # Release body templates (chemin racine du repo)
-  RELEASE_BODY_NIGHTLY_TEMPLATE: nightly-body-template.md
-  RELEASE_BODY_STABLE_TEMPLATE: release-body-template.md
+  RELEASE_BODY_NIGHTLY_TEMPLATE: .github/workflows/nightly-body-template.md
+  RELEASE_BODY_STABLE_TEMPLATE: .github/workflows/release-body-template.md
 
 jobs:
   build:
@@ -178,30 +178,30 @@ jobs:
           if (Test-Path $env:PUBLISH_DIR) { Remove-Item $env:PUBLISH_DIR -Recurse -Force }
           dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o $env:PUBLISH_DIR
 
-      - name: Build MSIX (best effort)
-        continue-on-error: true
-        run: |
-          New-Item -ItemType Directory -Force -Path $env:MSIX_DIR | Out-Null
-          $done=$false
-
-          try {
-            dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o $env:MSIX_DIR -p:WindowsPackageType=MSIX
-            $done=$true
-          } catch { }
-
-          if (-not $done) {
-            $wapproj = Get-ChildItem -Recurse -Filter *.wapproj | Select-Object -First 1
-            if ($wapproj) {
-              msbuild $wapproj.FullName /restore /t:Rebuild `
-                /p:Configuration=Release `
-                /p:GenerateAppxPackageOnBuild=true `
-                /p:AppxBundle=Never `
-                /p:UapAppxPackageBuildMode=SideLoadOnly
-              Get-ChildItem -Recurse -Include *.msix,*.msixbundle | Copy-Item -Destination $env:MSIX_DIR -Force
-              $done=$true
-            }
-          }
-          if ($done) { Write-Host "MSIX artifacts in $env:MSIX_DIR" } else { Write-Host "MSIX build skipped" }
+#      - name: Build MSIX (best effort)
+#        continue-on-error: true
+#        run: |
+#          New-Item -ItemType Directory -Force -Path $env:MSIX_DIR | Out-Null
+#          $done=$false
+#
+#          try {
+#            dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o $env:MSIX_DIR -p:WindowsPackageType=MSIX
+#            $done=$true
+#          } catch { }
+#
+#          if (-not $done) {
+#            $wapproj = Get-ChildItem -Recurse -Filter *.wapproj | Select-Object -First 1
+#            if ($wapproj) {
+#              msbuild $wapproj.FullName /restore /t:Rebuild `
+#                /p:Configuration=Release `
+#                /p:GenerateAppxPackageOnBuild=true `
+#                /p:AppxBundle=Never `
+#                /p:UapAppxPackageBuildMode=SideLoadOnly
+#              Get-ChildItem -Recurse -Include *.msix,*.msixbundle | Copy-Item -Destination $env:MSIX_DIR -Force
+#              $done=$true
+#            }
+#          }
+#          if ($done) { Write-Host "MSIX artifacts in $env:MSIX_DIR" } else { Write-Host "MSIX build skipped" }
 
       - name: Install/Update Velopack (vpk) & pack
         run: |
@@ -238,13 +238,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload artifacts (MSIX)
-        uses: actions/upload-artifact@v4
-        with:
-          name: msix
-          path: ${{ env.MSIX_DIR }}/**
-          if-no-files-found: warn
-          retention-days: 14
+#      - name: Upload artifacts (MSIX)
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: msix
+#          path: ${{ env.MSIX_DIR }}/**
+#          if-no-files-found: warn
+#          retention-days: 14
 
       - name: Calculate hashes & generate FILES_TABLE
         id: files-table
