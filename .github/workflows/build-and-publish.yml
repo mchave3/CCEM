@@ -181,19 +181,21 @@ jobs:
       - name: Capture workflow outputs
         id: metadata
         run: |
-          @"
-version=${{ inputs.version }}
-msix_version=${{ inputs.msix_version }}
-tag=${{ inputs.tag }}
-channel=${{ inputs.channel }}
-"@ | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          $outputLines = @(
+            "version=${{ inputs.version }}"
+            "msix_version=${{ inputs.msix_version }}"
+            "tag=${{ inputs.tag }}"
+            "channel=${{ inputs.channel }}"
+          )
+          $outputLines | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-          @"
-| Key | Value |
-| --- | --- |
-| Version | ${{ inputs.version }} |
-| MSIX Version | ${{ inputs.msix_version }} |
-| Channel | ${{ inputs.channel }} |
-| Tag | ${{ inputs.tag }} |
-| Release URL | ${{ steps.create-release.outputs.url }} |
-"@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+          $summary = @(
+            '| Key | Value |'
+            '| --- | --- |'
+            "| Version | ${{ inputs.version }} |"
+            "| MSIX Version | ${{ inputs.msix_version }} |"
+            "| Channel | ${{ inputs.channel }} |"
+            "| Tag | ${{ inputs.tag }} |"
+            "| Release URL | ${{ steps.create-release.outputs.url }} |"
+          )
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append

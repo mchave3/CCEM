@@ -62,11 +62,12 @@ jobs:
               $reason = "no new commits on '$($env:SOURCE_BRANCH)' since $latestTag."
             }
 
-            @"
-### Nightly build skipped
-
-- Reason: $reason
-"@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+            $summaryLines = @(
+              '### Nightly build skipped'
+              ''
+              "- Reason: $reason"
+            )
+            $summaryLines | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
           }
 
   derive_version:
