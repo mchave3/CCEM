@@ -21,6 +21,7 @@ jobs:
     outputs:
       has_changes: ${{ steps.detect.outputs.has_changes }}
       latest_tag: ${{ steps.detect.outputs.latest_tag }}
+      branch: ${{ steps.detect.outputs.branch }}
     steps:
       - name: Checkout develop branch
         uses: actions/checkout@v4
@@ -52,6 +53,7 @@ jobs:
 
           "has_changes=$hasChanges" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "latest_tag=$latestTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "branch=$($env:SOURCE_BRANCH)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
           if ($hasChanges -ne 'true') {
             if ([string]::IsNullOrWhiteSpace($latestTag)) {
@@ -83,7 +85,7 @@ jobs:
     if: ${{ needs.check_changes.outputs.has_changes == 'true' }}
     uses: ./.github/workflows/partials/build-and-publish.yml
     with:
-      branch: ${{ env.SOURCE_BRANCH }}
+      branch: ${{ needs.check_changes.outputs.branch }}
       version: ${{ needs.derive_version.outputs.version }}
       msix_version: ${{ needs.derive_version.outputs.msix_version }}
       tag: ${{ needs.derive_version.outputs.tag }}

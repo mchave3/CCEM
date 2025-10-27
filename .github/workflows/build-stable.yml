@@ -10,18 +10,35 @@ permissions:
   contents: write
 
 jobs:
+  expose_branch:
+    name: Expose source branch
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      branch: ${{ steps.set.outputs.branch }}
+    steps:
+      - name: Set branch output
+        id: set
+        run: |
+          "branch=$($env:SOURCE_BRANCH)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
   derive_version:
     name: Derive release version
+    needs: expose_branch
     uses: ./.github/workflows/partials/versioning.yml
     with:
       release_type: stable
 
   build_and_publish:
     name: Build and publish release
-    needs: derive_version
+    needs:
+      - expose_branch
+      - derive_version
     uses: ./.github/workflows/partials/build-and-publish.yml
     with:
-      branch: ${{ env.SOURCE_BRANCH }}
+      branch: ${{ needs.expose_branch.outputs.branch }}
       version: ${{ needs.derive_version.outputs.version }}
       msix_version: ${{ needs.derive_version.outputs.msix_version }}
       tag: ${{ needs.derive_version.outputs.tag }}
