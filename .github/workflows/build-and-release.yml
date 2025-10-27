@@ -59,7 +59,6 @@ env:
   # Velopack
   VELOPACK_APP_ID: CCEM
   VELOPACK_TITLE: Client Center for Endpoint Manager
-  VELOPACK_FRAMEWORKS: net8.0-x64-desktop,webview2
   VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
 
   # Release body templates (chemin racine du repo)
@@ -210,7 +209,6 @@ jobs:
             -p $env:PUBLISH_DIR `
             -o $env:VELOPACK_OUTPUT_DIR `
             -c "${{ inputs.release-channel }}" `
-            --framework $env:VELOPACK_FRAMEWORKS `
             --packTitle "$env:VELOPACK_TITLE" `
             --icon "$env:VELOPACK_ICON"
 

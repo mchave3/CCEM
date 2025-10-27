@@ -28,6 +28,8 @@
         <TieredCompilation>true</TieredCompilation>
         <PublishReadyToRun>true</PublishReadyToRun>
         <EnableProfileOptimization>true</EnableProfileOptimization>
+        <SelfContained>true</SelfContained>
+        <PublishSelfContained>true</PublishSelfContained>
     </PropertyGroup>
 
     <PropertyGroup>
