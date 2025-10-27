@@ -27,7 +27,7 @@ jobs:
   derive_version:
     name: Derive release version
     needs: expose_branch
-    uses: ./.github/workflows/partials/versioning.yml
+    uses: ./.github/workflows/versioning.yml
     with:
       release_type: stable
 
@@ -36,7 +36,7 @@ jobs:
     needs:
       - expose_branch
       - derive_version
-    uses: ./.github/workflows/partials/build-and-publish.yml
+    uses: ./.github/workflows/build-and-publish.yml
     with:
       branch: ${{ needs.expose_branch.outputs.branch }}
       version: ${{ needs.derive_version.outputs.version }}
