@@ -19,9 +19,6 @@ on:
         description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Nightly")
         required: true
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
     outputs:
       version:
         description: Short version identifier (YYMM.n or YYMM-BUILD)
