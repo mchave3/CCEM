@@ -113,29 +113,39 @@ jobs:
           dotnet restore $env:PROJECT_PATH -r win-x64
           dotnet build $env:PROJECT_PATH -c Release -r win-x64 -p:Platform=x64
 
-      - name: Calculate version (YYMM.n or YYMM-BUILD)
+      - name: Calculate version (SemVer per channel)
         id: calculate-version
         run: |
           $releaseType = "${{ inputs.release-type }}".ToLowerInvariant()
           $now = [DateTime]::UtcNow
-          $yy = $now.ToString("yy")
-          $MM = $now.ToString("MM")
-          $yymm = "$yy$MM"
+          $yy = $now.ToString("yy")   # major
+          $MM = $now.ToString("MM")   # minor
 
-          $tags = (git tag) | Where-Object { $_ -match "^v\d{4}([\.-]\d+)?$" }
-          $max = 0
-          foreach ($t in $tags) {
-            if ($releaseType -eq "stable" -and $t -match "^v$yymm\.(\d+)$") { $max=[math]::Max($max,[int]$Matches[1]) }
-            elseif ($releaseType -eq "nightly" -and $t -match "^v$yymm-(\d+)$") { $max=[math]::Max($max,[int]$Matches[1]) }
-          }
-          $seq = $max + 1
+          $tags = git tag
 
           if ($releaseType -eq "stable") {
-            $version     = "$yymm.$seq"           # 2510.1
-            $msixVersion = "$yy.$MM.$seq.0"       # 25.10.1.0
+            $pattern = "^v$yy\.$MM\.(\d+)$"
+            $maxPatch = 0
+            foreach ($t in $tags) {
+              if ($t -match $pattern) {
+                $maxPatch = [Math]::Max($maxPatch, [int]$Matches[1])
+              }
+            }
+            $patch = $maxPatch + 1
+            $version     = "{0}.{1}.{2}" -f $yy, $MM, $patch          # 25.10.1
+            $msixVersion = "{0}.{1}.{2}.0" -f $yy, $MM, $patch        # 25.10.1.0
           } else {
-            $version     = "$yymm-$seq"           # 2510-3
-            $msixVersion = "$yy.$MM.0.$seq"       # 25.10.0.3
+            $patch = 0
+            $pattern = "^v$yy\.$MM\.$patch-nightly\.(\d+)$"
+            $maxBuild = 0
+            foreach ($t in $tags) {
+              if ($t -match $pattern) {
+                $maxBuild = [Math]::Max($maxBuild, [int]$Matches[1])
+              }
+            }
+            $build = $maxBuild + 1
+            $version     = "{0}.{1}.{2}-nightly.{3}" -f $yy, $MM, $patch, $build  # 25.10.0-nightly.3
+            $msixVersion = "{0}.{1}.{2}.{3}" -f $yy, $MM, $patch, $build          # 25.10.0.3
           }
 
           "version=$version"           | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -175,7 +185,7 @@ jobs:
           $done=$false
 
           try {
-            dotnet publish $env:PROJECT_PATH -c Release -o $env:MSIX_DIR -p:WindowsPackageType=MSIX
+            dotnet publish $env:PROJECT_PATH -c Release -r win-x64 --self-contained true -o $env:MSIX_DIR -p:WindowsPackageType=MSIX
             $done=$true
           } catch { }
 
