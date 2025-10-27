@@ -95,4 +95,4 @@ jobs:
       release_name: ${{ needs.derive_version.outputs.release_name }}
       make_latest: "false"
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      release_token: ${{ secrets.GITHUB_TOKEN }}

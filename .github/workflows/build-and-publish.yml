@@ -36,7 +36,7 @@ on:
         required: true
         type: string
     secrets:
-      github_token:
+      release_token:
         required: true
     outputs:
       version:
@@ -169,7 +169,7 @@ jobs:
           files: |
             Releases/**
         env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+          GITHUB_TOKEN: ${{ secrets.release_token }}
 
       - name: Upload Velopack artifacts
         uses: actions/upload-artifact@v4
