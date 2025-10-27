@@ -2,9 +2,12 @@ name: Build Stable Release
 
 on:
   workflow_dispatch:
-
-env:
-  SOURCE_BRANCH: main
+    inputs:
+      branch:
+        description: Branch to release from
+        required: false
+        default: main
+        type: string
 
 permissions:
   contents: write
@@ -22,7 +25,7 @@ jobs:
       - derive_version
     uses: ./.github/workflows/build-and-publish.yml
     with:
-      branch: ${{ env.SOURCE_BRANCH }}
+      branch: ${{ inputs.branch }}
       version: ${{ needs.derive_version.outputs.version }}
       msix_version: ${{ needs.derive_version.outputs.msix_version }}
       tag: ${{ needs.derive_version.outputs.tag }}
