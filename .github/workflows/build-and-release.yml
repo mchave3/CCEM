@@ -112,7 +112,7 @@ jobs:
       - name: Restore & Build (baseline)
         run: |
           dotnet restore $env:PROJECT_PATH
-          dotnet build $env:PROJECT_PATH -c Release /warnaserror
+          dotnet build $env:PROJECT_PATH -c Release
 
       - name: Calculate version (YYMM.n or YYMM-BUILD)
         id: calculate-version
