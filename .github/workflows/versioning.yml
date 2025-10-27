@@ -29,7 +29,8 @@ on:
 
 jobs:
   compute:
-    runs-on: windows-latest
+    name: "🧮 Compute Release Metadata"
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: pwsh
@@ -41,18 +42,20 @@ jobs:
       build_iteration: ${{ steps.set-metadata.outputs.build_iteration }}
       release_name: ${{ steps.set-metadata.outputs.release_name }}
     steps:
-      - name: Checkout repository
+      - name: "📦 Checkout Repository"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
+          filter: blob:none
 
-      - name: Compute release version components
+      - name: "🧠 Derive Version Components"
         id: set-metadata
         run: |
           $ErrorActionPreference = 'Stop'
 
           $releaseType = '${{ inputs.release_type }}'.ToLowerInvariant()
+          Write-Host "🚀 Starting release metadata derivation for type: $releaseType"
 
           if ($releaseType -ne 'stable' -and $releaseType -ne 'nightly') {
             throw "Unsupported release type: $releaseType"
@@ -61,6 +64,7 @@ jobs:
           $now = [DateTime]::UtcNow
           $YY = $now.ToString('yy')
           $MM = $now.ToString('MM')
+          Write-Host "📅 Current UTC date interpreted as YY=$YY and MM=$MM"
 
           if ($releaseType -eq 'stable') {
             $pattern = "v{0}{1}.*" -f $YY, $MM
@@ -68,14 +72,17 @@ jobs:
             $pattern = "v{0}{1}-*" -f $YY, $MM
           }
 
+          Write-Host "🔎 Looking for tags matching pattern: $pattern"
           $tags = git tag -l $pattern
           $maxIteration = 0
+          $totalTags = 0
 
           foreach ($tag in $tags) {
             if ([string]::IsNullOrWhiteSpace($tag)) {
               continue
             }
 
+            $totalTags++
             if ($releaseType -eq 'stable') {
               if ($tag -match "^v$YY$MM\.([0-9]+)$") {
                 $value = [int]$Matches[1]
@@ -93,21 +100,29 @@ jobs:
             }
           }
 
+          Write-Host "📊 Processed $totalTags tags. Highest iteration found: $maxIteration"
+
           $nextIteration = $maxIteration + 1
+          Write-Host "🔢 Next iteration resolved to: $nextIteration"
 
           if ($releaseType -eq 'stable') {
             $shortVersion = "{0}{1}.{2}" -f $YY, $MM, $nextIteration
             $msixVersion = "{0}.{1}.{2}.0" -f $YY, $MM, $nextIteration
             $channel = 'stable'
             $releaseName = "CCEM $shortVersion"
+            Write-Host "✅ Stable release detected."
           } else {
             $shortVersion = "{0}{1}-{2}" -f $YY, $MM, $nextIteration
             $msixVersion = "{0}.{1}.0.{2}" -f $YY, $MM, $nextIteration
             $channel = 'nightly'
             $releaseName = "CCEM Nightly $shortVersion"
+            Write-Host "🌙 Nightly release detected."
           }
 
           $tagValue = "v$shortVersion"
+          Write-Host "🏷️ Resolved tag: $tagValue"
+          Write-Host "📝 MSIX version: $msixVersion"
+          Write-Host "📢 Release name: $releaseName"
 
           $outputLines = @(
             "version=$shortVersion"
