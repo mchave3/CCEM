@@ -3,32 +3,21 @@ name: Build Stable Release
 on:
   workflow_dispatch:
 
-env:
-  SOURCE_BRANCH: main
-
 permissions:
   contents: write
 
-jobs:
-  derive_version:
-    name: "🧮 Derive Stable Version"
-    uses: ./.github/workflows/versioning.yml
-    with:
-      release_type: stable
+env:
+  SOURCE_BRANCH: main
+  VELOPACK_CHANNEL: stable
+  RELEASE_TITLE_PREFIX: CCEM
 
-  build_and_publish:
-    name: "🚢 Build and Publish Stable Release"
-    needs:
-      - derive_version
-    uses: ./.github/workflows/build-and-publish.yml
+jobs:
+  stable-release:
+    name: Build Stable Release
+    uses: ./.github/workflows/build-and-release.yml
     with:
-      branch: ${{ env.SOURCE_BRANCH }}
-      version: ${{ needs.derive_version.outputs.version }}
-      msix_version: ${{ needs.derive_version.outputs.msix_version }}
-      tag: ${{ needs.derive_version.outputs.tag }}
-      channel: ${{ needs.derive_version.outputs.channel }}
-      prerelease: false
-      release_name: ${{ needs.derive_version.outputs.release_name }}
-      make_latest: "true"
-    secrets:
-      release_token: ${{ secrets.GITHUB_TOKEN }}
+      source-branch: ${{ env.SOURCE_BRANCH }}
+      release-channel: ${{ env.VELOPACK_CHANNEL }}
+      release-type: stable
+      release-title-prefix: ${{ env.RELEASE_TITLE_PREFIX }}
+    secrets: inherit
