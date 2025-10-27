@@ -1,22 +1,17 @@
 <Solution>
   <Configurations>
-    <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
   <Project Path="CCEM.Core.Logger/CCEM.Core.Logger.csproj" Id="e42b0646-f0a8-412f-9db2-0d366cac8b3d">
-    <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="CCEM.Core.Velopack.Tests/CCEM.Core.Velopack.Tests.csproj" Id="cd6771c6-02da-450f-9ec3-b74977e04d6a">
-    <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="CCEM.Core.Velopack/CCEM.Core.Velopack.csproj" Id="4529700f-4e12-4196-9eca-25f960a71df1">
-    <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="CCEM/CCEM.csproj" Id="810d6294-ceb7-44c6-bb8c-447422bdfe40">
-    <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
     <Deploy />
   </Project>
