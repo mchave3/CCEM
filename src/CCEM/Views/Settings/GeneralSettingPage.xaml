@@ -21,12 +21,12 @@
 
             <controls:SettingsCard Description="Automatically launch app when you log in to Windows"
                                    Header="Run at startup"
-                                   HeaderIcon="{ui:FontIcon Glyph=&#xE7C3;}">
+                                   HeaderIcon="{ui:FontIcon Glyph=&#xE768;}">
                 <ToggleSwitch IsOn="{x:Bind dev:StartupHelper.IsAppStartupWithWindowsForXamlBindingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </controls:SettingsCard>
 
-            <dev:SettingsCard Header="Update channel"
-                              HeaderIcon="{dev:BitmapIcon Source=Assets/Fluent/Update.png}">
+            <controls:SettingsCard Header="Update channel"
+                                   HeaderIcon="{ui:FontIcon Glyph=&#xE8AB;}">
                 <StackPanel Spacing="8">
                     <ToggleSwitch IsOn="{x:Bind ViewModel.IsNightlyChannelSelected, Mode=TwoWay}"
                                   OffContent="Stable builds"
@@ -42,19 +42,19 @@
                                TextWrapping="Wrap"
                                Visibility="{x:Bind ViewModel.RestartWarningVisibility, Mode=OneWay}" />
                 </StackPanel>
-            </dev:SettingsCard>
+            </controls:SettingsCard>
 
-            <dev:SettingsExpander Description="Help us improve this app by sharing optional diagnostics data to inform bug fixes, performance, and feature enhancements"
-                                  Header="Diagnostics &amp; feedback (Restart Required)"
-                                  HeaderIcon="{dev:BitmapIcon Source=Assets/Fluent/DevMode.png}">
+            <controls:SettingsExpander Description="Help us improve this app by sharing optional diagnostics data to inform bug fixes, performance, and feature enhancements"
+                                       Header="Diagnostics &amp; feedback (Restart Required)"
+                                       HeaderIcon="{ui:FontIcon Glyph=&#xEC7A;}">
                 <ToggleSwitch IsOn="{x:Bind common:AppHelper.Settings.UseDeveloperMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <dev:SettingsExpander.ItemsHeader>
+                <controls:SettingsExpander.ItemsHeader>
                     <HyperlinkButton HorizontalAlignment="Stretch"
                                      HorizontalContentAlignment="Left"
                                      Click="NavigateToLogPath_Click"
                                      Content="{x:Bind common:Constants.LogDirectoryPath}" />
-                </dev:SettingsExpander.ItemsHeader>
-            </dev:SettingsExpander>
+                </controls:SettingsExpander.ItemsHeader>
+            </controls:SettingsExpander>
 
         </StackPanel>
     </ScrollView>
