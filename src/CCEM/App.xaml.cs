@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
+using CCEM.Services;
 using Velopack;
 
 namespace CCEM;
@@ -39,6 +40,7 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IJsonNavigationService, JsonNavigationService>();
+        services.AddSingleton<IUpdateDialogService, UpdateDialogService>();
         services.AddSingleton<IVelopackUpdateService>(_ =>
         {
             var configuration = new VelopackUpdateConfiguration("https://github.com/mchave3/CCEM");
@@ -97,6 +99,7 @@ public partial class App : Application
         }
 
         var updateService = GetService<IVelopackUpdateService>();
+        var updateDialogService = GetService<IUpdateDialogService>();
 
         try
         {
@@ -107,62 +110,21 @@ public partial class App : Application
                 return;
             }
 
-            var shouldInstall = await PromptForUpdateAsync(updateResult.AvailableVersion);
+            var downloaded = await updateDialogService.ShowUpdateAvailableDialogAsync(
+                updateResult.AvailableVersion,
+                progress => updateService.DownloadUpdatesAsync(updateResult, progress));
 
-            if (!shouldInstall)
+            if (!downloaded)
             {
                 return;
             }
 
-            await updateService.DownloadUpdatesAsync(updateResult);
             updateService.ApplyUpdatesAndRestart(updateResult);
         }
         catch (Exception ex)
         {
             Logger?.Error(ex, "Failed to process application updates.");
         }
-    }
-
-    private static Task<bool> PromptForUpdateAsync(string? availableVersion)
-    {
-        if (MainWindow?.DispatcherQueue is null)
-        {
-            return Task.FromResult(false);
-        }
-
-        var completion = new TaskCompletionSource<bool>();
-
-        if (!MainWindow.DispatcherQueue.TryEnqueue(async () =>
-        {
-            try
-            {
-                var dialog = new ContentDialog
-                {
-                    Title = "Update Available",
-                    Content = $"A new version ({availableVersion ?? "unknown"}) is available. Would you like to download and install it now?",
-                    PrimaryButtonText = "Yes",
-                    CloseButtonText = "No"
-                };
-
-                if (MainWindow.Content is FrameworkElement root)
-                {
-                    dialog.XamlRoot = root.XamlRoot;
-                }
-
-                var dialogResult = await dialog.ShowAsync();
-                completion.TrySetResult(dialogResult == ContentDialogResult.Primary);
-            }
-            catch (Exception ex)
-            {
-                Logger?.Error(ex, "Failed to display update dialog.");
-                completion.TrySetResult(false);
-            }
-        }))
-        {
-            completion.TrySetResult(false);
-        }
-
-        return completion.Task;
     }
 
     private static void ConfigureApplicationLogger()

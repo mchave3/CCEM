@@ -1,5 +1,9 @@
+using System;
+using System.Threading.Tasks;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
+using CCEM.Services;
+using Microsoft.UI.Xaml;
 using Windows.System;
 
 namespace CCEM.ViewModels;
@@ -9,6 +13,7 @@ public partial class AppUpdateSettingViewModel : ObservableObject
     private const string LatestReleaseUrl = "https://github.com/mchave3/CCEM/releases/latest";
 
     private readonly IVelopackUpdateService _updateService;
+    private readonly IUpdateDialogService _updateDialogService;
     private readonly bool _updatesSupported;
     private VelopackUpdateCheckResult? _lastCheckResult;
     private string _changeLog = string.Empty;
@@ -31,9 +36,10 @@ public partial class AppUpdateSettingViewModel : ObservableObject
     [ObservableProperty]
     private string loadingStatus = "Status";
 
-    public AppUpdateSettingViewModel(IVelopackUpdateService updateService)
+    public AppUpdateSettingViewModel(IVelopackUpdateService updateService, IUpdateDialogService updateDialogService)
     {
         _updateService = updateService ?? throw new ArgumentNullException(nameof(updateService));
+        _updateDialogService = updateDialogService ?? throw new ArgumentNullException(nameof(updateDialogService));
 
         CurrentVersion = $"Current Version {ProcessInfoHelper.VersionWithPrefix}";
         LastUpdateCheck = Settings.LastUpdateCheck;
@@ -75,6 +81,11 @@ public partial class AppUpdateSettingViewModel : ObservableObject
                 IsUpdateAvailable = true;
                 _changeLog = _lastCheckResult.ReleaseNotesMarkdown ?? "Release notes are not available.";
                 LoadingStatus = $"Version {_lastCheckResult.AvailableVersion} is ready to install.";
+
+                if (await DownloadAndApplyUpdateAsync())
+                {
+                    return;
+                }
             }
             else
             {
@@ -110,13 +121,15 @@ public partial class AppUpdateSettingViewModel : ObservableObject
 
         IsLoading = true;
         IsCheckButtonEnabled = false;
-        LoadingStatus = "Downloading update...";
+        LoadingStatus = "Preparing to download update...";
 
         try
         {
-            await _updateService.DownloadUpdatesAsync(_lastCheckResult);
-            LoadingStatus = "Restarting to finish the update...";
-            _updateService.ApplyUpdatesAndRestart(_lastCheckResult);
+            var downloaded = await DownloadAndApplyUpdateAsync();
+            if (!downloaded)
+            {
+                LoadingStatus = "Update postponed.";
+            }
         }
         catch (Exception ex)
         {
@@ -158,5 +171,25 @@ public partial class AppUpdateSettingViewModel : ObservableObject
         };
 
         await dialog.ShowAsync();
+    }
+
+    private async Task<bool> DownloadAndApplyUpdateAsync()
+    {
+        if (_lastCheckResult is null)
+        {
+            return false;
+        }
+
+        var downloaded = await _updateDialogService.ShowUpdateAvailableDialogAsync(
+            _lastCheckResult.AvailableVersion,
+            progress => _updateService.DownloadUpdatesAsync(_lastCheckResult, progress));
+
+        if (downloaded)
+        {
+            LoadingStatus = "Restarting to finish the update...";
+            _updateService.ApplyUpdatesAndRestart(_lastCheckResult);
+        }
+
+        return downloaded;
     }
 }
