@@ -34,6 +34,11 @@
                                Text="Switch to nightly builds to receive pre-release updates distributed as GitHub pre-releases." />
                     <TextBlock Style="{StaticResource SecondaryTextStyle}"
                                Text="{x:Bind ViewModel.ChannelDisplayText, Mode=OneWay}" />
+                    <TextBlock Foreground="{ThemeResource SystemFillColorAttentionBrush}"
+                               FontStyle="Italic"
+                               Text="Restart CCEM to apply the channel change."
+                               TextWrapping="Wrap"
+                               Visibility="{x:Bind ViewModel.RestartWarningVisibility, Mode=OneWay}" />
                 </StackPanel>
             </dev:SettingsCard>
 
@@ -52,4 +57,3 @@
         </StackPanel>
     </ScrollView>
 </Page>
-
