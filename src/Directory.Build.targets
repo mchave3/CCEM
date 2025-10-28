@@ -1,0 +1,8 @@
+<Project>
+  <!-- Ensure test projects never require a RuntimeIdentifier by forcing non-self-contained and no R2R -->
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <SelfContained>false</SelfContained>
+    <PublishSelfContained>false</PublishSelfContained>
+    <PublishReadyToRun>false</PublishReadyToRun>
+  </PropertyGroup>
+</Project>

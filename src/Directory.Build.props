@@ -22,7 +22,7 @@
         <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(IsTestProject)' != 'true'">
         <Optimize>true</Optimize>
         <WholeProgramOptimization>true</WholeProgramOptimization>
         <TieredCompilation>true</TieredCompilation>
