@@ -6,9 +6,9 @@
       xmlns:controls="using:CommunityToolkit.WinUI.Controls"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:dev="using:DevWinUI"
-      xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:local="using:CCEM"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:views="using:CCEM.Views"
       dev:BreadcrumbNavigator.IsHeaderVisible="True"
       mc:Ignorable="d">
@@ -19,15 +19,9 @@
                     dev:PanelAttach.ChildrenTransitions="Default"
                     Spacing="5">
 
-            <dev:SettingsCard Description="Automatically launch app when you log in to Windows"
-                              Header="Run at startup"
-                              HeaderIcon="{dev:BitmapIcon Source=Assets/Fluent/Startup.png}">
-                <ToggleSwitch IsOn="{x:Bind dev:StartupHelper.IsAppStartupWithWindowsForXamlBindingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </dev:SettingsCard>
-
             <controls:SettingsCard Description="Automatically launch app when you log in to Windows"
-                              Header="Run at startup"
-                              HeaderIcon="{ui:FontIcon Glyph=&#xE768;}">
+                                   Header="Run at startup"
+                                   HeaderIcon="{ui:FontIcon Glyph=&#xE7C3;}">
                 <ToggleSwitch IsOn="{x:Bind dev:StartupHelper.IsAppStartupWithWindowsForXamlBindingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </controls:SettingsCard>
 
@@ -42,8 +36,8 @@
                                Text="Switch to nightly builds to receive pre-release updates distributed as GitHub pre-releases." />
                     <TextBlock Style="{StaticResource SecondaryTextStyle}"
                                Text="{x:Bind ViewModel.ChannelDisplayText, Mode=OneWay}" />
-                    <TextBlock Foreground="{ThemeResource SystemFillColorAttentionBrush}"
-                               FontStyle="Italic"
+                    <TextBlock FontStyle="Italic"
+                               Foreground="{ThemeResource SystemFillColorAttentionBrush}"
                                Text="Restart CCEM to apply the channel change."
                                TextWrapping="Wrap"
                                Visibility="{x:Bind ViewModel.RestartWarningVisibility, Mode=OneWay}" />
