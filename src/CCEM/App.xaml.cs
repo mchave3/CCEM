@@ -1,4 +1,6 @@
+using System.Threading;
 using System.Threading.Tasks;
+using CCEM.Core.Startup;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using CCEM.Services;
@@ -62,68 +64,128 @@ public partial class App : Application
         return services.BuildServiceProvider();
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new MainWindow();
-        MainWindow.Closed += (_, _) => CloseAndFlush();
+        var window = new MainWindow();
+        MainWindow = window;
+        window.Closed += (_, _) => CloseAndFlush();
 
-        MainWindow.Title = MainWindow.AppWindow.Title = ProcessInfoHelper.ProductNameAndVersion;
-        MainWindow.AppWindow.SetIcon("Assets/AppIcon.ico");
+        window.Title = window.AppWindow.Title = ProcessInfoHelper.ProductNameAndVersion;
+        window.AppWindow.SetIcon("Assets/AppIcon.ico");
 
-        ThemeService.Initialize(MainWindow);
+        ThemeService.Initialize(window);
 
-        MainWindow.Activate();
+        window.Activate();
 
-        _ = InitializeAppAsync();
-    }
-
-    private async Task InitializeAppAsync()
-    {
-        var menuService = GetService<ContextMenuService>();
-        if (menuService != null && RuntimeHelper.IsPackaged())
-        {
-            ContextMenuItem menu = new ContextMenuItem
-            {
-                Title = "Open CCEM Here",
-                Param = @"""{path}""",
-                AcceptFileFlag = (int)FileMatchFlagEnum.All,
-                AcceptDirectoryFlag = (int)(DirectoryMatchFlagEnum.Directory | DirectoryMatchFlagEnum.Background | DirectoryMatchFlagEnum.Desktop),
-                AcceptMultipleFilesFlag = (int)FilesMatchFlagEnum.Each,
-                Index = 0,
-                Enabled = true,
-                Icon = ProcessInfoHelper.GetFileVersionInfo().FileName,
-                Exe = "CCEM.exe"
-            };
-
-            await menuService.SaveAsync(menu);
-        }
-
-        var updateService = GetService<IVelopackUpdateService>();
-        var updateDialogService = GetService<IUpdateDialogService>();
+        var startupPipeline = BuildStartupPipeline(window);
 
         try
         {
-            var updateResult = await updateService.CheckForUpdatesAsync();
+            await startupPipeline.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger?.Fatal(ex, "Critical failure while executing the startup pipeline.");
+            throw;
+        }
+    }
+
+    private AppStartupPipeline BuildStartupPipeline(MainWindow host)
+    {
+        var options = new StartupPipelineOptions
+        {
+            InitialStatusMessage = "Preparing CCEM...",
+            CompletionStatusMessage = "Loading workspace..."
+        };
+
+        var builder = new StartupPipelineBuilder()
+            .AddCriticalStep(
+                "Context menu registration",
+                "Configuring Windows context menu integration...",
+                EnsureContextMenuAsync)
+            .AddBackgroundStep(
+                "Update discovery",
+                RunUpdateFlowAsync);
+
+        return builder.Build(host, Services, options, Logger);
+    }
+
+    private static async Task EnsureContextMenuAsync(StartupContext context, CancellationToken cancellationToken)
+    {
+        var menuService = context.GetService<ContextMenuService>();
+        if (menuService is null)
+        {
+            context.Logger?.Debug("Context menu service unavailable; skipping integration.");
+            return;
+        }
+
+        if (!RuntimeHelper.IsPackaged())
+        {
+            context.Logger?.Debug("Application is not packaged; skipping context menu registration.");
+            return;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        ContextMenuItem menu = new ContextMenuItem
+        {
+            Title = "Open CCEM Here",
+            Param = @"""{path}""",
+            AcceptFileFlag = (int)FileMatchFlagEnum.All,
+            AcceptDirectoryFlag = (int)(DirectoryMatchFlagEnum.Directory | DirectoryMatchFlagEnum.Background | DirectoryMatchFlagEnum.Desktop),
+            AcceptMultipleFilesFlag = (int)FilesMatchFlagEnum.Each,
+            Index = 0,
+            Enabled = true,
+            Icon = ProcessInfoHelper.GetFileVersionInfo().FileName,
+            Exe = "CCEM.exe"
+        };
+
+        await menuService.SaveAsync(menu).ConfigureAwait(false);
+        context.Logger?.Information("Context menu integration ensured.");
+    }
+
+    private static async Task RunUpdateFlowAsync(StartupContext context, CancellationToken cancellationToken)
+    {
+        var updateService = context.GetService<IVelopackUpdateService>();
+        var updateDialogService = context.GetService<IUpdateDialogService>();
+
+        if (updateService is null || updateDialogService is null)
+        {
+            context.Logger?.Warning("Update services unavailable; skipping update workflow.");
+            return;
+        }
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var updateResult = await updateService.CheckForUpdatesAsync().ConfigureAwait(false);
 
             if (!updateResult.IsUpdateAvailable)
             {
+                context.Logger?.Information("No application updates available.");
                 return;
             }
 
             var downloaded = await updateDialogService.ShowUpdateAvailableDialogAsync(
                 updateResult.AvailableVersion,
-                progress => updateService.DownloadUpdatesAsync(updateResult, progress));
+                progress => updateService.DownloadUpdatesAsync(updateResult, progress)).ConfigureAwait(false);
 
             if (!downloaded)
             {
+                context.Logger?.Information("User declined to download updates.");
                 return;
             }
 
             updateService.ApplyUpdatesAndRestart(updateResult);
         }
+        catch (OperationCanceledException)
+        {
+            context.Logger?.Warning("Update workflow cancelled by caller.");
+        }
         catch (Exception ex)
         {
-            Logger?.Error(ex, "Failed to process application updates.");
+            context.Logger?.Error(ex, "Failed to process application updates.");
         }
     }
 
