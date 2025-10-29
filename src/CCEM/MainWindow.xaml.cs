@@ -47,8 +47,8 @@ public sealed partial class MainWindow : Window
             InAnimation_Icon.Start();
             InAnimation_Text.Start();
 
-            // Wait for animations to complete (700ms duration)
-            await Task.Delay(700);
+            // Wait for animations to complete (10000ms duration)
+            await Task.Delay(10000);
         });
     }
 
