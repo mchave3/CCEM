@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\CCEM.Core.Logger\CCEM.Core.Logger.csproj" />
-  </ItemGroup>
-
-</Project>

@@ -1,6 +1,5 @@
-using System.Threading;
+using System;
 using System.Threading.Tasks;
-using CCEM.Core.Startup;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using CCEM.Services;
@@ -64,7 +63,7 @@ public partial class App : Application
         return services.BuildServiceProvider();
     }
 
-    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         var window = new MainWindow();
         MainWindow = window;
@@ -75,97 +74,105 @@ public partial class App : Application
 
         ThemeService.Initialize(window);
 
+        // Start loading components in background (UniGetUI-style)
+        _ = LoadComponentsAsync(window);
+
         window.Activate();
+    }
 
-        var startupPipeline = BuildStartupPipeline(window);
-
+    /// <summary>
+    /// Background component loader similar to UniGetUI
+    /// </summary>
+    private async Task LoadComponentsAsync(MainWindow window)
+    {
         try
         {
-            await startupPipeline.RunAsync();
+            // Start the entry animation/loading display
+            _ = window.DoEntryAnimationAsync();
+
+            // Initialize all services in parallel
+            var contextMenuTask = EnsureContextMenuAsync();
+            var updateTask = CheckForUpdatesAsync();
+
+            // Wait for all tasks to complete
+            await Task.WhenAll(contextMenuTask, updateTask);
+
+            // Switch to the main interface
+            Logger?.Information("LoadComponentsAsync finished. Switching to interface.");
+            window.SwitchToInterface();
         }
         catch (Exception ex)
         {
-            Logger?.Fatal(ex, "Critical failure while executing the startup pipeline.");
+            Logger?.Fatal(ex, "Critical failure while loading components.");
             throw;
         }
     }
 
-    private AppStartupPipeline BuildStartupPipeline(MainWindow host)
+    private static async Task EnsureContextMenuAsync()
     {
-        var options = new StartupPipelineOptions
-        {
-            InitialStatusMessage = "Preparing CCEM...",
-            CompletionStatusMessage = "Loading workspace..."
-        };
-
-        var builder = new StartupPipelineBuilder()
-            .AddCriticalStep(
-                "Context menu registration",
-                "Configuring Windows context menu integration...",
-                EnsureContextMenuAsync)
-            .AddBackgroundStep(
-                "Update discovery",
-                RunUpdateFlowAsync);
-
-        return builder.Build(host, Services, options, Logger);
-    }
-
-    private static async Task EnsureContextMenuAsync(StartupContext context, CancellationToken cancellationToken)
-    {
-        var menuService = context.GetService<ContextMenuService>();
-        if (menuService is null)
-        {
-            context.Logger?.Debug("Context menu service unavailable; skipping integration.");
-            return;
-        }
-
-        if (!RuntimeHelper.IsPackaged())
-        {
-            context.Logger?.Debug("Application is not packaged; skipping context menu registration.");
-            return;
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        ContextMenuItem menu = new ContextMenuItem
-        {
-            Title = "Open CCEM Here",
-            Param = @"""{path}""",
-            AcceptFileFlag = (int)FileMatchFlagEnum.All,
-            AcceptDirectoryFlag = (int)(DirectoryMatchFlagEnum.Directory | DirectoryMatchFlagEnum.Background | DirectoryMatchFlagEnum.Desktop),
-            AcceptMultipleFilesFlag = (int)FilesMatchFlagEnum.Each,
-            Index = 0,
-            Enabled = true,
-            Icon = ProcessInfoHelper.GetFileVersionInfo().FileName,
-            Exe = "CCEM.exe"
-        };
-
-        await menuService.SaveAsync(menu).ConfigureAwait(false);
-        context.Logger?.Information("Context menu integration ensured.");
-    }
-
-    private static async Task RunUpdateFlowAsync(StartupContext context, CancellationToken cancellationToken)
-    {
-        var updateService = context.GetService<IVelopackUpdateService>();
-        var updateDialogService = context.GetService<IUpdateDialogService>();
-
-        if (updateService is null || updateDialogService is null)
-        {
-            context.Logger?.Warning("Update services unavailable; skipping update workflow.");
-            return;
-        }
-
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            var menuService = GetService<ContextMenuService>();
+            if (menuService is null)
+            {
+                Logger?.Debug("Context menu service unavailable; skipping integration.");
+                return;
+            }
+
+            if (!RuntimeHelper.IsPackaged())
+            {
+                Logger?.Debug("Application is not packaged; skipping context menu registration.");
+                return;
+            }
+
+            Logger?.Information("Configuring Windows context menu integration...");
+
+            ContextMenuItem menu = new ContextMenuItem
+            {
+                Title = "Open CCEM Here",
+                Param = @"""{path}""",
+                AcceptFileFlag = (int)FileMatchFlagEnum.All,
+                AcceptDirectoryFlag = (int)(DirectoryMatchFlagEnum.Directory | DirectoryMatchFlagEnum.Background | DirectoryMatchFlagEnum.Desktop),
+                AcceptMultipleFilesFlag = (int)FilesMatchFlagEnum.Each,
+                Index = 0,
+                Enabled = true,
+                Icon = ProcessInfoHelper.GetFileVersionInfo().FileName,
+                Exe = "CCEM.exe"
+            };
+
+            await menuService.SaveAsync(menu).ConfigureAwait(false);
+            Logger?.Information("Context menu integration ensured.");
+        }
+        catch (Exception ex)
+        {
+            Logger?.Error(ex, "Failed to configure context menu.");
+        }
+    }
+
+    private static async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var updateService = GetService<IVelopackUpdateService>();
+            var updateDialogService = GetService<IUpdateDialogService>();
+
+            if (updateService is null || updateDialogService is null)
+            {
+                Logger?.Warning("Update services unavailable; skipping update workflow.");
+                return;
+            }
+
+            Logger?.Information("Checking for updates...");
 
             var updateResult = await updateService.CheckForUpdatesAsync().ConfigureAwait(false);
 
             if (!updateResult.IsUpdateAvailable)
             {
-                context.Logger?.Information("No application updates available.");
+                Logger?.Information("No application updates available.");
                 return;
             }
+
+            Logger?.Information($"Update available: {updateResult.AvailableVersion}");
 
             var downloaded = await updateDialogService.ShowUpdateAvailableDialogAsync(
                 updateResult.AvailableVersion,
@@ -173,19 +180,19 @@ public partial class App : Application
 
             if (!downloaded)
             {
-                context.Logger?.Information("User declined to download updates.");
+                Logger?.Information("User declined to download updates.");
                 return;
             }
 
             updateService.ApplyUpdatesAndRestart(updateResult);
         }
-        catch (OperationCanceledException)
+        catch (Velopack.Exceptions.NotInstalledException)
         {
-            context.Logger?.Warning("Update workflow cancelled by caller.");
+            Logger?.Debug("Application is running in development mode; skipping update checks.");
         }
         catch (Exception ex)
         {
-            context.Logger?.Error(ex, "Failed to process application updates.");
+            Logger?.Error(ex, "Failed to process application updates.");
         }
     }
 

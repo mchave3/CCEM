@@ -1,16 +1,13 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using CCEM.Core.Startup;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 
 namespace CCEM.Views;
 
-public sealed partial class MainWindow : Window, ISplashScreenHost
+public sealed partial class MainWindow : Window
 {
     private readonly DispatcherQueue _dispatcherQueue;
-    private bool _shellPresented;
 
     public MainViewModel ViewModel { get; }
 
@@ -20,19 +17,8 @@ public sealed partial class MainWindow : Window, ISplashScreenHost
         this.InitializeComponent();
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         ExtendsContentIntoTitleBar = true;
-        SetTitleBar(AppTitleBar);
+        SetTitleBar(MainContentGrid);
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
-
-        var navService = App.GetService<IJsonNavigationService>() as JsonNavigationService;
-        if (navService != null)
-        {
-            navService.Initialize(NavView, NavFrame, NavigationPageMappings.PageDictionary)
-                .ConfigureDefaultPage(typeof(HomeLandingPage))
-                .ConfigureSettingsPage(typeof(SettingsPage))
-                .ConfigureJsonFile("Assets/NavViewMenu/AppData.json")
-                .ConfigureTitleBar(AppTitleBar)
-                .ConfigureBreadcrumbBar(BreadCrumbNav, BreadcrumbPageMappings.PageDictionary);
-        }
     }
 
     private async void ThemeButton_Click(object sender, RoutedEventArgs e)
@@ -50,64 +36,50 @@ public sealed partial class MainWindow : Window, ISplashScreenHost
         AutoSuggestBoxHelper.OnITitleBarAutoSuggestBoxQuerySubmittedEvent(sender, args, NavFrame);
     }
 
-    public void ShowSplash()
+    /// <summary>
+    /// Plays the entry animations for the loading screen
+    /// </summary>
+    public async Task DoEntryAnimationAsync()
     {
-        _shellPresented = false;
-        RunOnDispatcher(() =>
+        await RunOnDispatcherAsync(async () =>
         {
-            SplashRoot.Visibility = Visibility.Visible;
-            ShellRoot.Visibility = Visibility.Collapsed;
-            SplashProgressBar.IsIndeterminate = true;
+            // Start both animations simultaneously
+            InAnimation_Icon.Start();
+            InAnimation_Text.Start();
+
+            // Wait for animations to complete (700ms duration)
+            await Task.Delay(700);
         });
     }
 
-    public void UpdateStatus(string message)
+    /// <summary>
+    /// Switches from the loading screen to the main interface
+    /// </summary>
+    public void SwitchToInterface()
     {
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return;
-        }
-
-        RunOnDispatcher(() => SplashStatusText.Text = message);
-    }
-
-    public Task EnterShellAsync(CancellationToken cancellationToken = default)
-    {
-        if (_shellPresented)
-        {
-            return Task.CompletedTask;
-        }
-
-        _shellPresented = true;
-
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return Task.FromCanceled(cancellationToken);
-        }
-
-        var completion = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        CancellationTokenRegistration registration = default;
-        var hasRegistration = false;
-
-        if (cancellationToken.CanBeCanceled)
-        {
-            registration = cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken), useSynchronizationContext: false);
-            hasRegistration = true;
-        }
-
         RunOnDispatcher(() =>
         {
-            SplashProgressBar.IsIndeterminate = false;
-            SplashRoot.Visibility = Visibility.Collapsed;
+            // Hide the loading screen
+            LoadingRoot.Visibility = Visibility.Collapsed;
+
+            // Show the main shell
             ShellRoot.Visibility = Visibility.Visible;
-            if (hasRegistration)
-            {
-                registration.Dispose();
-            }
-            completion.TrySetResult(null);
-        });
 
-        return completion.Task;
+            // Update title bar
+            SetTitleBar(AppTitleBar);
+
+            // Initialize navigation service
+            var navService = App.GetService<IJsonNavigationService>() as JsonNavigationService;
+            if (navService != null)
+            {
+                navService.Initialize(NavView, NavFrame, NavigationPageMappings.PageDictionary)
+                    .ConfigureDefaultPage(typeof(HomeLandingPage))
+                    .ConfigureSettingsPage(typeof(SettingsPage))
+                    .ConfigureJsonFile("Assets/NavViewMenu/AppData.json")
+                    .ConfigureTitleBar(AppTitleBar)
+                    .ConfigureBreadcrumbBar(BreadCrumbNav, BreadcrumbPageMappings.PageDictionary);
+            }
+        });
     }
 
     private void RunOnDispatcher(Action action)
@@ -118,9 +90,31 @@ public sealed partial class MainWindow : Window, ISplashScreenHost
             return;
         }
 
-        if (!_dispatcherQueue.TryEnqueue(() => action()))
+        _ = _dispatcherQueue.TryEnqueue(() => action());
+    }
+
+    private async Task RunOnDispatcherAsync(Func<Task> action)
+    {
+        if (_dispatcherQueue.HasThreadAccess)
         {
-            action();
+            await action();
+        }
+        else
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            _dispatcherQueue.TryEnqueue(async () =>
+            {
+                try
+                {
+                    await action();
+                    tcs.SetResult(true);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+            await tcs.Task;
         }
     }
 }
