@@ -43,12 +43,12 @@ public sealed partial class MainWindow : Window
     {
         await RunOnDispatcherAsync(async () =>
         {
-            // Start both animations simultaneously
+            // Trigger the same entry animations used in UniGetUI
             InAnimation_Icon.Start();
             InAnimation_Text.Start();
 
-            // Wait for animations to complete (10000ms duration)
-            await Task.Delay(10000);
+            await Task.Delay(TimeSpan.FromMilliseconds(700));
+            LoadingIndicator.Visibility = Visibility.Visible;
         });
     }
 

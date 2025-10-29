@@ -16,6 +16,8 @@ public partial class App : Application
     public IJsonNavigationService NavService => GetService<IJsonNavigationService>();
     public IThemeService ThemeService => GetService<IThemeService>();
 
+    private static readonly TimeSpan MinimumSplashDuration = TimeSpan.FromSeconds(3);
+
     public static T GetService<T>() where T : class
     {
         if ((App.Current as App)!.Services.GetService(typeof(T)) is not T service)
@@ -88,16 +90,16 @@ public partial class App : Application
         try
         {
             // Start the entry animation/loading display
-            _ = window.DoEntryAnimationAsync();
+            var entryAnimationTask = window.DoEntryAnimationAsync();
 
-            // Initialize all services in parallel
+            // Initialize supporting services in parallel
             var contextMenuTask = EnsureContextMenuAsync();
+
             var updateTask = CheckForUpdatesAsync();
+            var minimumDurationTask = Task.Delay(MinimumSplashDuration);
 
-            // Wait for all tasks to complete
-            await Task.WhenAll(contextMenuTask, updateTask);
+            await Task.WhenAll(entryAnimationTask, contextMenuTask, updateTask, minimumDurationTask);
 
-            // Switch to the main interface
             Logger?.Information("LoadComponentsAsync finished. Switching to interface.");
             window.SwitchToInterface();
         }
