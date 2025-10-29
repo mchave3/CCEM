@@ -2,10 +2,12 @@
 <Page x:Class="CCEM.Views.AboutUsSettingPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="using:CommunityToolkit.WinUI.Controls"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:dev="using:DevWinUI"
       xmlns:local="using:CCEM"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:views="using:CCEM.Views"
       dev:BreadcrumbNavigator.IsHeaderVisible="True"
       mc:Ignorable="d">
@@ -15,29 +17,28 @@
         <StackPanel Margin="10"
                     dev:PanelAttach.ChildrenTransitions="Default"
                     Spacing="5">
-            <dev:SettingsExpander Description="Description"
-                                  Header="CCEM"
-                                  HeaderIcon="{dev:BitmapIcon Source=Assets/AppIcon.png}"
-                                  IsExpanded="True">
+            <controls:SettingsExpander Description="Description"
+                                       Header="CCEM"
+                                       HeaderIcon="{ui:BitmapIcon Source=Assets/AppIcon.png}"
+                                       IsExpanded="True">
 
                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            IsTextSelectionEnabled="True"
                            Text="{x:Bind dev:ProcessInfoHelper.VersionWithPrefix}" />
-                <dev:SettingsExpander.Items>
-                    <dev:SettingsCard HorizontalContentAlignment="Left"
-                                      ContentAlignment="Left">
+                <controls:SettingsExpander.Items>
+                    <controls:SettingsCard HorizontalContentAlignment="Left"
+                                           ContentAlignment="Left">
                         <StackPanel Orientation="Vertical"
                                     Spacing="5">
                             <TextBlock Text="Related Links" />
                             <HyperlinkButton Content="Source Code"
-                                             NavigateUri="https://github.com/Ghost1372/DevWinUI" />
+                                             NavigateUri="https://github.com/mchave3/CCEM" />
                             <HyperlinkButton Content="Release Notes"
-                                             NavigateUri="https://github.com/Ghost1372/DevWinUI/releases" />
+                                             NavigateUri="https://github.com/mchave3/CCEM/releases" />
                         </StackPanel>
-                    </dev:SettingsCard>
-                </dev:SettingsExpander.Items>
-            </dev:SettingsExpander>
+                    </controls:SettingsCard>
+                </controls:SettingsExpander.Items>
+            </controls:SettingsExpander>
         </StackPanel>
     </ScrollView>
 </Page>
-
