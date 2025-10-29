@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CCEM.Core.Logger\CCEM.Core.Logger.csproj" />
+    <ProjectReference Include="..\CCEM.Core.Startup\CCEM.Core.Startup.csproj" />
     <ProjectReference Include="..\CCEM.Core.Velopack\CCEM.Core.Velopack.csproj" />
   </ItemGroup>
   <!--

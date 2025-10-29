@@ -6,6 +6,9 @@
     <Project Path="CCEM.Core.Logger/CCEM.Core.Logger.csproj" Id="e42b0646-f0a8-412f-9db2-0d366cac8b3d">
       <Platform Project="x64" />
     </Project>
+    <Project Path="CCEM.Core.Startup/CCEM.Core.Startup.csproj" Id="e7714581-32c2-44b8-b679-33723e8168fc">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="CCEM.Core.Velopack.Tests/CCEM.Core.Velopack.Tests.csproj" Id="cd6771c6-02da-450f-9ec3-b74977e04d6a">
       <Platform Project="x64" />
     </Project>
