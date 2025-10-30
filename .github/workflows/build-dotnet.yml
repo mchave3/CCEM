@@ -60,8 +60,8 @@ jobs:
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj') }}
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
@@ -106,9 +106,9 @@ jobs:
           $publishDir = "${{ inputs.publish-dir }}"
           $projectPath = "${{ inputs.project-path }}"
 
-          if (Test-Path $publishDir) { 
+          if (Test-Path $publishDir) {
             Write-Host "Cleaning existing publish directory..."
-            Remove-Item $publishDir -Recurse -Force 
+            Remove-Item $publishDir -Recurse -Force
           }
 
           Write-Host "Publishing project to $publishDir..."
@@ -129,7 +129,7 @@ jobs:
         shell: pwsh
         run: |
           $publishDir = "${{ inputs.publish-dir }}"
-          
+
           if (Test-Path $publishDir) {
             Write-Host "## Published Files" >> $env:GITHUB_STEP_SUMMARY
             $fileCount = (Get-ChildItem -Path $publishDir -Recurse -File).Count
