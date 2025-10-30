@@ -8,31 +8,39 @@
         xmlns:local="using:CCEM"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d">
+    <!--  Main Content Container  -->
     <Grid x:Name="MainContentGrid">
-        <!--  Main Shell (collapsed at startup)  -->
+        <!--  Main Application Shell (collapsed at startup)  -->
         <Grid x:Name="ShellRoot"
               Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <!--  Title Bar  -->
                 <RowDefinition />
+                <!--  Navigation Content  -->
             </Grid.RowDefinitions>
+
+            <!--  Custom Title Bar with Search and Theme Button  -->
             <TitleBar x:Name="AppTitleBar"
                       Title="{x:Bind dev:ProcessInfoHelper.ProductName}"
                       IsBackButtonVisible="True"
                       IsPaneToggleButtonVisible="True"
                       Subtitle="{x:Bind dev:ProcessInfoHelper.VersionWithPrefix}">
+                <!--  Search Box in Title Bar  -->
                 <AutoSuggestBox MinWidth="320"
                                 VerticalAlignment="Center"
                                 PlaceholderText="Search"
                                 QueryIcon="Find"
                                 QuerySubmitted="OnQuerySubmitted"
                                 TextChanged="OnTextChanged" />
+                <!--  App Icon in Title Bar  -->
                 <TitleBar.LeftHeader>
                     <ImageIcon Width="16"
                                Height="16"
                                Margin="2,0,14,0"
                                Source="ms-appx:///Assets/AppIcon.png" />
                 </TitleBar.LeftHeader>
+                <!--  Theme Toggle Button in Title Bar  -->
                 <TitleBar.RightHeader>
                     <Button x:Name="ThemeButton"
                             Height="32"
@@ -44,13 +52,17 @@
                             ToolTipService.ToolTip="Toggle Theme" />
                 </TitleBar.RightHeader>
             </TitleBar>
+
+            <!--  Main Navigation View  -->
             <NavigationView x:Name="NavView"
                             Grid.Row="1"
                             IsBackButtonVisible="Collapsed"
                             IsPaneToggleButtonVisible="False">
+                <!--  Breadcrumb Navigation Header  -->
                 <NavigationView.Header>
                     <dev:BreadcrumbNavigator x:Name="BreadCrumbNav" />
                 </NavigationView.Header>
+                <!--  Content Frame for Page Navigation  -->
                 <Frame x:Name="NavFrame" />
             </NavigationView>
         </Grid>
@@ -60,15 +72,22 @@
               Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
+                <!--  Left Spacer  -->
                 <ColumnDefinition Width="Auto" />
+                <!--  Center Content  -->
                 <ColumnDefinition Width="*" />
+                <!--  Right Spacer  -->
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
+                <!--  Top Spacer  -->
+                <RowDefination Height="Auto" />
+                <!--  Center Content  -->
                 <RowDefinition Height="*" />
+                <!--  Bottom Spacer  -->
             </Grid.RowDefinitions>
 
+            <!--  Centered Logo and Title Container  -->
             <StackPanel Grid.Row="1"
                         Grid.Column="1"
                         Padding="0,20,0,20"
@@ -80,7 +99,7 @@
                             <animations:TranslationAnimation EasingMode="EaseOut"
                                                              From="225,0"
                                                              To="0,0"
-                                                             Duration="0:0:0.7" />
+                                                             Duration="0:0:1" />
                         </animations:AnimationSet>
                     </animations:Explicit.Animations>
                     <Image Width="96"
@@ -95,13 +114,14 @@
                             <animations:TranslationAnimation EasingMode="EaseOut"
                                                              From="-225,0"
                                                              To="0,0"
-                                                             Duration="0:0:0.7" />
+                                                             Duration="0:0:1" />
                             <animations:OpacityAnimation EasingMode="EaseOut"
                                                          From="0"
                                                          To="1"
-                                                         Duration="0:0:0.7" />
+                                                         Duration="0:0:1" />
                         </animations:AnimationSet>
                     </animations:Explicit.Animations>
+                    <!--  App Title  -->
                     <TextBlock x:Name="AppTitle"
                                Margin="0,-10,0,-20"
                                HorizontalAlignment="Left"
@@ -109,6 +129,7 @@
                                FontSize="90"
                                FontWeight="ExtraBlack"
                                Text="CCEM" />
+                    <!--  App Subtitle  -->
                     <TextBlock HorizontalAlignment="Center"
                                FontFamily="Segoe UI Variable"
                                FontSize="20"
@@ -116,6 +137,7 @@
                 </StackPanel>
             </StackPanel>
 
+            <!--  Loading Progress Indicator  -->
             <ProgressBar x:Name="LoadingIndicator"
                          Grid.Row="1"
                          Grid.Column="1"

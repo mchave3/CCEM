@@ -9,15 +9,47 @@ namespace CCEM;
 
 public partial class App : Application
 {
+    /// <summary>
+    /// Gets the singleton application object.
+    /// </summary>
     public new static App Current => (App)Application.Current;
+
+    /// <summary>
+    /// Gets the main window of the application.
+    /// </summary>
     public static Window MainWindow = Window.Current;
+
+    /// <summary>
+    /// Gets the window handle (HWND) of the main window.
+    /// </summary>
     public static IntPtr Hwnd => WinRT.Interop.WindowNative.GetWindowHandle(MainWindow);
+
+    /// <summary>
+    /// Gets the service provider for dependency injection.
+    /// </summary>
     public IServiceProvider Services { get; }
+
+    /// <summary>
+    /// Gets the JSON navigation service.
+    /// </summary>
     public IJsonNavigationService NavService => GetService<IJsonNavigationService>();
+
+    /// <summary>
+    /// Gets the theme service.
+    /// </summary>
     public IThemeService ThemeService => GetService<IThemeService>();
 
+    /// <summary>
+    /// The minimum duration to show the splash screen.
+    /// </summary>
     private static readonly TimeSpan MinimumSplashDuration = TimeSpan.FromSeconds(3);
 
+    /// <summary>
+    /// Gets a service of the specified type from the service provider.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public static T GetService<T>() where T : class
     {
         if ((App.Current as App)!.Services.GetService(typeof(T)) is not T service)
@@ -28,16 +60,34 @@ public partial class App : Application
         return service;
     }
 
+    #region Application Initialization
+    /// <summary>
+    /// Initializes the singleton application object
+    /// </summary>
     public App()
     {
+        // Initialize Velopack application.
         VelopackApp.Build().Run();
+
+        // Configure logger.
         ConfigureApplicationLogger();
+
+        // Global exception handling.
         UnhandledException += (s, e) => Logger?.Error(e.Exception, "UnhandledException");
+
+        // Configure services.
         Services = ConfigureServices();
 
+        // Initialize XAML components.
         this.InitializeComponent();
     }
+    #endregion Application Initialization
 
+    #region Service Configuration
+    /// <summary>
+    /// Configures the dependency injection services.
+    /// </summary>
+    /// <returns></returns>
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
@@ -46,6 +96,7 @@ public partial class App : Application
         services.AddSingleton<IUpdateDialogService, UpdateDialogService>();
         services.AddSingleton<IVelopackUpdateService>(_ =>
         {
+            // Configure Velopack update service.
             var configuration = new VelopackUpdateConfiguration("https://github.com/mchave3/CCEM");
             if (!Enum.TryParse(Settings.UpdateChannel, ignoreCase: true, out VelopackChannel channel))
             {
@@ -64,24 +115,37 @@ public partial class App : Application
 
         return services.BuildServiceProvider();
     }
+    #endregion Service Configuration
 
+    #region OnLaunched
+    /// <summary>
+    /// Invoked when the application is launched normally by the end user. Other entry points
+    /// will be used such as when the application is launched to open a specific file.
+    /// </summary>
+    /// <param name="args"></param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // Create the main window.
         var window = new MainWindow();
         MainWindow = window;
         window.Closed += (_, _) => CloseAndFlush();
 
+        // Set window title and icon.
         window.Title = window.AppWindow.Title = ProcessInfoHelper.ProductNameAndVersion;
         window.AppWindow.SetIcon("Assets/AppIcon.ico");
 
+        // Initialize theme service.
         ThemeService.Initialize(window);
 
-        // Start loading components in background (UniGetUI-style)
+        // Start loading components in the background.
         _ = LoadComponentsAsync(window);
 
+        // Activate the window.
         window.Activate();
     }
+    #endregion OnLaunched
 
+    #region Application Component Loaders
     /// <summary>
     /// Background component loader similar to UniGetUI
     /// </summary>
@@ -89,18 +153,17 @@ public partial class App : Application
     {
         try
         {
-            // Start the entry animation/loading display
+            // Start tasks to load components in parallel.
             var entryAnimationTask = window.DoEntryAnimationAsync();
-
-            // Initialize supporting services in parallel
             var contextMenuTask = EnsureContextMenuAsync();
-
             var updateTask = CheckForUpdatesAsync();
             var minimumDurationTask = Task.Delay(MinimumSplashDuration);
 
+            // Wait for all tasks to complete.
             await Task.WhenAll(entryAnimationTask, contextMenuTask, updateTask, minimumDurationTask);
-
             Logger?.Information("LoadComponentsAsync finished. Switching to interface.");
+
+            // Switch to the main interface.
             window.SwitchToInterface();
         }
         catch (Exception ex)
@@ -110,6 +173,10 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Ensures that the Windows context menu integration is configured
+    /// </summary>
+    /// <returns></returns>
     private static async Task EnsureContextMenuAsync()
     {
         try
@@ -151,6 +218,10 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Checks for application updates and prompts the user to install them if available
+    /// </summary>
+    /// <returns></returns>
     private static async Task CheckForUpdatesAsync()
     {
         try
@@ -198,6 +269,9 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Configures the application logger
+    /// </summary>
     private static void ConfigureApplicationLogger()
     {
         ConfigureLogger(new LoggerConfigurationOptions
@@ -209,4 +283,5 @@ public partial class App : Application
             EnableDebugSink = true
         });
     }
+    #endregion Application Component Loaders
 }
