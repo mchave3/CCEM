@@ -1,17 +1,29 @@
-<div align="center">
+# 🧪 CCEM Beta {VERSION}
 
-## 🧪 Beta Build Available
+> ⚠️ **This is a pre-release version** - Use for testing purposes only
 
-⚠️ **Warning**: This is a beta build and may contain unstable features or bugs.
+## 📝 What's New in this Beta
 
-## 📦 Available Downloads
+**{PR_TITLE}** by [@{PR_AUTHOR}](https://github.com/{PR_AUTHOR})
+[#{PR_NUMBER}](https://github.com/{PR_REPO_OWNER}/{PR_REPO_NAME}/pull/{PR_NUMBER})
+
+{PR_BODY}
+
+---
+
+## 🔗 Feedback
+
+Please report any issues you encounter:
+
+* 🐛 [Report Bug](https://github.com/{PR_REPO_OWNER}/{PR_REPO_NAME}/issues/new?labels=bug,beta)
+* 💡 [Feature Request](https://github.com/{PR_REPO_OWNER}/{PR_REPO_NAME}/issues/new?labels=enhancement,beta)
+
+---
+
+## 📦 Downloads
 
 {FILES_TABLE}
 
-</div>
+---
 
-## 🔧 Installation Notes
-
-- These builds are for testing purposes only
-- Not recommended for production use
-- Report issues on the project's GitHub repository
+⚠️ **Beta Release** - May contain unstable features

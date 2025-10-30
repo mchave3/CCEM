@@ -24,4 +24,9 @@ jobs:
       release-channel: beta
       release-type: beta
       release-title-prefix: 'CCEM Beta'
+      pr-number: ${{ github.event.pull_request.number }}
+      pr-title: ${{ github.event.pull_request.title }}
+      pr-author: ${{ github.event.pull_request.user.login }}
+      pr-body: ${{ github.event.pull_request.body }}
+      pr-url: ${{ github.event.pull_request.html_url }}
     secrets: inherit

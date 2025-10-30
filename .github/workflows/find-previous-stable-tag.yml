@@ -1,0 +1,106 @@
+name: 🔍 Find Previous Stable Tag
+
+on:
+  workflow_call:
+    inputs:
+      current-version:
+        description: 'Current version string (e.g., 2510.1)'
+        required: true
+        type: string
+    outputs:
+      previous-tag:
+        description: 'Previous stable tag (e.g., v2509.1)'
+        value: ${{ jobs.find.outputs.previous-tag }}
+
+jobs:
+  find:
+    name: Find Previous Tag
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      previous-tag: ${{ steps.find.outputs.previous-tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure tags
+        run: git fetch --force --tags
+
+      - name: Find previous stable tag
+        id: find
+        run: |
+          Write-Host "Finding previous stable tag before current version: ${{ inputs.current-version }}"
+
+          # Get all tags matching stable pattern (vYYMM.N)
+          # Exclude beta tags
+          $allTags = git tag | Where-Object { $_ -match '^v\d{4}\.\d+$' }
+
+          if ($allTags.Count -eq 0) {
+            Write-Host "⚠️ No previous stable tags found"
+            $previousTag = ""
+          } else {
+            # Sort tags by version (natural sort)
+            # Extract YYMM and patch number for sorting
+            $tagObjects = @()
+            foreach ($tag in $allTags) {
+              if ($tag -match '^v(\d{4})\.(\d+)$') {
+                $yymm = [int]$Matches[1]
+                $patch = [int]$Matches[2]
+                $tagObjects += [PSCustomObject]@{
+                  Tag = $tag
+                  YYMM = $yymm
+                  Patch = $patch
+                }
+              }
+            }
+
+            # Sort by YYMM descending, then by Patch descending
+            $sortedTags = $tagObjects | Sort-Object -Property YYMM, Patch -Descending
+
+            # Get the most recent tag (which should be the latest or current)
+            # If we're creating a new version, take the second one
+            # Otherwise take the first one
+            $currentVersionClean = "${{ inputs.current-version }}" -replace '^v', ''
+
+            if ($sortedTags.Count -ge 2) {
+              # Check if the first tag matches current version
+              $firstTag = $sortedTags[0].Tag -replace '^v', ''
+
+              if ($firstTag -eq $currentVersionClean) {
+                # Current version already exists as a tag, use second one
+                $previousTag = $sortedTags[1].Tag
+                Write-Host "Current version already tagged, using second tag: $previousTag"
+              } else {
+                # Current version not yet tagged, use first one
+                $previousTag = $sortedTags[0].Tag
+                Write-Host "Current version not yet tagged, using first tag: $previousTag"
+              }
+            } elseif ($sortedTags.Count -eq 1) {
+              # Only one tag exists, use it
+              $previousTag = $sortedTags[0].Tag
+              Write-Host "Only one stable tag found: $previousTag"
+            } else {
+              Write-Host "⚠️ No stable tags found"
+              $previousTag = ""
+            }
+          }
+
+          if ([string]::IsNullOrEmpty($previousTag)) {
+            Write-Host "⚠️ No previous stable tag found, using empty string"
+            $previousTag = ""
+          } else {
+            Write-Host "✅ Previous stable tag: $previousTag"
+          }
+
+          "previous-tag=$previousTag" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Summary
+        run: |
+          Write-Host "## Previous Tag Search" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Current Version**: ``${{ inputs.current-version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Previous Stable Tag**: ``${{ steps.find.outputs.previous-tag }}``" >> $env:GITHUB_STEP_SUMMARY

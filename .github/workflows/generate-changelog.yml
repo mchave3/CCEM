@@ -1,0 +1,115 @@
+name: 📝 Generate Changelog
+
+on:
+  workflow_call:
+    inputs:
+      from-tag:
+        description: 'Start tag to compare from (e.g., v2509.1)'
+        required: true
+        type: string
+      to-ref:
+        description: 'End ref to compare to (e.g., HEAD or a tag)'
+        required: false
+        type: string
+        default: 'HEAD'
+      repo-owner:
+        description: 'Repository owner'
+        required: true
+        type: string
+      repo-name:
+        description: 'Repository name'
+        required: true
+        type: string
+    outputs:
+      changelog:
+        description: 'Generated changelog in markdown format'
+        value: ${{ jobs.generate.outputs.changelog }}
+
+jobs:
+  generate:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      changelog: ${{ steps.parse.outputs.changelog }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure tags
+        run: git fetch --force --tags
+
+      - name: Parse git log for merged PRs
+        id: parse
+        run: |
+          $fromTag = "${{ inputs.from-tag }}"
+          $toRef = "${{ inputs.to-ref }}"
+          $repoOwner = "${{ inputs.repo-owner }}"
+          $repoName = "${{ inputs.repo-name }}"
+
+          Write-Host "Generating changelog from $fromTag to $toRef"
+
+          # Get all merge commits between tags
+          # GitHub merge commits have format: "Merge pull request #123 from user/branch"
+          $logOutput = git log "$fromTag..$toRef" --merges --pretty=format:"%s|%an|%ae" --first-parent
+
+          if ([string]::IsNullOrEmpty($logOutput)) {
+            Write-Host "No merge commits found between $fromTag and $toRef"
+            $changelog = "_No changes recorded_"
+          } else {
+            $prEntries = @()
+
+            foreach ($line in $logOutput -split "`n") {
+              if ($line -match "Merge pull request #(\d+) from (.+)\|(.+)\|(.+)") {
+                $prNumber = $Matches[1]
+                $branch = $Matches[2]
+                $authorName = $Matches[3]
+                $authorEmail = $Matches[4]
+
+                # Extract username from branch (format: username/branch-name)
+                $username = if ($branch -match "^([^/]+)/") { $Matches[1] } else { $authorName }
+
+                # Get PR title from GitHub API or git log
+                # Try to get the actual PR title from the commit body
+                $prTitle = git log "$fromTag..$toRef" --grep="Merge pull request #$prNumber" --format=%B -n 1 | Select-Object -Skip 2 -First 1
+
+                if ([string]::IsNullOrWhiteSpace($prTitle)) {
+                  $prTitle = "Pull Request #$prNumber"
+                }
+
+                $prTitle = $prTitle.Trim()
+
+                $entry = "* **$prTitle** by [@$username](https://github.com/$username) - [#$prNumber](https://github.com/$repoOwner/$repoName/pull/$prNumber)"
+                $prEntries += $entry
+              }
+            }
+
+            if ($prEntries.Count -eq 0) {
+              $changelog = "_No pull requests found_"
+            } else {
+              $changelog = $prEntries -join "`n"
+            }
+          }
+
+          Write-Host "Generated changelog:"
+          Write-Host $changelog
+
+          # Use multiline output
+          "changelog<<EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          $changelog | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Changelog Summary
+        run: |
+          Write-Host "## Changelog Generated" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **From**: ``${{ inputs.from-tag }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **To**: ``${{ inputs.to-ref }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "### Preview" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "${{ steps.parse.outputs.changelog }}" >> $env:GITHUB_STEP_SUMMARY

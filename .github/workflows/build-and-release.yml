@@ -19,6 +19,31 @@ on:
         description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Beta")
         required: true
         type: string
+      pr-number:
+        description: 'Pull request number (for beta releases)'
+        required: false
+        type: number
+        default: 0
+      pr-title:
+        description: 'Pull request title (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      pr-author:
+        description: 'Pull request author username (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      pr-body:
+        description: 'Pull request body/description (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      pr-url:
+        description: 'Pull request URL (for beta releases)'
+        required: false
+        type: string
+        default: ''
     outputs:
       version:
         description: Short version identifier (YYMM.n or YYMM-Beta.BUILD)
@@ -70,7 +95,16 @@ jobs:
       release-type: ${{ inputs.release-type }}
       source-branch: ${{ inputs.source-branch }}
 
-  # Job 2: Build .NET project
+  # Job 2: Find previous stable tag (for stable releases only)
+  find-previous-tag:
+    name: 🔍 Find Previous Tag
+    needs: calculate-version
+    if: inputs.release-type == 'stable'
+    uses: ./.github/workflows/find-previous-stable-tag.yml
+    with:
+      current-version: ${{ needs.calculate-version.outputs.version }}
+
+  # Job 3: Build .NET project
   build-dotnet:
     name: 🏗️ Build .NET
     needs: calculate-version
@@ -83,7 +117,7 @@ jobs:
       publish-dir: publish
       dotnet-version: 8.0.x
 
-  # Job 3: Package with Velopack
+  # Job 4: Package with Velopack
   package-velopack:
     name: 📦 Package Velopack
     needs: [calculate-version, build-dotnet]
@@ -98,10 +132,11 @@ jobs:
       icon-path: src/CCEM/Assets/AppIcon.ico
       artifact-name: velopack-${{ inputs.release-channel }}-${{ needs.calculate-version.outputs.version }}
 
-  # Job 4: Create GitHub Release
+  # Job 5: Create GitHub Release
   create-release:
     name: 🚀 Create Release
-    needs: [calculate-version, package-velopack]
+    needs: [calculate-version, find-previous-tag, package-velopack]
+    if: always() && needs.calculate-version.result == 'success' && needs.package-velopack.result == 'success'
     uses: ./.github/workflows/create-github-release.yml
     with:
       version: ${{ needs.calculate-version.outputs.version }}
@@ -112,8 +147,13 @@ jobs:
       release-body-template: ${{ inputs.release-type == 'beta' && '.github/workflows/beta-body-template.md' || '.github/workflows/release-body-template.md' }}
       velopack-output-dir: Releases
       msix-dir: ''
+      pr-number: ${{ inputs.pr-number }}
+      pr-title: ${{ inputs.pr-title }}
+      pr-author: ${{ inputs.pr-author }}
+      pr-body: ${{ inputs.pr-body }}
+      previous-stable-tag: ${{ needs.find-previous-tag.outputs.previous-tag || '' }}
 
-  # Job 5: Generate GitHub Summary
+  # Job 6: Generate GitHub Summary
   github-summary:
     name: 📋 Summary
     needs: [calculate-version, create-release]

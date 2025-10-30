@@ -36,6 +36,31 @@ on:
         required: false
         type: string
         default: ''
+      pr-number:
+        description: 'Pull request number (for beta releases)'
+        required: false
+        type: number
+        default: 0
+      pr-title:
+        description: 'Pull request title (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      pr-author:
+        description: 'Pull request author username (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      pr-body:
+        description: 'Pull request body/description (for beta releases)'
+        required: false
+        type: string
+        default: ''
+      previous-stable-tag:
+        description: 'Previous stable tag (for stable releases changelog)'
+        required: false
+        type: string
+        default: ''
     outputs:
       release-url:
         description: 'URL of the created GitHub Release'
@@ -124,23 +149,86 @@ jobs:
           }
 
           $templateContent = Get-Content -Path $templatePath -Raw
-          $notes = ""  # Can be extended to inject custom release notes
-
           $body = $templateContent
 
-          # Remove RELEASE_NOTES placeholder if no notes
-          if ([string]::IsNullOrEmpty($notes)) {
-            $body = $body -replace '\{RELEASE_NOTES\}\r?\n\r?\n',''
-            $body = $body -replace '\{RELEASE_NOTES\}',''
-          } else {
-            $body = $body -replace '\{RELEASE_NOTES\}',$notes
+          # Replace common placeholders
+          $repoFullName = "${{ github.repository }}"
+          $repoParts = $repoFullName -split "/"
+          $repoOwner = $repoParts[0]
+          $repoName = $repoParts[1]
+
+          $body = $body -replace '\{VERSION\}',"${{ inputs.version }}"
+          $body = $body -replace '\{REPO_OWNER\}',$repoOwner
+          $body = $body -replace '\{REPO_NAME\}',$repoName
+
+          # For beta releases: use PR information
+          if ("${{ inputs.is-prerelease }}" -eq "True" -and "${{ inputs.pr-number }}" -ne "0") {
+            Write-Host "Processing beta release with PR information"
+
+            $body = $body -replace '\{PR_TITLE\}',"${{ inputs.pr-title }}"
+            $body = $body -replace '\{PR_AUTHOR\}',"${{ inputs.pr-author }}"
+            $body = $body -replace '\{PR_NUMBER\}',"${{ inputs.pr-number }}"
+            $body = $body -replace '\{PR_REPO_OWNER\}',$repoOwner
+            $body = $body -replace '\{PR_REPO_NAME\}',$repoName
+
+            # Handle PR body (description)
+            $prBody = @"
+          ${{ inputs.pr-body }}
+          "@
+            if ([string]::IsNullOrWhiteSpace($prBody)) {
+              $prBody = "_No description provided_"
+            }
+            $body = $body -replace '\{PR_BODY\}',$prBody
+          }
+
+          # For stable releases: generate changelog
+          if ("${{ inputs.is-prerelease }}" -eq "False" -and "${{ inputs.previous-stable-tag }}" -ne "") {
+            Write-Host "Processing stable release - generating changelog"
+
+            # Get all merge commits since last stable tag
+            $fromTag = "${{ inputs.previous-stable-tag }}"
+            $logOutput = git log "$fromTag..HEAD" --merges --pretty=format:"%s|%an" --first-parent
+
+            $changelog = ""
+            if ([string]::IsNullOrEmpty($logOutput)) {
+              $changelog = "_No changes recorded_"
+            } else {
+              $prEntries = @()
+
+              foreach ($line in $logOutput -split "`n") {
+                if ($line -match "Merge pull request #(\d+) from (.+)\|(.+)") {
+                  $prNumber = $Matches[1]
+                  $branch = $Matches[2]
+                  $authorName = $Matches[3]
+
+                  # Extract username from branch
+                  $username = if ($branch -match "^([^/]+)/") { $Matches[1] } else { $authorName }
+
+                  # Get PR title
+                  $prTitle = git log "$fromTag..HEAD" --grep="Merge pull request #$prNumber" --format=%B -n 1 | Select-Object -Skip 2 -First 1
+                  if ([string]::IsNullOrWhiteSpace($prTitle)) {
+                    $prTitle = "Pull Request #$prNumber"
+                  }
+                  $prTitle = $prTitle.Trim()
+
+                  $entry = "* **$prTitle** by [@$username](https://github.com/$username) - [#$prNumber](https://github.com/$repoOwner/$repoName/pull/$prNumber)"
+                  $prEntries += $entry
+                }
+              }
+
+              if ($prEntries.Count -eq 0) {
+                $changelog = "_No pull requests found_"
+              } else {
+                $changelog = $prEntries -join "`n"
+              }
+            }
+
+            $body = $body -replace '\{CHANGELOG\}',$changelog
+            $body = $body -replace '\{PREVIOUS_TAG\}',"${{ inputs.previous-stable-tag }}"
           }
 
           # Replace FILES_TABLE placeholder
-          $filesTable = @"
-          ${{ steps.files-table.outputs.files_table }}
-          "@
-          $body = $body -replace '\{FILES_TABLE\}',$filesTable
+          $body = $body -replace '\{FILES_TABLE\}',"${{ steps.files-table.outputs.files_table }}"
 
           # Save to file
           $outputPath = "generated-release-body.md"
