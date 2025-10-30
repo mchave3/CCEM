@@ -69,12 +69,12 @@ jobs:
         shell: pwsh
         run: |
           $publishDir = "${{ inputs.publish-dir }}"
-          
+
           if (-not (Test-Path $publishDir)) {
             Write-Host "❌ Publish directory not found: $publishDir"
             exit 1
           }
-          
+
           $fileCount = (Get-ChildItem -Path $publishDir -Recurse -File).Count
           Write-Host "✅ Downloaded $fileCount files to: $publishDir"
 
@@ -83,7 +83,7 @@ jobs:
         run: |
           Write-Host "Checking for vpk tool..."
           $vpkPath = Join-Path $env:USERPROFILE ".dotnet\tools\vpk.exe"
-          
+
           if (-not (Test-Path $vpkPath)) {
             Write-Host "Installing vpk..."
             dotnet tool install --global vpk
@@ -91,25 +91,22 @@ jobs:
             Write-Host "Updating vpk..."
             dotnet tool update --global vpk
           }
-          
+
           # Add to PATH for subsequent steps
           $toolsPath = Join-Path $env:USERPROFILE ".dotnet\tools"
           Write-Host "Adding to PATH: $toolsPath"
           Add-Content -Path $env:GITHUB_PATH -Value $toolsPath
-          
-          # Verify installation
-          & $vpkPath --version
 
       - name: Clean output directory
         shell: pwsh
         run: |
           $outputDir = "${{ inputs.output-dir }}"
-          
+
           if (Test-Path $outputDir) {
             Write-Host "Cleaning existing output directory: $outputDir"
             Remove-Item $outputDir -Recurse -Force
           }
-          
+
           Write-Host "✅ Output directory ready"
 
       - name: Package with Velopack
@@ -120,7 +117,7 @@ jobs:
           Write-Host "  Version: ${{ inputs.version }}"
           Write-Host "  Channel: ${{ inputs.channel }}"
           Write-Host "  Title: ${{ inputs.title }}"
-          
+
           vpk pack `
             -u "${{ inputs.app-id }}" `
             -v "${{ inputs.version }}" `
@@ -129,7 +126,7 @@ jobs:
             -c "${{ inputs.channel }}" `
             --packTitle "${{ inputs.title }}" `
             --icon "${{ inputs.icon-path }}"
-          
+
           if ($LASTEXITCODE -eq 0) {
             Write-Host "✅ Velopack packaging completed successfully"
           } else {
@@ -141,7 +138,7 @@ jobs:
         shell: pwsh
         run: |
           $outputDir = "${{ inputs.output-dir }}"
-          
+
           if (Test-Path $outputDir) {
             Write-Host "## Generated Files" >> $env:GITHUB_STEP_SUMMARY
             Get-ChildItem -Path $outputDir -Recurse -File | ForEach-Object {
