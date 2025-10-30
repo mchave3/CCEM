@@ -108,9 +108,14 @@ jobs:
 
           $collect = @()
 
-          # Collect Velopack files
-          if (Test-Path "downloaded-artifacts") {
-            $collect += Get-ChildItem -Path "downloaded-artifacts" -File -Recurse
+          # This directory contains only the final Velopack packages
+          $velopackDir = "downloaded-artifacts/velopack-releases"
+
+          if (Test-Path $velopackDir) {
+            Write-Host "Collecting files from Velopack output directory: $velopackDir"
+            $collect += Get-ChildItem -Path $velopackDir -File
+          } else {
+            Write-Host "⚠️ Velopack directory not found: $velopackDir"
           }
 
           # Collect MSIX files if directory is specified and exists
@@ -118,11 +123,14 @@ jobs:
             $collect += Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse
           }
 
+          Write-Host "Found $($collect.Count) files for FILES_TABLE"
+
           foreach ($f in ($collect | Sort-Object Name)) {
             $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
             $dl = "https://github.com/$repo/releases/download/${{ inputs.tag-name }}/$($f.Name)"
             $badge = "https://img.shields.io/github/downloads/$repo/${{ inputs.tag-name }}/$($f.Name)?style=flat-square&label=&color=blue"
             $rows += "|[$($f.Name)]($dl)|``$hash``|<picture>![$($f.Name)]($badge)</picture>|"
+            Write-Host "  - $($f.Name)"
           }
 
           $table = @"
