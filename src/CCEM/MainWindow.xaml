@@ -81,7 +81,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <!--  Top Spacer  -->
-                <RowDefination Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <!--  Center Content  -->
                 <RowDefinition Height="*" />
                 <!--  Bottom Spacer  -->
