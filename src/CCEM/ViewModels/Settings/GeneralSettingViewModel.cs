@@ -2,6 +2,7 @@ using System;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using Microsoft.UI.Xaml;
+using Velopack.Locators;
 
 namespace CCEM.ViewModels;
 
@@ -28,7 +29,20 @@ public partial class GeneralSettingViewModel : ObservableObject
             if (SetProperty(ref _isBetaChannelSelected, value))
             {
                 var channel = value ? VelopackChannel.Beta : VelopackChannel.Stable;
-                Settings.UpdateChannel = channel.ToString();
+                var channelName = channel.ToString();
+                Settings.UpdateChannel = channelName;
+
+                var packagedChannelName = VelopackLocator.Current?.Channel;
+                if (!string.IsNullOrWhiteSpace(packagedChannelName) &&
+                    packagedChannelName.Equals(channelName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Settings.IsUpdateChannelOverridden = false;
+                }
+                else
+                {
+                    Settings.IsUpdateChannelOverridden = true;
+                }
+
                 _updateService.SetChannel(channel);
 
                 OnPropertyChanged(nameof(CurrentChannelName));

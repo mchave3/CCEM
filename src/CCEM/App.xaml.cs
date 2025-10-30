@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using CCEM.Services;
 using Velopack;
+using Velopack.Locators;
 
 namespace CCEM;
 
@@ -98,11 +100,7 @@ public partial class App : Application
         {
             // Configure Velopack update service.
             var configuration = new VelopackUpdateConfiguration("https://github.com/mchave3/CCEM");
-            if (!Enum.TryParse(Settings.UpdateChannel, ignoreCase: true, out VelopackChannel channel))
-            {
-                channel = VelopackChannel.Stable;
-                Settings.UpdateChannel = channel.ToString();
-            }
+            var channel = ResolveInitialUpdateChannel();
 
             return new VelopackUpdateService(configuration, initialChannel: channel);
         });
@@ -284,4 +282,66 @@ public partial class App : Application
         });
     }
     #endregion Application Component Loaders
+
+    /// <summary>
+    /// Resolves the initial update channel based on packaged channel and existing settings.
+    /// </summary>
+    /// <returns></returns>
+    private static VelopackChannel ResolveInitialUpdateChannel()
+    {
+        var packagedChannelName = VelopackLocator.Current?.Channel;
+        VelopackChannel? packagedChannel = null;
+
+        if (!string.IsNullOrWhiteSpace(packagedChannelName) &&
+            Enum.TryParse(packagedChannelName, ignoreCase: true, out VelopackChannel parsedPackagedChannel))
+        {
+            packagedChannel = parsedPackagedChannel;
+        }
+
+        var hasExistingSettings = File.Exists(Constants.AppConfigPath);
+
+        if (hasExistingSettings &&
+            Enum.TryParse(Settings.UpdateChannel, ignoreCase: true, out VelopackChannel persistedChannel))
+        {
+            if (packagedChannel.HasValue)
+            {
+                var packagedChannelString = packagedChannel.Value.ToString();
+                var lastInstalledChannel = Settings.LastInstalledChannel;
+                var installerChannelChanged = !string.Equals(
+                    lastInstalledChannel,
+                    packagedChannelString,
+                    StringComparison.OrdinalIgnoreCase);
+
+                if (installerChannelChanged || string.IsNullOrWhiteSpace(lastInstalledChannel))
+                {
+                    Settings.LastInstalledChannel = packagedChannelString;
+                }
+
+                if (installerChannelChanged && !Settings.IsUpdateChannelOverridden)
+                {
+                    Settings.UpdateChannel = packagedChannelString;
+                    Settings.IsUpdateChannelOverridden = false;
+                    return packagedChannel.Value;
+                }
+            }
+
+            return persistedChannel;
+        }
+
+        if (packagedChannel.HasValue)
+        {
+            var packagedChannelString = packagedChannel.Value.ToString();
+            Settings.LastInstalledChannel = packagedChannelString;
+            Settings.IsUpdateChannelOverridden = false;
+            Settings.UpdateChannel = packagedChannelString;
+            return packagedChannel.Value;
+        }
+
+        var fallbackChannel = VelopackChannel.Stable;
+        var fallbackChannelString = fallbackChannel.ToString();
+        Settings.LastInstalledChannel = fallbackChannelString;
+        Settings.IsUpdateChannelOverridden = false;
+        Settings.UpdateChannel = fallbackChannelString;
+        return fallbackChannel;
+    }
 }
