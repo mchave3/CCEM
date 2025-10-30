@@ -1,0 +1,133 @@
+name: 🔢 Calculate Version
+
+on:
+  workflow_call:
+    inputs:
+      release-type:
+        description: 'Versioning scheme (stable | beta)'
+        required: true
+        type: string
+      source-branch:
+        description: 'Git branch to checkout before calculating version'
+        required: true
+        type: string
+    outputs:
+      version:
+        description: 'Short version identifier (YYMM.n or YYMM-Beta.BUILD)'
+        value: ${{ jobs.calculate.outputs.version }}
+      msix-version:
+        description: '4-part MSIX version (e.g., 25.10.1.0 or 25.10.0.7)'
+        value: ${{ jobs.calculate.outputs.msix-version }}
+      tag-name:
+        description: 'Git tag name (e.g., v2510.1 or v2510-Beta.1)'
+        value: ${{ jobs.calculate.outputs.tag-name }}
+      release-name:
+        description: 'GitHub Release name'
+        value: ${{ jobs.calculate.outputs.release-name }}
+      source-commit:
+        description: 'Source commit SHA'
+        value: ${{ jobs.calculate.outputs.source-commit }}
+
+jobs:
+  calculate:
+    name: Calculate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      msix-version: ${{ steps.version.outputs.msix-version }}
+      tag-name: ${{ steps.version.outputs.tag-name }}
+      release-name: ${{ steps.version.outputs.release-name }}
+      source-commit: ${{ steps.version.outputs.source-commit }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source-branch }}
+          fetch-depth: 0
+
+      - name: Ensure tags
+        run: git fetch --force --tags
+
+      - name: Calculate SemVer version
+        id: version
+        shell: pwsh
+        run: |
+          $releaseType = "${{ inputs.release-type }}".ToLowerInvariant()
+          $now = [DateTime]::UtcNow
+          $yy = $now.ToString("yy")
+          $MM = $now.ToString("MM")
+          $yymm = "$yy$MM"
+
+          $tags = git tag
+
+          if ($releaseType -eq "stable") {
+            # Pattern: v2510.1, v2510.2, etc.
+            $pattern = "^v$yymm\.(\d+)$"
+            $maxPatch = 0
+            foreach ($t in $tags) {
+              if ($t -match $pattern) {
+                $maxPatch = [Math]::Max($maxPatch, [int]$Matches[1])
+              }
+            }
+            $patch = $maxPatch + 1
+            $version     = "{0}.{1}" -f $yymm, $patch                 # 2510.1
+            $msixVersion = "{0}.{1}.{2}.0" -f $yy, $MM, $patch        # 25.10.1.0
+          } else {
+            # Beta: find latest stable tag to get YYMM reference
+            $stablePattern = "^v(\d{4})\.(\d+)$"
+            $latestStableYYMM = $null
+            $latestStableDate = [DateTime]::MinValue
+
+            foreach ($t in $tags) {
+              if ($t -match $stablePattern) {
+                $tagYYMM = $Matches[1]
+                $tagYY = $tagYYMM.Substring(0,2)
+                $tagMM = $tagYYMM.Substring(2,2)
+                try {
+                  $tagDate = [DateTime]::ParseExact("20$tagYY-$tagMM-01", "yyyy-MM-dd", $null)
+                  if ($tagDate -gt $latestStableDate) {
+                    $latestStableDate = $tagDate
+                    $latestStableYYMM = $tagYYMM
+                  }
+                } catch { }
+              }
+            }
+
+            # If no stable found, use current YYMM
+            if (-not $latestStableYYMM) {
+              $latestStableYYMM = $yymm
+            }
+
+            # Extract YY and MM from latest stable YYMM
+            $refYY = $latestStableYYMM.Substring(0,2)
+            $refMM = $latestStableYYMM.Substring(2,2)
+
+            # Pattern: v2510-Beta.1, v2510-Beta.2, etc.
+            $betaPattern = "^v$latestStableYYMM-Beta\.(\d+)$"
+            $maxBuild = 0
+            foreach ($t in $tags) {
+              if ($t -match $betaPattern) {
+                $maxBuild = [Math]::Max($maxBuild, [int]$Matches[1])
+              }
+            }
+            $build = $maxBuild + 1
+            $version     = "{0}-Beta.{1}" -f $latestStableYYMM, $build           # 2510-Beta.1
+            $msixVersion = "{0}.{1}.0.{2}" -f $refYY, $refMM, $build             # 25.10.0.1
+          }
+
+          "version=$version"           | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "msix-version=$msixVersion"  | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag-name=v$version"         | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "release-name=$version"      | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "source-commit=$(git rev-parse HEAD)" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Version Summary
+        shell: pwsh
+        run: |
+          Write-Host "## Version Calculation" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Type**: ${{ inputs.release-type }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Version**: ``${{ steps.version.outputs.version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **MSIX**: ``${{ steps.version.outputs.msix-version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Tag**: ``${{ steps.version.outputs.tag-name }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Commit**: ``${{ steps.version.outputs.source-commit }}``" >> $env:GITHUB_STEP_SUMMARY

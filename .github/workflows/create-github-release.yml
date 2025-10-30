@@ -1,0 +1,205 @@
+name: 🚀 Create GitHub Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        required: true
+        type: string
+      tag-name:
+        description: 'Git tag name (e.g., v2510.1)'
+        required: true
+        type: string
+      release-name:
+        description: 'GitHub Release name'
+        required: true
+        type: string
+      source-commit:
+        description: 'Source commit SHA to tag'
+        required: true
+        type: string
+      is-prerelease:
+        description: 'Whether this is a prerelease (beta)'
+        required: true
+        type: boolean
+      release-body-template:
+        description: 'Path to release body template (markdown file)'
+        required: true
+        type: string
+      velopack-output-dir:
+        description: 'Directory containing Velopack releases'
+        required: true
+        type: string
+      msix-dir:
+        description: 'Directory containing MSIX files (optional)'
+        required: false
+        type: string
+        default: ''
+    outputs:
+      release-url:
+        description: 'URL of the created GitHub Release'
+        value: ${{ jobs.release.outputs.release-url }}
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      release-url: ${{ steps.release-url.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Velopack artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-artifacts
+
+      - name: List downloaded artifacts
+        shell: pwsh
+        run: |
+          Write-Host "## Downloaded Artifacts" >> $env:GITHUB_STEP_SUMMARY
+          if (Test-Path "downloaded-artifacts") {
+            Get-ChildItem -Path "downloaded-artifacts" -Recurse -File | ForEach-Object {
+              Write-Host "* ``$($_.FullName)``" >> $env:GITHUB_STEP_SUMMARY
+            }
+          }
+
+      - name: Calculate hashes & generate FILES_TABLE
+        id: files-table
+        shell: pwsh
+        run: |
+          $repo = "${{ github.repository }}"
+          $ver = "${{ inputs.version }}"
+          $rows = @()
+
+          $collect = @()
+          
+          # Collect Velopack files
+          if (Test-Path "downloaded-artifacts") {
+            $collect += Get-ChildItem -Path "downloaded-artifacts" -File -Recurse
+          }
+          
+          # Collect MSIX files if directory is specified and exists
+          if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
+            $collect += Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse
+          }
+
+          foreach ($f in ($collect | Sort-Object Name)) {
+            $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+            $dl = "https://github.com/$repo/releases/download/${{ inputs.tag-name }}/$($f.Name)"
+            $badge = "https://img.shields.io/github/downloads/$repo/${{ inputs.tag-name }}/$($f.Name)?style=flat-square&label=&color=blue"
+            $rows += "|[$($f.Name)]($dl)|``$hash``|<picture>![$($f.Name)]($badge)</picture>|"
+          }
+
+          $table = @"
+          ## Files
+          |Files|Hash (SHA256)|Downloads|
+          |---|---|---|
+          $($rows -join "`n")
+          "@
+
+          # Use multiline output
+          "files_table<<EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          $table | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Generate release body from template
+        id: release-body
+        shell: pwsh
+        run: |
+          $templatePath = "${{ inputs.release-body-template }}"
+          
+          if (-not (Test-Path $templatePath)) {
+            Write-Host "❌ Release body template not found: $templatePath"
+            exit 1
+          }
+          
+          $templateContent = Get-Content -Path $templatePath -Raw
+          $notes = ""  # Can be extended to inject custom release notes
+          
+          $body = $templateContent
+          
+          # Remove RELEASE_NOTES placeholder if no notes
+          if ([string]::IsNullOrEmpty($notes)) {
+            $body = $body -replace '\{RELEASE_NOTES\}\r?\n\r?\n',''
+            $body = $body -replace '\{RELEASE_NOTES\}',''
+          } else {
+            $body = $body -replace '\{RELEASE_NOTES\}',$notes
+          }
+          
+          # Replace FILES_TABLE placeholder
+          $filesTable = @"
+          ${{ steps.files-table.outputs.files_table }}
+          "@
+          $body = $body -replace '\{FILES_TABLE\}',$filesTable
+          
+          # Save to file
+          $outputPath = "generated-release-body.md"
+          $body | Out-File -FilePath $outputPath -Encoding UTF8 -NoNewline
+          
+          Write-Host "✅ Release body generated successfully"
+          
+          "body_path=$outputPath" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Prepare release files
+        id: prepare-files
+        shell: pwsh
+        run: |
+          # Create a staging directory for all release files
+          $stagingDir = "release-staging"
+          New-Item -ItemType Directory -Force -Path $stagingDir | Out-Null
+          
+          # Copy Velopack files
+          if (Test-Path "downloaded-artifacts") {
+            Get-ChildItem -Path "downloaded-artifacts" -File -Recurse | ForEach-Object {
+              Copy-Item $_.FullName -Destination $stagingDir -Force
+              Write-Host "Copied: $($_.Name)"
+            }
+          }
+          
+          # Copy MSIX files if available
+          if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
+            Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse | ForEach-Object {
+              Copy-Item $_.FullName -Destination $stagingDir -Force
+              Write-Host "Copied: $($_.Name)"
+            }
+          }
+          
+          "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Create Git tag & GitHub Release
+        id: gh-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag-name }}
+          name: ${{ inputs.release-name }}
+          target_commitish: ${{ inputs.source-commit }}
+          prerelease: ${{ inputs.is-prerelease }}
+          files: ${{ steps.prepare-files.outputs.staging-dir }}/*
+          body_path: ${{ steps.release-body.outputs.body_path }}
+
+      - name: Calculate release URL
+        id: release-url
+        shell: pwsh
+        run: |
+          $url = "https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag-name }}"
+          "url=$url" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Release URL: $url"
+
+      - name: Release Summary
+        shell: pwsh
+        run: |
+          Write-Host "## Release Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Version**: ``${{ inputs.version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Tag**: ``${{ inputs.tag-name }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Prerelease**: ``${{ inputs.is-prerelease }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Release URL**: ${{ steps.release-url.outputs.url }}" >> $env:GITHUB_STEP_SUMMARY

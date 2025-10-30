@@ -1,0 +1,70 @@
+name: 📋 GitHub Summary
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        required: true
+        type: string
+      msix-version:
+        description: '4-part MSIX version (e.g., 25.10.1.0)'
+        required: true
+        type: string
+      tag-name:
+        description: 'Git tag name (e.g., v2510.1)'
+        required: true
+        type: string
+      release-channel:
+        description: 'Release channel (stable or beta)'
+        required: true
+        type: string
+      release-url:
+        description: 'URL of the GitHub Release'
+        required: true
+        type: string
+      source-commit:
+        description: 'Source commit SHA'
+        required: true
+        type: string
+
+jobs:
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate comprehensive summary
+        shell: bash
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          # 🎉 Release Summary
+
+          ## 📦 Release Information
+          | Property | Value |
+          |----------|-------|
+          | **Version** | `${{ inputs.version }}` |
+          | **MSIX Version** | `${{ inputs.msix-version }}` |
+          | **Tag** | `${{ inputs.tag-name }}` |
+          | **Channel** | `${{ inputs.release-channel }}` |
+          | **Commit** | `${{ inputs.source-commit }}` |
+
+          ## 🔗 Links
+          * **Release Page**: ${{ inputs.release-url }}
+          * **Repository**: https://github.com/${{ github.repository }}
+          * **Workflow Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ## ✅ Workflow Status
+          All steps completed successfully! 🚀
+
+          ---
+          *Generated on $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+          EOF
+
+      - name: Create job summary badge
+        shell: bash
+        run: |
+          echo "## 🏆 Build Badges" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "![Version](https://img.shields.io/badge/version-${{ inputs.version }}-blue?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY
+          echo "![Channel](https://img.shields.io/badge/channel-${{ inputs.release-channel }}-green?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY
+          echo "![Status](https://img.shields.io/badge/status-released-success?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY

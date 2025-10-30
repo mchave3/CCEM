@@ -1,0 +1,169 @@
+name: 📦 Package with Velopack
+
+on:
+  workflow_call:
+    inputs:
+      app-id:
+        description: 'Velopack application ID'
+        required: true
+        type: string
+      version:
+        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        required: true
+        type: string
+      publish-dir:
+        description: 'Directory containing published files'
+        required: true
+        type: string
+      output-dir:
+        description: 'Output directory for Velopack releases'
+        required: true
+        type: string
+      channel:
+        description: 'Release channel (stable or beta)'
+        required: true
+        type: string
+      title:
+        description: 'Application title'
+        required: true
+        type: string
+      icon-path:
+        description: 'Path to application icon'
+        required: true
+        type: string
+      artifact-name:
+        description: 'Name for the uploaded artifact'
+        required: false
+        type: string
+        default: 'velopack-releases'
+    outputs:
+      output-dir:
+        description: 'Directory containing Velopack releases'
+        value: ${{ jobs.package.outputs.output-dir }}
+      artifact-name:
+        description: 'Name of the uploaded artifact'
+        value: ${{ jobs.package.outputs.artifact-name }}
+
+jobs:
+  package:
+    name: Package
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      output-dir: ${{ inputs.output-dir }}
+      artifact-name: ${{ inputs.artifact-name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download publish artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dotnet-publish
+          path: ${{ inputs.publish-dir }}
+
+      - name: Validate downloaded artifacts
+        shell: pwsh
+        run: |
+          $publishDir = "${{ inputs.publish-dir }}"
+          
+          if (-not (Test-Path $publishDir)) {
+            Write-Host "❌ Publish directory not found: $publishDir"
+            exit 1
+          }
+          
+          $fileCount = (Get-ChildItem -Path $publishDir -Recurse -File).Count
+          Write-Host "✅ Downloaded $fileCount files to: $publishDir"
+
+      - name: Install/Update Velopack (vpk)
+        shell: pwsh
+        run: |
+          Write-Host "Checking for vpk tool..."
+          $vpkPath = Join-Path $env:USERPROFILE ".dotnet\tools\vpk.exe"
+          
+          if (-not (Test-Path $vpkPath)) {
+            Write-Host "Installing vpk..."
+            dotnet tool install --global vpk
+          } else {
+            Write-Host "Updating vpk..."
+            dotnet tool update --global vpk
+          }
+          
+          # Add to PATH for subsequent steps
+          $toolsPath = Join-Path $env:USERPROFILE ".dotnet\tools"
+          Write-Host "Adding to PATH: $toolsPath"
+          Add-Content -Path $env:GITHUB_PATH -Value $toolsPath
+          
+          # Verify installation
+          & $vpkPath --version
+
+      - name: Clean output directory
+        shell: pwsh
+        run: |
+          $outputDir = "${{ inputs.output-dir }}"
+          
+          if (Test-Path $outputDir) {
+            Write-Host "Cleaning existing output directory: $outputDir"
+            Remove-Item $outputDir -Recurse -Force
+          }
+          
+          Write-Host "✅ Output directory ready"
+
+      - name: Package with Velopack
+        shell: pwsh
+        run: |
+          Write-Host "Packaging with Velopack..."
+          Write-Host "  App ID: ${{ inputs.app-id }}"
+          Write-Host "  Version: ${{ inputs.version }}"
+          Write-Host "  Channel: ${{ inputs.channel }}"
+          Write-Host "  Title: ${{ inputs.title }}"
+          
+          vpk pack `
+            -u "${{ inputs.app-id }}" `
+            -v "${{ inputs.version }}" `
+            -p "${{ inputs.publish-dir }}" `
+            -o "${{ inputs.output-dir }}" `
+            -c "${{ inputs.channel }}" `
+            --packTitle "${{ inputs.title }}" `
+            --icon "${{ inputs.icon-path }}"
+          
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Velopack packaging completed successfully"
+          } else {
+            Write-Host "❌ Velopack packaging failed with exit code: $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+
+      - name: List generated files
+        shell: pwsh
+        run: |
+          $outputDir = "${{ inputs.output-dir }}"
+          
+          if (Test-Path $outputDir) {
+            Write-Host "## Generated Files" >> $env:GITHUB_STEP_SUMMARY
+            Get-ChildItem -Path $outputDir -Recurse -File | ForEach-Object {
+              $size = [math]::Round($_.Length / 1MB, 2)
+              Write-Host "* ``$($_.Name)`` - $size MB" >> $env:GITHUB_STEP_SUMMARY
+            }
+          }
+
+      - name: Upload Velopack artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.output-dir }}/**
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Package Summary
+        shell: pwsh
+        run: |
+          Write-Host "## Package Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Version**: ``${{ inputs.version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Channel**: ``${{ inputs.channel }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Output**: ``${{ inputs.output-dir }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Artifact**: ``${{ inputs.artifact-name }}``" >> $env:GITHUB_STEP_SUMMARY

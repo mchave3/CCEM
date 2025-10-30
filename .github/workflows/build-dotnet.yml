@@ -1,0 +1,157 @@
+name: 🏗️ Build .NET Project
+
+on:
+  workflow_call:
+    inputs:
+      project-path:
+        description: 'Path to the .csproj file'
+        required: true
+        type: string
+      msix-version:
+        description: '4-part MSIX version (e.g., 25.10.1.0)'
+        required: true
+        type: string
+      manifest-path:
+        description: 'Path to Package.appxmanifest'
+        required: true
+        type: string
+      shared-assembly-info-path:
+        description: 'Path to SharedAssemblyInfo.cs'
+        required: true
+        type: string
+      publish-dir:
+        description: 'Output directory for published files'
+        required: true
+        type: string
+      dotnet-version:
+        description: '.NET SDK version'
+        required: false
+        type: string
+        default: '8.0.x'
+    outputs:
+      publish-dir:
+        description: 'Directory containing published files'
+        value: ${{ jobs.build.outputs.publish-dir }}
+
+jobs:
+  build:
+    name: Build & Publish
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    outputs:
+      publish-dir: ${{ inputs.publish-dir }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Update version in AppxManifest
+        shell: pwsh
+        run: |
+          $msixVersion = "${{ inputs.msix-version }}"
+          $manifestPath = "${{ inputs.manifest-path }}"
+
+          if (Test-Path $manifestPath) {
+            Write-Host "Updating AppxManifest version to $msixVersion"
+            [xml]$manifest = Get-Content $manifestPath
+            $manifest.Package.Identity.Version = $msixVersion
+            $manifest.Save((Resolve-Path $manifestPath))
+            Write-Host "✅ AppxManifest updated successfully"
+          } else {
+            Write-Host "⚠️ Manifest not found at: $manifestPath"
+          }
+
+      - name: Update version in SharedAssemblyInfo.cs
+        shell: pwsh
+        run: |
+          $msixVersion = "${{ inputs.msix-version }}"
+          $assemblyInfoPath = "${{ inputs.shared-assembly-info-path }}"
+
+          if (Test-Path $assemblyInfoPath) {
+            Write-Host "Updating SharedAssemblyInfo.cs version to $msixVersion"
+            $path = Resolve-Path $assemblyInfoPath
+            $content = Get-Content $path -Raw
+            $content = [regex]::Replace($content,'AssemblyVersion\(".*?"\)',"AssemblyVersion(`"$msixVersion`")")
+            $content = [regex]::Replace($content,'AssemblyFileVersion\(".*?"\)',"AssemblyFileVersion(`"$msixVersion`")")
+            $content = [regex]::Replace($content,'AssemblyInformationalVersion\(".*?"\)',"AssemblyInformationalVersion(`"$msixVersion`")")
+            Set-Content $path $content -Encoding utf8
+            Write-Host "✅ SharedAssemblyInfo.cs updated successfully"
+          } else {
+            Write-Host "⚠️ SharedAssemblyInfo.cs not found at: $assemblyInfoPath"
+          }
+
+      - name: Publish (unpackaged) for Velopack
+        shell: pwsh
+        run: |
+          $publishDir = "${{ inputs.publish-dir }}"
+          $projectPath = "${{ inputs.project-path }}"
+
+          if (Test-Path $publishDir) { 
+            Write-Host "Cleaning existing publish directory..."
+            Remove-Item $publishDir -Recurse -Force 
+          }
+
+          Write-Host "Publishing project to $publishDir..."
+          dotnet publish $projectPath `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -o $publishDir
+
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Project published successfully"
+          } else {
+            Write-Host "❌ Publish failed with exit code: $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+
+      - name: List published files
+        shell: pwsh
+        run: |
+          $publishDir = "${{ inputs.publish-dir }}"
+          
+          if (Test-Path $publishDir) {
+            Write-Host "## Published Files" >> $env:GITHUB_STEP_SUMMARY
+            $fileCount = (Get-ChildItem -Path $publishDir -Recurse -File).Count
+            $totalSize = [math]::Round((Get-ChildItem -Path $publishDir -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB, 2)
+            Write-Host "* **Total Files**: $fileCount" >> $env:GITHUB_STEP_SUMMARY
+            Write-Host "* **Total Size**: $totalSize MB" >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-publish
+          path: ${{ inputs.publish-dir }}/**
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Build Summary
+        shell: pwsh
+        run: |
+          Write-Host "## Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **MSIX Version**: ``${{ inputs.msix-version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Project**: ``${{ inputs.project-path }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Publish Directory**: ``${{ inputs.publish-dir }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **.NET SDK**: ``${{ inputs.dotnet-version }}``" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "* **Artifact**: ``dotnet-publish``" >> $env:GITHUB_STEP_SUMMARY
