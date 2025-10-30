@@ -1,0 +1,27 @@
+name: 🧪 Build Beta
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-beta
+  cancel-in-progress: false
+
+jobs:
+  beta:
+    name: Beta
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/build-and-release.yml
+    with:
+      source-branch: develop
+      release-channel: beta
+      release-type: beta
+      release-title-prefix: 'CCEM Beta'
+    secrets: inherit

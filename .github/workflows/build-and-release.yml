@@ -8,20 +8,20 @@ on:
         required: true
         type: string
       release-channel:
-        description: Velopack channel name (stable or nightly)
+        description: Velopack channel name (stable or beta)
         required: true
         type: string
       release-type:
-        description: Versioning scheme (stable | nightly)
+        description: Versioning scheme (stable | beta)
         required: true
         type: string
       release-title-prefix:
-        description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Nightly")
+        description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Beta")
         required: true
         type: string
     outputs:
       version:
-        description: Short version identifier (YYMM.n or YYMM-BUILD)
+        description: Short version identifier (YYMM.n or YYMM-Beta.BUILD)
         value: ${{ jobs.build.outputs.version }}
       msix-version:
         description: 4-part MSIX version (e.g., 25.10.1.0 or 25.10.0.7)
@@ -35,10 +35,6 @@ on:
 
 permissions:
   contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ inputs.release-type }}
-  cancel-in-progress: true
 
 env:
   # Tooling
@@ -62,7 +58,7 @@ env:
   VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
 
   # Release body templates (chemin racine du repo)
-  RELEASE_BODY_NIGHTLY_TEMPLATE: .github/workflows/nightly-body-template.md
+  RELEASE_BODY_BETA_TEMPLATE: .github/workflows/beta-body-template.md
   RELEASE_BODY_STABLE_TEMPLATE: .github/workflows/release-body-template.md
 
 jobs:
@@ -113,13 +109,15 @@ jobs:
         run: |
           $releaseType = "${{ inputs.release-type }}".ToLowerInvariant()
           $now = [DateTime]::UtcNow
-          $yy = $now.ToString("yy")   # major
-          $MM = $now.ToString("MM")   # minor
+          $yy = $now.ToString("yy")
+          $MM = $now.ToString("MM")
+          $yymm = "$yy$MM"
 
           $tags = git tag
 
           if ($releaseType -eq "stable") {
-            $pattern = "^v$yy\.$MM\.(\d+)$"
+            # Pattern: v2510.1, v2510.2, etc.
+            $pattern = "^v$yymm\.(\d+)$"
             $maxPatch = 0
             foreach ($t in $tags) {
               if ($t -match $pattern) {
@@ -127,20 +125,49 @@ jobs:
               }
             }
             $patch = $maxPatch + 1
-            $version     = "{0}.{1}.{2}" -f $yy, $MM, $patch          # 25.10.1
+            $version     = "{0}.{1}" -f $yymm, $patch                 # 2510.1
             $msixVersion = "{0}.{1}.{2}.0" -f $yy, $MM, $patch        # 25.10.1.0
           } else {
-            $patch = 0
-            $pattern = "^v$yy\.$MM\.$patch-nightly\.(\d+)$"
+            # Beta: find latest stable tag to get YYMM reference
+            $stablePattern = "^v(\d{4})\.(\d+)$"
+            $latestStableYYMM = $null
+            $latestStableDate = [DateTime]::MinValue
+
+            foreach ($t in $tags) {
+              if ($t -match $stablePattern) {
+                $tagYYMM = $Matches[1]
+                $tagYY = $tagYYMM.Substring(0,2)
+                $tagMM = $tagYYMM.Substring(2,2)
+                try {
+                  $tagDate = [DateTime]::ParseExact("20$tagYY-$tagMM-01", "yyyy-MM-dd", $null)
+                  if ($tagDate -gt $latestStableDate) {
+                    $latestStableDate = $tagDate
+                    $latestStableYYMM = $tagYYMM
+                  }
+                } catch { }
+              }
+            }
+
+            # If no stable found, use current YYMM
+            if (-not $latestStableYYMM) {
+              $latestStableYYMM = $yymm
+            }
+
+            # Extract YY and MM from latest stable YYMM
+            $refYY = $latestStableYYMM.Substring(0,2)
+            $refMM = $latestStableYYMM.Substring(2,2)
+
+            # Pattern: v2510-Beta.1, v2510-Beta.2, etc.
+            $betaPattern = "^v$latestStableYYMM-Beta\.(\d+)$"
             $maxBuild = 0
             foreach ($t in $tags) {
-              if ($t -match $pattern) {
+              if ($t -match $betaPattern) {
                 $maxBuild = [Math]::Max($maxBuild, [int]$Matches[1])
               }
             }
             $build = $maxBuild + 1
-            $version     = "{0}.{1}.{2}-nightly.{3}" -f $yy, $MM, $patch, $build  # 25.10.0-nightly.3
-            $msixVersion = "{0}.{1}.{2}.{3}" -f $yy, $MM, $patch, $build          # 25.10.0.3
+            $version     = "{0}-Beta.{1}" -f $latestStableYYMM, $build           # 2510-Beta.1
+            $msixVersion = "{0}.{1}.0.{2}" -f $refYY, $refMM, $build             # 25.10.0.1
           }
 
           "version=$version"           | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -167,10 +194,6 @@ jobs:
             $c = [regex]::Replace($c,'AssemblyInformationalVersion\(".*?"\)',"AssemblyInformationalVersion(`"$msixVersion`")")
             Set-Content $p $c -Encoding utf8
           }
-
-      - name: Build
-        run: |
-          dotnet build $env:PROJECT_PATH -c Release -r win-x64 -p:Platform=x64
 
       - name: Publish (unpackaged) for Velopack
         run: |
@@ -271,8 +294,8 @@ jobs:
         id: release-body
         shell: pwsh
         run: |
-          $isNightly = ("${{ inputs.release-type }}" -eq "nightly")
-          $tpl = if ($isNightly) { $env:RELEASE_BODY_NIGHTLY_TEMPLATE } else { $env:RELEASE_BODY_STABLE_TEMPLATE }
+          $isBeta = ("${{ inputs.release-type }}" -eq "beta")
+          $tpl = if ($isBeta) { $env:RELEASE_BODY_BETA_TEMPLATE } else { $env:RELEASE_BODY_STABLE_TEMPLATE }
           $tplContent = Get-Content -Path $tpl -Raw
           $notes = ""  # inject notes if needed
           $body = $tplContent
@@ -295,7 +318,7 @@ jobs:
           tag_name: ${{ steps.calculate-version.outputs.tag-name }}
           name: ${{ steps.calculate-version.outputs.release-name }}
           target_commitish: ${{ steps.calculate-version.outputs.source-commit }}
-          prerelease: ${{ inputs.release-type == 'nightly' }}
+          prerelease: ${{ inputs.release-type == 'beta' }}
           files: |
             ${{ env.VELOPACK_OUTPUT_DIR }}/**
             ${{ env.MSIX_DIR }}/**

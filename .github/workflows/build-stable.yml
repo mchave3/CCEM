@@ -6,6 +6,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: build-stable
+  cancel-in-progress: false
+
 jobs:
   stable:
     name: Stable

@@ -32,9 +32,9 @@ public sealed class VelopackUpdateServiceTests
     {
         var service = CreateService();
 
-        service.SetChannel(VelopackChannel.Nightly);
+        service.SetChannel(VelopackChannel.Beta);
 
-        Assert.Equal(VelopackChannel.Nightly, service.CurrentChannel);
+        Assert.Equal(VelopackChannel.Beta, service.CurrentChannel);
     }
 
     [Fact]
@@ -52,10 +52,10 @@ public sealed class VelopackUpdateServiceTests
     }
 
     [Fact]
-    public void CreateManager_ConfiguresNightlyChannelAndPrerelease()
+    public void CreateManager_ConfiguresBetaChannelAndPrerelease()
     {
         var service = CreateService();
-        service.SetChannel(VelopackChannel.Nightly);
+        service.SetChannel(VelopackChannel.Beta);
 
         var manager = InvokeCreateManager(service);
         var source = GetGithubSource(manager);
@@ -63,7 +63,7 @@ public sealed class VelopackUpdateServiceTests
         var allowDowngrade = GetMemberValue<bool>(manager, "ShouldAllowVersionDowngrade");
 
         Assert.True(allowDowngrade);
-        Assert.Equal("nightly", channel);
+        Assert.Equal("beta", channel);
         Assert.True(source.Prerelease);
     }
 

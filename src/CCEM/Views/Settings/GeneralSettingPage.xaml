@@ -28,12 +28,12 @@
             <controls:SettingsCard Header="Update channel"
                                    HeaderIcon="{ui:FontIcon Glyph=&#xE8AB;}">
                 <StackPanel Spacing="8">
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsNightlyChannelSelected, Mode=TwoWay}"
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsBetaChannelSelected, Mode=TwoWay}"
                                   OffContent="Stable builds"
-                                  OnContent="Nightly builds"
-                                  ToolTipService.ToolTip="Nightly builds include the latest changes but may be less stable." />
+                                  OnContent="Beta builds"
+                                  ToolTipService.ToolTip="Beta builds include the latest changes but may be less stable." />
                     <TextBlock Style="{StaticResource SecondaryTextStyle}"
-                               Text="Switch to nightly builds to receive pre-release updates distributed as GitHub pre-releases." />
+                               Text="Switch to beta builds to receive pre-release updates distributed as GitHub pre-releases." />
                     <TextBlock Style="{StaticResource SecondaryTextStyle}"
                                Text="{x:Bind ViewModel.ChannelDisplayText, Mode=OneWay}" />
                     <TextBlock FontStyle="Italic"

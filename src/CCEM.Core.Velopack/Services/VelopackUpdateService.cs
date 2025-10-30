@@ -258,7 +258,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
         VelopackUpdateConfiguration configuration,
         VelopackChannel channel)
     {
-        var includePrerelease = channel == VelopackChannel.Nightly;
+        var includePrerelease = channel == VelopackChannel.Beta;
 
         var source = new GithubSource(
             configuration.RepositoryUrl,
@@ -271,7 +271,7 @@ public sealed class VelopackUpdateService : IVelopackUpdateService
             ExplicitChannel = channel switch
             {
                 VelopackChannel.Stable => "stable",
-                VelopackChannel.Nightly => "nightly",
+                VelopackChannel.Beta => "beta",
                 _ => null
             },
             AllowVersionDowngrade = true

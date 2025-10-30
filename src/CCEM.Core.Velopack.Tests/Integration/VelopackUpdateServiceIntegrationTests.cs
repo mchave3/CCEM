@@ -105,7 +105,7 @@ public sealed class VelopackUpdateServiceIntegrationTests : IDisposable
                     ExplicitChannel = channel switch
                     {
                         VelopackChannel.Stable => "stable",
-                        VelopackChannel.Nightly => "nightly",
+                        VelopackChannel.Beta => "beta",
                         _ => null
                     },
                     AllowVersionDowngrade = true

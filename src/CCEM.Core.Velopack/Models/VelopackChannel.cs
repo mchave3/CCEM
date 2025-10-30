@@ -11,7 +11,7 @@ public enum VelopackChannel
     Stable,
 
     /// <summary>
-    /// Represents the nightly release stream with the latest changes.
+    /// Represents the beta release stream with the latest changes.
     /// </summary>
-    Nightly
+    Beta
 }

@@ -1,8 +1,8 @@
 <div align="center">
 
-## 🌙 Nightly Build Available
+## 🧪 Beta Build Available
 
-⚠️ **Warning**: This is an automated nightly build and may contain unstable features or bugs.
+⚠️ **Warning**: This is a beta build and may contain unstable features or bugs.
 
 ## 📦 Available Downloads
 

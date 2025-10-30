@@ -8,26 +8,26 @@ namespace CCEM.ViewModels;
 public partial class GeneralSettingViewModel : ObservableObject
 {
     private readonly IVelopackUpdateService _updateService;
-    private readonly bool _initialNightlySelection;
-    private bool _isNightlyChannelSelected;
+    private readonly bool _initialBetaSelection;
+    private bool _isBetaChannelSelected;
 
     public GeneralSettingViewModel(IVelopackUpdateService updateService)
     {
         _updateService = updateService ?? throw new ArgumentNullException(nameof(updateService));
 
-        _isNightlyChannelSelected = GetChannelFromSettings() == VelopackChannel.Nightly;
-        _initialNightlySelection = _isNightlyChannelSelected;
-        _updateService.SetChannel(_isNightlyChannelSelected ? VelopackChannel.Nightly : VelopackChannel.Stable);
+        _isBetaChannelSelected = GetChannelFromSettings() == VelopackChannel.Beta;
+        _initialBetaSelection = _isBetaChannelSelected;
+        _updateService.SetChannel(_isBetaChannelSelected ? VelopackChannel.Beta : VelopackChannel.Stable);
     }
 
-    public bool IsNightlyChannelSelected
+    public bool IsBetaChannelSelected
     {
-        get => _isNightlyChannelSelected;
+        get => _isBetaChannelSelected;
         set
         {
-            if (SetProperty(ref _isNightlyChannelSelected, value))
+            if (SetProperty(ref _isBetaChannelSelected, value))
             {
-                var channel = value ? VelopackChannel.Nightly : VelopackChannel.Stable;
+                var channel = value ? VelopackChannel.Beta : VelopackChannel.Stable;
                 Settings.UpdateChannel = channel.ToString();
                 _updateService.SetChannel(channel);
 
@@ -39,9 +39,9 @@ public partial class GeneralSettingViewModel : ObservableObject
         }
     }
 
-    public string CurrentChannelName => _isNightlyChannelSelected ? "Nightly" : "Stable";
+    public string CurrentChannelName => _isBetaChannelSelected ? "Beta" : "Stable";
     public string ChannelDisplayText => $"Current channel: {CurrentChannelName}";
-    public bool IsRestartRequired => _isNightlyChannelSelected != _initialNightlySelection;
+    public bool IsRestartRequired => _isBetaChannelSelected != _initialBetaSelection;
     public Visibility RestartWarningVisibility => IsRestartRequired ? Visibility.Visible : Visibility.Collapsed;
 
     private static VelopackChannel GetChannelFromSettings()
