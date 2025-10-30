@@ -47,7 +47,7 @@ permissions:
 jobs:
   release:
     name: Create Release
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: pwsh
@@ -82,12 +82,12 @@ jobs:
           $rows = @()
 
           $collect = @()
-          
+
           # Collect Velopack files
           if (Test-Path "downloaded-artifacts") {
             $collect += Get-ChildItem -Path "downloaded-artifacts" -File -Recurse
           }
-          
+
           # Collect MSIX files if directory is specified and exists
           if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
             $collect += Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse
@@ -117,17 +117,17 @@ jobs:
         shell: pwsh
         run: |
           $templatePath = "${{ inputs.release-body-template }}"
-          
+
           if (-not (Test-Path $templatePath)) {
             Write-Host "❌ Release body template not found: $templatePath"
             exit 1
           }
-          
+
           $templateContent = Get-Content -Path $templatePath -Raw
           $notes = ""  # Can be extended to inject custom release notes
-          
+
           $body = $templateContent
-          
+
           # Remove RELEASE_NOTES placeholder if no notes
           if ([string]::IsNullOrEmpty($notes)) {
             $body = $body -replace '\{RELEASE_NOTES\}\r?\n\r?\n',''
@@ -135,19 +135,19 @@ jobs:
           } else {
             $body = $body -replace '\{RELEASE_NOTES\}',$notes
           }
-          
+
           # Replace FILES_TABLE placeholder
           $filesTable = @"
           ${{ steps.files-table.outputs.files_table }}
           "@
           $body = $body -replace '\{FILES_TABLE\}',$filesTable
-          
+
           # Save to file
           $outputPath = "generated-release-body.md"
           $body | Out-File -FilePath $outputPath -Encoding UTF8 -NoNewline
-          
+
           Write-Host "✅ Release body generated successfully"
-          
+
           "body_path=$outputPath" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Prepare release files
@@ -157,7 +157,7 @@ jobs:
           # Create a staging directory for all release files
           $stagingDir = "release-staging"
           New-Item -ItemType Directory -Force -Path $stagingDir | Out-Null
-          
+
           # Copy Velopack files
           if (Test-Path "downloaded-artifacts") {
             Get-ChildItem -Path "downloaded-artifacts" -File -Recurse | ForEach-Object {
@@ -165,7 +165,7 @@ jobs:
               Write-Host "Copied: $($_.Name)"
             }
           }
-          
+
           # Copy MSIX files if available
           if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
             Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse | ForEach-Object {
@@ -173,7 +173,7 @@ jobs:
               Write-Host "Copied: $($_.Name)"
             }
           }
-          
+
           "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Create Git tag & GitHub Release

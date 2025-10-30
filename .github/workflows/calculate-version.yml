@@ -32,6 +32,9 @@ jobs:
   calculate:
     name: Calculate Version
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
     outputs:
       version: ${{ steps.version.outputs.version }}
       msix-version: ${{ steps.version.outputs.msix-version }}

@@ -32,21 +32,25 @@ jobs:
   summary:
     name: Generate Summary
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Generate comprehensive summary
-        shell: bash
         run: |
-          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss UTC")
+
+          $summary = @"
           # 🎉 Release Summary
 
           ## 📦 Release Information
           | Property | Value |
           |----------|-------|
-          | **Version** | `${{ inputs.version }}` |
-          | **MSIX Version** | `${{ inputs.msix-version }}` |
-          | **Tag** | `${{ inputs.tag-name }}` |
-          | **Channel** | `${{ inputs.release-channel }}` |
-          | **Commit** | `${{ inputs.source-commit }}` |
+          | **Version** | ``${{ inputs.version }}`` |
+          | **MSIX Version** | ``${{ inputs.msix-version }}`` |
+          | **Tag** | ``${{ inputs.tag-name }}`` |
+          | **Channel** | ``${{ inputs.release-channel }}`` |
+          | **Commit** | ``${{ inputs.source-commit }}`` |
 
           ## 🔗 Links
           * **Release Page**: ${{ inputs.release-url }}
@@ -57,14 +61,15 @@ jobs:
           All steps completed successfully! 🚀
 
           ---
-          *Generated on $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
-          EOF
+          *Generated on $timestamp*
+          "@
 
-      - name: Create job summary badge
-        shell: bash
+          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Create job summary badges
         run: |
-          echo "## 🏆 Build Badges" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "![Version](https://img.shields.io/badge/version-${{ inputs.version }}-blue?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY
-          echo "![Channel](https://img.shields.io/badge/channel-${{ inputs.release-channel }}-green?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY
-          echo "![Status](https://img.shields.io/badge/status-released-success?style=for-the-badge)" >> $GITHUB_STEP_SUMMARY
+          Write-Host "## 🏆 Build Badges" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "![Version](https://img.shields.io/badge/version-${{ inputs.version }}-blue?style=for-the-badge)" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "![Channel](https://img.shields.io/badge/channel-${{ inputs.release-channel }}-green?style=for-the-badge)" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "![Status](https://img.shields.io/badge/status-released-success?style=for-the-badge)" >> $env:GITHUB_STEP_SUMMARY
