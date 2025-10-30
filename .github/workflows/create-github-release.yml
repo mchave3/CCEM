@@ -31,6 +31,10 @@ on:
         description: 'Directory containing Velopack releases'
         required: true
         type: string
+      artifact-name:
+        description: 'Name of the Velopack artifact to download'
+        required: true
+        type: string
       msix-dir:
         description: 'Directory containing MSIX files (optional)'
         required: false
@@ -86,7 +90,8 @@ jobs:
       - name: Download Velopack artifacts
         uses: actions/download-artifact@v4
         with:
-          path: downloaded-artifacts
+          name: ${{ inputs.artifact-name }}
+          path: downloaded-artifacts/velopack-releases
 
       - name: List downloaded artifacts
         shell: pwsh
@@ -250,25 +255,34 @@ jobs:
         id: prepare-files
         shell: pwsh
         run: |
-          # Create a staging directory for all release files
+          # Create a staging directory for release files
           $stagingDir = "release-staging"
           New-Item -ItemType Directory -Force -Path $stagingDir | Out-Null
 
-          # Copy Velopack files
-          if (Test-Path "downloaded-artifacts") {
-            Get-ChildItem -Path "downloaded-artifacts" -File -Recurse | ForEach-Object {
+          # Copy only Velopack files (not all artifacts)
+          $velopackDir = "downloaded-artifacts/velopack-releases"
+
+          if (Test-Path $velopackDir) {
+            Write-Host "Copying Velopack files from: $velopackDir"
+            Get-ChildItem -Path $velopackDir -File | ForEach-Object {
               Copy-Item $_.FullName -Destination $stagingDir -Force
-              Write-Host "Copied: $($_.Name)"
+              Write-Host "  Copied: $($_.Name)"
             }
+          } else {
+            Write-Host "⚠️ Velopack directory not found: $velopackDir"
           }
 
           # Copy MSIX files if available
           if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
+            Write-Host "Copying MSIX files from: ${{ inputs.msix-dir }}"
             Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse | ForEach-Object {
               Copy-Item $_.FullName -Destination $stagingDir -Force
-              Write-Host "Copied: $($_.Name)"
+              Write-Host "  Copied: $($_.Name)"
             }
           }
+
+          $fileCount = (Get-ChildItem -Path $stagingDir -File).Count
+          Write-Host "✅ Total files prepared for release: $fileCount"
 
           "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 

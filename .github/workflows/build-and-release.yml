@@ -146,6 +146,7 @@ jobs:
       is-prerelease: ${{ inputs.release-type == 'beta' }}
       release-body-template: ${{ inputs.release-type == 'beta' && '.github/workflows/beta-body-template.md' || '.github/workflows/release-body-template.md' }}
       velopack-output-dir: Releases
+      artifact-name: ${{ needs.package-velopack.outputs.artifact-name }}
       msix-dir: ''
       pr-number: ${{ inputs.pr-number }}
       pr-title: ${{ inputs.pr-title }}
