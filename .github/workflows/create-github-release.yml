@@ -128,7 +128,10 @@ jobs:
             $collect += Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse
           }
 
-          Write-Host "Found $($collect.Count) files for FILES_TABLE"
+          # Filter out .json files from FILES_TABLE
+          $collect = $collect | Where-Object { $_.Extension -ne ".json" }
+
+          Write-Host "Found $($collect.Count) files for FILES_TABLE (excluding .json files)"
 
           foreach ($f in ($collect | Sort-Object Name)) {
             $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
