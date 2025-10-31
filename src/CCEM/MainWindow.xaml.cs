@@ -79,11 +79,11 @@ public sealed partial class MainWindow : Window
     {
         await RunOnDispatcherAsync(async () =>
         {
-            // Trigger the same entry animations used in UniGetUI.
+            // Start entry animations.
             InAnimation_Icon.Start();
             InAnimation_Text.Start();
 
-            // Delay showing the loading indicator for better UX.
+            // Wait before showing loading indicator.
             await Task.Delay(TimeSpan.FromMilliseconds(1000));
             LoadingIndicator.Visibility = Visibility.Visible;
         });
