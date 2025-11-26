@@ -27,7 +27,7 @@ on:
         description: '.NET SDK version'
         required: false
         type: string
-        default: '8.0.x'
+        default: '10.0.x'
     outputs:
       publish-dir:
         description: 'Directory containing published files'
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v5
