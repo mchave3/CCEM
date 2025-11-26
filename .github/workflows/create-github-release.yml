@@ -208,7 +208,7 @@ jobs:
 
             # Get all merge commits since last stable tag
             $fromTag = "${{ inputs.previous-stable-tag }}"
-            $logOutput = git log "$fromTag..HEAD" --merges --pretty=format:"%s|%an" --first-parent
+            $logOutput = git log "$fromTag..HEAD" --merges --pretty=format:"%s|%an"
 
             $changelog = ""
             if ([string]::IsNullOrEmpty($logOutput)) {
