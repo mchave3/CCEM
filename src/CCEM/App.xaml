@@ -6,15 +6,16 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!--  Additional resource dictionaries  -->
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="ms-appx:///DevWinUI.Controls/Themes/Generic.xaml" />
                 <ResourceDictionary Source="Themes/Styles.xaml" />
 
+                <!--  Additional app resources here  -->
                 <ResourceDictionary Source="Themes/ThemeResources.xaml" />
                 <ResourceDictionary Source="Themes/Fonts.xaml" />
                 <ResourceDictionary Source="Themes/Converters.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <!--  Other app resources here  -->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

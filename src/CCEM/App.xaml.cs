@@ -64,7 +64,7 @@ public partial class App : Application
 
     #region Application Initialization
     /// <summary>
-    /// Initializes the singleton application object
+    /// Initializes the singleton application object.
     /// </summary>
     public App()
     {
@@ -145,7 +145,7 @@ public partial class App : Application
 
     #region Application Component Loaders
     /// <summary>
-    /// Background component loader similar to UniGetUI
+    /// Background component loader.
     /// </summary>
     private async Task LoadComponentsAsync(MainWindow window)
     {
@@ -172,7 +172,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Ensures that the Windows context menu integration is configured
+    /// Ensures that the Windows context menu integration is configured.
     /// </summary>
     /// <returns></returns>
     private static async Task EnsureContextMenuAsync()
@@ -217,7 +217,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Checks for application updates and prompts the user to install them if available
+    /// Checks for application updates and prompts the user to install them if available.
     /// </summary>
     /// <returns></returns>
     private static async Task CheckForUpdatesAsync()
@@ -268,7 +268,7 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Configures the application logger
+    /// Configures the application logger.
     /// </summary>
     private static void ConfigureApplicationLogger()
     {
@@ -289,9 +289,11 @@ public partial class App : Application
     /// <returns></returns>
     private static VelopackChannel ResolveInitialUpdateChannel()
     {
+        // Get the packaged channel from Velopack locator.
         var packagedChannelName = VelopackLocator.Current?.Channel;
         VelopackChannel? packagedChannel = null;
 
+        // Parse the packaged channel if available.
         if (!string.IsNullOrWhiteSpace(packagedChannelName) &&
             Enum.TryParse(packagedChannelName, ignoreCase: true, out VelopackChannel parsedPackagedChannel))
         {
@@ -300,6 +302,7 @@ public partial class App : Application
 
         var hasExistingSettings = File.Exists(Constants.AppConfigPath);
 
+        // Determine the initial update channel based on existing settings and packaged channel.
         if (hasExistingSettings &&
             Enum.TryParse(Settings.UpdateChannel, ignoreCase: true, out VelopackChannel persistedChannel))
         {
@@ -328,6 +331,7 @@ public partial class App : Application
             return persistedChannel;
         }
 
+        // No existing settings; use packaged channel or fallback to Stable.
         if (packagedChannel.HasValue)
         {
             var packagedChannelString = packagedChannel.Value.ToString();
