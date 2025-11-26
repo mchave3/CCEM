@@ -63,7 +63,7 @@ permissions:
 
 env:
   # Tooling
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
   # Project paths
@@ -115,7 +115,7 @@ jobs:
       manifest-path: src/CCEM/Package.appxmanifest
       shared-assembly-info-path: src/SharedAssemblyInfo.cs
       publish-dir: publish
-      dotnet-version: 8.0.x
+      dotnet-version: 10.0.x
 
   # Job 4: Package with Velopack
   package-velopack:
