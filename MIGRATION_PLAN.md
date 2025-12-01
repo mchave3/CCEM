@@ -1,0 +1,79 @@
+﻿# Migration Plan CCCM_source → CCEM (.NET 10 / WinUI 3)
+
+Statuses: `[ ]` Not started · `[~]` In progress · `[x]` Done · `[!]` Blocked
+Boxes will be updated automatically as we progress.
+
+## Goal and scope
+- Merge CCCM (SCCM) capabilities into CCEM (WinUI 3) and add Intune management.
+- Modernize the stack (.NET 10, Windows App SDK/WinUI 3) without losing SCCM troubleshooting depth.
+- Preserve remote ops (WinRM/WMI/PowerShell) and add Microsoft Graph calls for Intune.
+- Adapt CCCM UX to CCEM patterns (JSON navigation, dynamic theming, Velopack packaging).
+
+## WinUI 3 references (Context7)
+- WinUI 3 ships via Windows App SDK (latest stable channel 1.4) and targets Desktop/Win32 apps (source: /microsoft/microsoft-ui-xaml).
+- Porting requires replacing WPF controls with WinUI 3 equivalents and following the AppWindow/Window model (WinUI 3, Windows App SDK).
+
+## Current state
+### CCEM (target)
+- WinUI 3, DI (App.ConfigureServices), JSON navigation, theming, packaging/updates via Velopack, DevWinUI + Toolkit animations.
+- Main shell: `MainWindow.xaml` (TitleBar/NavView/Frame), services: `ThemeService`, `JsonNavigationService`, `ContextMenuService`, `VelopackUpdateService`.
+### CCCM_source (origin)
+- WPF .NET Framework 4.7, dependencies WinRM + PowerShell 4 + Configuration Manager Agent.
+- Key modules (Controls): Advertisement/Application grids, CacheGrid, CCMEvalGrid, CollectionVariables, EventMonitoring, ExecHistory, InstallAgent/Repair, InstalledSoftwareGrid, LogViewer, PowerSettings, ProcessGrid, ServicesGrid, ServiceWindowGrid, SettingsMgmt, Software Updates (SW*), WMIBrowser, ScheduleControl.
+- Config/infra: `Settings.cs`, `Logs.cs`, `app.config`, plugins (Plugins/Customization), resx/ico, packages.config.
+
+## Risks and constraints
+- SCCM-specific APIs (WMI/COM/registry/PowerShell) need revalidation on .NET 10 + WinUI 3 (interop and UAC/WinRM permissions).
+- WPF → WinUI 3 differences (resources, styles, behaviors, NavigationService) require UI/command refactors.
+- Intune needs Microsoft Graph (interactive/device code auth, DeviceManagementConfiguration/ManagedDevices scopes) and token cache handling.
+- Packaging: align MSIX/Velopack with native dependencies (WinRM, WebView2 if used).
+
+## Migration roadmap (checkpoints)
+### Phase 0 – Preparation and framing
+- [x] P0.1 Draft initial plan and tracking rules.
+- [ ] P0.2 List technical dependencies (NuGet packages, COM/WMI interop, PS scripts) and WinUI/WinAppSDK equivalents.
+
+### Phase 1 – Functional mapping and target design
+- [ ] P1.1 Map each CCCM module (UI + logic) and prioritize (core troubleshooting first: inventory, logs, services, updates).
+- [ ] P1.2 Define SCCM service layer (abstractions for WMI/PowerShell/WinRM) and Intune surface (Graph) exposed via interfaces.
+- [ ] P1.3 Define target navigation in CCEM (pages, JSON routes, breadcrumbs, search/title bar) to host migrated modules.
+- [ ] P1.4 Design unified settings model (SCCM + Intune) and persistence (app config → modernized Settings).
+
+### Phase 2 – WinUI 3 / .NET 10 foundation
+- [ ] P2.1 Create interop projects/libs (SccmClientSdk) isolating WMI/PowerShell/WinRM with DI and cancellation.
+- [ ] P2.2 Add a logging adapter (Serilog already present via Core.Logger) + optional telemetry.
+- [ ] P2.3 Port helpers (Converters, Logs, Settings) to WinUI 3 + INotifyPropertyChanged/MVVM (CommunityToolkit MVVM if added).
+- [ ] P2.4 Integrate a remote execution service (PSRemoting/WinRM) with async/await and responsive UI.
+
+### Phase 3 – SCCM feature port (deliverable increments)
+- [ ] P3.1 Inventory/Client state: AgentComponents, AgentSettingItem, CCMEvalGrid, CacheGrid, InstalledSoftwareGrid, ProcessGrid.
+- [ ] P3.2 Maintenance/Actions: InstallAgent, InstallRepair, ServicesGrid, ServiceWindowGrid, ServiceWindowNew, PowerSettings.
+- [ ] P3.3 Content/updates distribution: AdvertisementGrid, ApplicationGrid, SWUpdates/SWAllUpdates/SWStatus, ExecHistoryGrid.
+- [ ] P3.4 Observability: EventMonitoring, LogGrid/LogViewer, WMIBrowser, CollectionVariables.
+- [ ] P3.5 Plugins/Customization: decide strategy for Plugins/Customization (WinUI add-ins vs direct migration).
+- [ ] P3.6 Targeted tests (interop unit tests + UI smoke) for each migrated slice.
+
+### Phase 4 – Intune addition/alignment
+- [ ] P4.1 Choose Graph auth flow (device code or WAM) and store required scopes (DeviceManagement*).
+- [ ] P4.2 Implement Intune service (ManagedDevices, Compliance, Apps/Assignments) with pagination and filters.
+- [ ] P4.3 SCCM/Intune UX parity: shared views (device details, apps, updates, logs) with source indicator.
+- [ ] P4.4 Integration tests on dev tenant (Graph throttling, auth errors, MFA) with consistent error UX.
+
+### Phase 5 – WinUI 3 UX/Navigation
+- [ ] P5.1 Adapt CCCM pages into WinUI 3 pages (NavigationView + Frame) following CCEM/DevWinUI styles.
+- [ ] P5.2 Add search/title bar and breadcrumbs to the new views, with keyboard commands.
+- [ ] P5.3 Light/dark theming and accessibility (contrast, keyboard nav, focus visuals) on migrated modules.
+
+### Phase 6 – Packaging, perf, and final validation
+- [ ] P6.1 Verify Velopack/MSIX packaging (icons, AppxManifest, context menu) and native dependencies (WinRM/PS).
+- [ ] P6.2 Optimize startup (splash → interface) and parallel executions (async/await) for remote operations.
+- [ ] P6.3 Final test campaign (SCCM + Intune) and author an operations/migration guide.
+- [ ] P6.4 Go/No-Go and release channel (Stable/Preview) with changelog.
+
+## Quick checkpoints (major)
+- [x] CP0 Initial plan ready.
+- [ ] CP1 Full CCCM module/dependency mapping.
+- [ ] CP2 WinUI 3 SCCM interop foundation ready (services + tests).
+- [ ] CP3 First SCCM batch migrated and navigable in CCEM.
+- [ ] CP4 Baseline Intune features delivered.
+- [ ] CP5 Release candidate packaged and tested.
