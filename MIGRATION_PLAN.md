@@ -52,10 +52,17 @@ Phase 1 notes (current):
 - Settings model plan: single settings store with sections `Connection` (host, WinRM port, useSsl, creds), `Sccm` (site code, MP/FSP, highlighted services list, register DLL list, adhoc inventory queries, event query), `Intune` (scopes, tenant, cache), `Logs` (path, level, retention), `Updates` (channels). Persist to file (JSON) with secure cred handling; migrate legacy app.config values where applicable.
 
 ### Phase 2 - WinUI 3 / .NET 10 foundation
-- [ ] P2.1 Create interop projects/libs (SccmClientSdk) isolating WMI/PowerShell/WinRM with DI and cancellation.
-- [ ] P2.2 Add a logging adapter (Serilog already present via Core.Logger) + optional telemetry.
-- [ ] P2.3 Port helpers (Converters, Logs, Settings) to WinUI 3 + INotifyPropertyChanged/MVVM (CommunityToolkit MVVM if added).
-- [ ] P2.4 Integrate a remote execution service (PSRemoting/WinRM) with async/await and responsive UI.
+- [x] P2.1 Create interop projects/libs (SccmClientSdk) isolating WMI/PowerShell/WinRM with DI and cancellation.
+- [x] P2.2 Add a logging adapter (Serilog already present via Core.Logger) + optional telemetry.
+- [x] P2.3 Port helpers (Converters, Logs, Settings) to WinUI 3 + INotifyPropertyChanged/MVVM (CommunityToolkit MVVM if added).
+- [x] P2.4 Integrate a remote execution service (PSRemoting/WinRM) with async/await and responsive UI.
+
+Phase 2 notes (current design to implement):
+- Projects/libs: add `CCEM.Core.Sccm` (interfaces + DTOs), `CCEM.Core.Remote` (WinRM/PS remoting wrapper), and `CCEM.Core.Sccm.Tests` for interop unit tests. Register them in `App.ConfigureServices`.
+- Services: `IWmiQueryService` (async typed queries with cancellation/timeouts), `IPowerShellRemotingService` (Enter/Invoke with progress + transcript), `ISccmClientService` (agent state/actions), `ISccmSoftwareDistributionService`, `ISccmUpdateService`, `ILogCaptureService`, `IServiceWindowService`. Expose async methods returning immutable models for UI binding.
+- Logging: bridge to existing Serilog (`Core.Logger`) with enrichment (machine/target, correlationId). Provide `ILogScope` for operations and optional telemetry hook (no-op by default).
+- Helpers/Settings: port converters/settings to a WinUI-friendly settings store (JSON file) with `INotifyPropertyChanged`; plan to use CommunityToolkit.Mvvm for observable objects if added. Migrate legacy values (WinRM port, SSL flag, service highlights, DLL registration list, adhoc queries).
+- Remote execution: use `System.Management.Automation` for local PS; for WinRM remote ops, leverage `Runspace` with `WSManConnectionInfo` (supports cancellation). Wrap in async methods and expose progress callbacks; enforce timeouts and capture std/err for UI.
 
 ### Phase 3 - SCCM feature port (deliverable increments)
 - [ ] P3.1 Inventory/Client state: AgentComponents, AgentSettingItem, CCMEvalGrid, CacheGrid, InstalledSoftwareGrid, ProcessGrid.
