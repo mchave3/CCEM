@@ -12,13 +12,23 @@ public sealed class SccmSoftwareDistributionService : ISccmSoftwareDistributionS
     {
         ArgumentNullException.ThrowIfNull(connection);
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult((IReadOnlyList<SccmAdvertisement>)Array.Empty<SccmAdvertisement>());
+        IReadOnlyList<SccmAdvertisement> sample =
+        [
+            new("ADV001", "Deploy Company Portal", "Install", "Success", DateTimeOffset.Now.AddHours(-6)),
+            new("ADV002", "Install .NET Runtime", "Install", "InProgress", DateTimeOffset.Now.AddHours(-2))
+        ];
+        return Task.FromResult(sample);
     }
 
     public Task<IReadOnlyList<SccmAdvertisement>> GetExecutionHistoryAsync(SccmConnectionInfo connection, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(connection);
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult((IReadOnlyList<SccmAdvertisement>)Array.Empty<SccmAdvertisement>());
+        IReadOnlyList<SccmAdvertisement> sample =
+        [
+            new("ADV001", "Deploy Company Portal", "Install", "Success", DateTimeOffset.Now.AddHours(-6)),
+            new("ADV003", "Software Metering", "Evaluate", "Failed", DateTimeOffset.Now.AddHours(-1))
+        ];
+        return Task.FromResult(sample);
     }
 }

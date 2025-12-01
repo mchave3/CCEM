@@ -65,12 +65,19 @@ Phase 2 notes (current design to implement):
 - Remote execution: uses `System.Management.Automation` and `WSManConnectionInfo`; cancellation stops PS pipeline and reports timeout status.
 
 ### Phase 3 - SCCM feature port (deliverable increments)
-- [ ] P3.1 Inventory/Client state: AgentComponents, AgentSettingItem, CCMEvalGrid, CacheGrid, InstalledSoftwareGrid, ProcessGrid.
+- [~] P3.1 Inventory/Client state: AgentComponents, AgentSettingItem, CCMEvalGrid, CacheGrid, InstalledSoftwareGrid, ProcessGrid.
 - [ ] P3.2 Maintenance/Actions: InstallAgent, InstallRepair, ServicesGrid, ServiceWindowGrid, ServiceWindowNew, PowerSettings.
 - [ ] P3.3 Content/updates distribution: AdvertisementGrid, ApplicationGrid, SWUpdates/SWAllUpdates/SWStatus, ExecHistoryGrid.
 - [ ] P3.4 Observability: EventMonitoring, LogGrid/LogViewer, WMIBrowser, CollectionVariables.
 - [ ] P3.5 Plugins/Customization: decide strategy for Plugins/Customization (WinUI add-ins vs direct migration).
 - [ ] P3.6 Targeted tests (interop unit tests + UI smoke) for each migrated slice.
+
+Phase 3 notes (slice 1 target):
+- Scope: Inventory + core troubleshooting (components/state, cache, installed SW, processes, services, CCMEval, agent settings basics).
+- Data plumbing: wire `IWmiQueryService`/`IRemotePowerShellClient` into `ISccmClientService` (real implementations), add DTOs for cache entries/software/process/service status, and map legacy WMI queries (CCM_* classes, Win32_*).
+- UI: create WinUI pages for inventory/installed SW/processes/services/cache using Nav routes (`inv/components`, `inv/cache`, `inv/installed-sw`, `ops/processes`, `ops/services`, `inv/eval`), bind to new viewmodels, add loading/error states.
+- Settings: load defaults from legacy app.config (WinRM port/SSL, highlighted services, adhoc inventory queries) into the new settings store.
+- Tests: unit tests for WMI query mappings (guarded by environment), and viewmodel smoke tests with mocked services.
 
 ### Phase 4 - Intune addition/alignment
 - [ ] P4.1 Choose Graph auth flow (device code or WAM) and store required scopes (DeviceManagement*).
@@ -91,8 +98,8 @@ Phase 2 notes (current design to implement):
 
 ## Quick checkpoints (major)
 - [x] CP0 Initial plan ready.
-- [ ] CP1 Full CCCM module/dependency mapping.
-- [~] CP2 WinUI 3 SCCM interop foundation ready (services + tests).
+- [x] CP1 Full CCCM module/dependency mapping.
+- [x] CP2 WinUI 3 SCCM interop foundation ready (services + tests).
 - [ ] CP3 First SCCM batch migrated and navigable in CCEM.
 - [ ] CP4 Baseline Intune features delivered.
 - [ ] CP5 Release candidate packaged and tested.

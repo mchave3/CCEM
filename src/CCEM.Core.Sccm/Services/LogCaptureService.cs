@@ -22,8 +22,19 @@ public sealed class LogCaptureService : ILogCaptureService
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Placeholder: actual implementation will stream remote logs via PowerShell (Get-Content -Tail).
-        await Task.CompletedTask.ConfigureAwait(false);
-        yield break;
+        // Placeholder: emits sample lines; replace with remote Get-Content -Tail implementation.
+        var sample = new[]
+        {
+            $"[{DateTimeOffset.Now:HH:mm:ss}] CCMExec: Heartbeat OK",
+            $"[{DateTimeOffset.Now:HH:mm:ss}] Updates: Scan started",
+            $"[{DateTimeOffset.Now:HH:mm:ss}] Updates: Scan completed"
+        };
+
+        foreach (var line in sample.Take(maxLines))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return line;
+            await Task.Delay(10, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

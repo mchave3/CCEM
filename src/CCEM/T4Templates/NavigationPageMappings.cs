@@ -16,5 +16,11 @@ public partial class NavigationPageMappings
     public static Dictionary<string, Type> PageDictionary { get; } = new Dictionary<string, Type>
     {
         {"CCEM.Views.HomeLandingPage", typeof(CCEM.Views.HomeLandingPage)},
+        {"CCEM.Views.InventoryComponentsPage", typeof(CCEM.Views.InventoryComponentsPage)},
+        {"CCEM.Views.InventoryCachePage", typeof(CCEM.Views.InventoryCachePage)},
+        {"CCEM.Views.InventoryInstalledSoftwarePage", typeof(CCEM.Views.InventoryInstalledSoftwarePage)},
+        {"CCEM.Views.InventoryEvaluationPage", typeof(CCEM.Views.InventoryEvaluationPage)},
+        {"CCEM.Views.OperationsProcessesPage", typeof(CCEM.Views.OperationsProcessesPage)},
+        {"CCEM.Views.OperationsServicesPage", typeof(CCEM.Views.OperationsServicesPage)},
     };
 }

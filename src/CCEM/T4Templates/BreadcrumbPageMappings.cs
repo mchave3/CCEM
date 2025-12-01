@@ -18,5 +18,11 @@ public partial class BreadcrumbPageMappings
         {typeof(CCEM.Views.AppUpdateSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
         {typeof(CCEM.Views.GeneralSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
         {typeof(CCEM.Views.ThemeSettingPage), new BreadcrumbPageConfig { PageTitle = null, IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.InventoryComponentsPage), new BreadcrumbPageConfig { PageTitle = "Components", IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.InventoryCachePage), new BreadcrumbPageConfig { PageTitle = "Cache", IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.InventoryInstalledSoftwarePage), new BreadcrumbPageConfig { PageTitle = "Installed software", IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.InventoryEvaluationPage), new BreadcrumbPageConfig { PageTitle = "Evaluation", IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.OperationsProcessesPage), new BreadcrumbPageConfig { PageTitle = "Processes", IsHeaderVisible = true, ClearNavigation = false}},
+        {typeof(CCEM.Views.OperationsServicesPage), new BreadcrumbPageConfig { PageTitle = "Services", IsHeaderVisible = true, ClearNavigation = false}},
     };
 }

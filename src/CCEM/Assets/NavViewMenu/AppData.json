@@ -15,6 +15,42 @@
           "Subtitle": "CCEM",
           "ImagePath": "ms-appx:///Assets/AppIcon.png",
           "HideItem": true
+        },
+        {
+          "UniqueId": "CCEM.Views.InventoryComponentsPage",
+          "Title": "Components",
+          "Subtitle": "Agent components status",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
+        },
+        {
+          "UniqueId": "CCEM.Views.InventoryCachePage",
+          "Title": "Cache",
+          "Subtitle": "Client cache",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
+        },
+        {
+          "UniqueId": "CCEM.Views.InventoryInstalledSoftwarePage",
+          "Title": "Installed software",
+          "Subtitle": "Inventory",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
+        },
+        {
+          "UniqueId": "CCEM.Views.InventoryEvaluationPage",
+          "Title": "Evaluations",
+          "Subtitle": "CCMEval",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
+        },
+        {
+          "UniqueId": "CCEM.Views.OperationsProcessesPage",
+          "Title": "Processes",
+          "Subtitle": "Process list",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
+        },
+        {
+          "UniqueId": "CCEM.Views.OperationsServicesPage",
+          "Title": "Services",
+          "Subtitle": "Service status",
+          "ImagePath": "ms-appx:///Assets/AppIcon.png"
         }
       ]
     }

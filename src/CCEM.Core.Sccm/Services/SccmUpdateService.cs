@@ -12,6 +12,12 @@ public sealed class SccmUpdateService : ISccmUpdateService
     {
         ArgumentNullException.ThrowIfNull(connection);
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult((IReadOnlyList<SccmUpdateInfo>)Array.Empty<SccmUpdateInfo>());
+        IReadOnlyList<SccmUpdateInfo> sample =
+        [
+            new("KB503200", "2025-01 Cumulative Update", "503200", "Installed", DateTimeOffset.Now.AddDays(-10)),
+            new("KB503210", "2025-01 .NET Rollup", "503210", "Pending", DateTimeOffset.Now.AddDays(-2)),
+            new("KB503215", "Defender Platform Update", "503215", "Downloading", DateTimeOffset.Now.AddHours(-4))
+        ];
+        return Task.FromResult(sample);
     }
 }

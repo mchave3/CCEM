@@ -7,6 +7,8 @@ using CCEM.Core.Sccm.Services;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using CCEM.Services;
+using CCEM.ViewModels;
+using CCEM.ViewModels.Sccm;
 using Velopack;
 using Velopack.Locators;
 
@@ -114,6 +116,12 @@ public partial class App : Application
         services.AddSingleton<ISccmUpdateService, SccmUpdateService>();
         services.AddSingleton<ILogCaptureService, LogCaptureService>();
         services.AddSingleton<IServiceWindowService, ServiceWindowService>();
+        services.AddTransient<InventoryComponentsViewModel>();
+        services.AddTransient<InventoryCacheViewModel>();
+        services.AddTransient<InventoryInstalledSoftwareViewModel>();
+        services.AddTransient<OperationsProcessesViewModel>();
+        services.AddTransient<OperationsServicesViewModel>();
+        services.AddTransient<InventoryEvaluationViewModel>();
 
         services.AddTransient<MainViewModel>();
         services.AddSingleton<ContextMenuService>();
