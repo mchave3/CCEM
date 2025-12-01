@@ -12,6 +12,15 @@
     <Project Path="CCEM.Core.Velopack/CCEM.Core.Velopack.csproj" Id="4529700f-4e12-4196-9eca-25f960a71df1">
       <Platform Project="x64" />
     </Project>
+    <Project Path="CCEM.Core.Remote/CCEM.Core.Remote.csproj" Id="6b3e4f65-7f7d-4b9b-8a42-81f5075e9b62">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="CCEM.Core.Sccm/CCEM.Core.Sccm.csproj" Id="f3edabf7-3b37-4a1e-8e4c-62c6b76c7c08">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="CCEM.Core.Sccm.Tests/CCEM.Core.Sccm.Tests.csproj" Id="e0b0e1f1-0865-4aba-8de2-0cd614e67255">
+      <Platform Project="x64" />
+    </Project>
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="Directory.Build.props" />

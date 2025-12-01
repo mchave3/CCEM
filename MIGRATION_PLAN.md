@@ -58,11 +58,11 @@ Phase 1 notes (current):
 - [x] P2.4 Integrate a remote execution service (PSRemoting/WinRM) with async/await and responsive UI.
 
 Phase 2 notes (current design to implement):
-- Projects/libs: add `CCEM.Core.Sccm` (interfaces + DTOs), `CCEM.Core.Remote` (WinRM/PS remoting wrapper), and `CCEM.Core.Sccm.Tests` for interop unit tests. Register them in `App.ConfigureServices`.
-- Services: `IWmiQueryService` (async typed queries with cancellation/timeouts), `IPowerShellRemotingService` (Enter/Invoke with progress + transcript), `ISccmClientService` (agent state/actions), `ISccmSoftwareDistributionService`, `ISccmUpdateService`, `ILogCaptureService`, `IServiceWindowService`. Expose async methods returning immutable models for UI binding.
-- Logging: bridge to existing Serilog (`Core.Logger`) with enrichment (machine/target, correlationId). Provide `ILogScope` for operations and optional telemetry hook (no-op by default).
-- Helpers/Settings: port converters/settings to a WinUI-friendly settings store (JSON file) with `INotifyPropertyChanged`; plan to use CommunityToolkit.Mvvm for observable objects if added. Migrate legacy values (WinRM port, SSL flag, service highlights, DLL registration list, adhoc queries).
-- Remote execution: use `System.Management.Automation` for local PS; for WinRM remote ops, leverage `Runspace` with `WSManConnectionInfo` (supports cancellation). Wrap in async methods and expose progress callbacks; enforce timeouts and capture std/err for UI.
+- Projects/libs created: `CCEM.Core.Remote` (WinRM/PS wrapper with `IRemotePowerShellClient` + `WinRmPowerShellClient`) and `CCEM.Core.Sccm` (contracts/models/services stubs) plus `CCEM.Core.Sccm.Tests` (xUnit scaffolding). Added to solution + CCEM project references and DI registrations in `App.ConfigureServices`.
+- Services implemented (initial stubs): `IWmiQueryService` (with timeout/cancellation), `ISccmClientService`, `ISccmSoftwareDistributionService`, `ISccmUpdateService`, `ILogCaptureService`, `IServiceWindowService`; async signatures for UI binding. PowerShell client supports local/WinRM with timeout + cancellation.
+- Logging: Serilog bridge unchanged; hook for future enrichment/telemetry still pending.
+- Helpers/Settings: to be modernized in Phase 3 alongside feature ports; legacy values migration still pending.
+- Remote execution: uses `System.Management.Automation` and `WSManConnectionInfo`; cancellation stops PS pipeline and reports timeout status.
 
 ### Phase 3 - SCCM feature port (deliverable increments)
 - [ ] P3.1 Inventory/Client state: AgentComponents, AgentSettingItem, CCMEvalGrid, CacheGrid, InstalledSoftwareGrid, ProcessGrid.
@@ -92,7 +92,7 @@ Phase 2 notes (current design to implement):
 ## Quick checkpoints (major)
 - [x] CP0 Initial plan ready.
 - [ ] CP1 Full CCCM module/dependency mapping.
-- [ ] CP2 WinUI 3 SCCM interop foundation ready (services + tests).
+- [~] CP2 WinUI 3 SCCM interop foundation ready (services + tests).
 - [ ] CP3 First SCCM batch migrated and navigable in CCEM.
 - [ ] CP4 Baseline Intune features delivered.
 - [ ] CP5 Release candidate packaged and tested.

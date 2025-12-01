@@ -78,6 +78,8 @@
   <ItemGroup>
     <ProjectReference Include="..\CCEM.Core.Logger\CCEM.Core.Logger.csproj" />
     <ProjectReference Include="..\CCEM.Core.Velopack\CCEM.Core.Velopack.csproj" />
+    <ProjectReference Include="..\CCEM.Core.Remote\CCEM.Core.Remote.csproj" />
+    <ProjectReference Include="..\CCEM.Core.Sccm\CCEM.Core.Sccm.csproj" />
   </ItemGroup>
   <!--
 	Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution

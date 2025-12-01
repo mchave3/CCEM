@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using CCEM.Core.Remote;
+using CCEM.Core.Sccm.Contracts;
+using CCEM.Core.Sccm.Services;
 using CCEM.Core.Velopack.Models;
 using CCEM.Core.Velopack.Services;
 using CCEM.Services;
@@ -104,6 +107,13 @@ public partial class App : Application
 
             return new VelopackUpdateService(configuration, initialChannel: channel);
         });
+        services.AddSingleton<IRemotePowerShellClient, WinRmPowerShellClient>();
+        services.AddSingleton<IWmiQueryService, WmiQueryService>();
+        services.AddSingleton<ISccmClientService, SccmClientService>();
+        services.AddSingleton<ISccmSoftwareDistributionService, SccmSoftwareDistributionService>();
+        services.AddSingleton<ISccmUpdateService, SccmUpdateService>();
+        services.AddSingleton<ILogCaptureService, LogCaptureService>();
+        services.AddSingleton<IServiceWindowService, ServiceWindowService>();
 
         services.AddTransient<MainViewModel>();
         services.AddSingleton<ContextMenuService>();
