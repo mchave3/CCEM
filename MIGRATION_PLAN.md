@@ -38,10 +38,18 @@ Phase 0 notes (current):
 - CCCM_source run pending: needs build/run of the .NET Framework 4.8 WPF app on Windows with WinRM/PowerShell 4+ available; not executed in this session (manual run needed for screenshots/logs/flows).
 
 ### Phase 1 - Functional mapping and target design
-- [ ] P1.1 Map each CCCM module (UI + logic) and prioritize (core troubleshooting first: inventory, logs, services, updates).
-- [ ] P1.2 Define SCCM service layer (abstractions for WMI/PowerShell/WinRM) and Intune surface (Graph) exposed via interfaces.
-- [ ] P1.3 Define target navigation in CCEM (pages, JSON routes, breadcrumbs, search/title bar) to host migrated modules.
-- [ ] P1.4 Design unified settings model (SCCM + Intune) and persistence (app config -> modernized Settings).
+- [x] P1.1 Map each CCCM module (UI + logic) and prioritize (core troubleshooting first: inventory, logs, services, updates).
+- [x] P1.2 Define SCCM service layer (abstractions for WMI/PowerShell/WinRM) and Intune surface (Graph) exposed via interfaces.
+- [x] P1.3 Define target navigation in CCEM (pages, JSON routes, breadcrumbs, search/title bar) to host migrated modules.
+- [x] P1.4 Design unified settings model (SCCM + Intune) and persistence (app config -> modernized Settings).
+
+Phase 1 notes (current):
+- Module map (from MainPage): Monitoring (Log Monitoring, EventMonitoring), Inventory (Overview, ComponentsPanel, CachePanel, InstalledSWTab, Process, ServicesPanel, CCMEval, WMIBrowser), Software Distribution (SWDistSummary, AdvertisementsTab, SWDistApps, SWUpdates, SWAllUpdates, ExecHistory, CollectionVariables), Agent Settings (AgentSettingsPanel, SettingsMgmtPanel, ServiceWindowTab/ServiceWindowGrid, PwrSettingsPanel), Maintenance (InstallRepair, InstallAgent), About, Tools (LogViewer, PowerShell console), ribbons for Inventory/Policy/Updates/PowerShell/Maintenance/App.Mgmt.
+- Priority for first deliverable: Inventory + Logs + Services + Updates + Process (core troubleshooting); second: Software Distribution + ExecHistory + CollectionVariables; third: Maintenance/Install + ServiceWindow + Power settings; plugins/custom actions deferred.
+- SCCM service layer design: `IWmiQueryService` (typed queries for CCM_* classes and CIM inventory), `IPowerShellRemotingService` (WinRM remote exec with cancellation/progress), `ISccmClientService` (agent state/actions: eval, cache, components, logs, services, processes), `ISccmSoftwareDistributionService` (advertisements, apps, content status, exec history), `ISccmUpdateService` (SWUpdates/SWAllUpdates/SWStatus), `ILogCaptureService` (live log tailing + filters), `IServiceWindowService` (read/write service windows). Compose via DI and expose async APIs; shield UI from WMI/PS details.
+- Intune surface design: `IIntuneAuthService` (device code or WAM + cache), `IIntuneDeviceService` (managed devices, compliance, primary users), `IIntuneAppService` (apps/assignments), `IIntuneUpdateService` (updates/quality/feature rings), shared models aligned with SCCM views for parity.
+- Navigation plan (CCEM NavView/Frame): top-level items Monitoring, Inventory, Software Distribution, Agent Settings, Maintenance, Settings, About; each route stored in JSON nav config (e.g., `inv/overview`, `inv/cache`, `inv/components`, `inv/installed-sw`, `ops/processes`, `ops/services`, `updates/software`, `updates/all`, `updates/history`, `dist/ads`, `dist/apps`, `dist/summary`, `logs/live`, `logs/event-monitor`, `settings/agent`, `settings/service-window`, `settings/power`, `maint/install-repair`, `maint/install-agent`, `tools/wmi-browser`, `tools/collection-vars`). Breadcrumbs and search wired to tags; reuse CCEM TitleBar search hook.
+- Settings model plan: single settings store with sections `Connection` (host, WinRM port, useSsl, creds), `Sccm` (site code, MP/FSP, highlighted services list, register DLL list, adhoc inventory queries, event query), `Intune` (scopes, tenant, cache), `Logs` (path, level, retention), `Updates` (channels). Persist to file (JSON) with secure cred handling; migrate legacy app.config values where applicable.
 
 ### Phase 2 - WinUI 3 / .NET 10 foundation
 - [ ] P2.1 Create interop projects/libs (SccmClientSdk) isolating WMI/PowerShell/WinRM with DI and cancellation.
