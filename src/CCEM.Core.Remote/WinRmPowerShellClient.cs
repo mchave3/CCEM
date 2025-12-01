@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 
@@ -42,7 +43,7 @@ public sealed class WinRmPowerShellClient : IRemotePowerShellClient
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts?.Token ?? CancellationToken.None);
         using var registration = linkedCts.Token.Register(ps.Stop, useSynchronizationContext: false);
 
-        List<PSObject> results;
+        Collection<PSObject> results;
         try
         {
             results = timeoutCts is null
