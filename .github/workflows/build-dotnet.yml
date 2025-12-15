@@ -58,7 +58,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Cache NuGet packages
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
@@ -139,7 +139,7 @@ jobs:
           }
 
       - name: Upload publish artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dotnet-publish
           path: ${{ inputs.publish-dir }}/**

@@ -93,7 +93,7 @@ jobs:
         run: git fetch --force --tags
 
       - name: Download Velopack artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ inputs.artifact-name }}
           path: downloaded-artifacts/velopack-releases
@@ -296,7 +296,7 @@ jobs:
 
       - name: Create Git tag & GitHub Release
         id: gh-release
-        uses: softprops/action-gh-release@v2.4.2
+        uses: softprops/action-gh-release@v2.5.0
         with:
           tag_name: ${{ inputs.tag-name }}
           name: ${{ inputs.release-name }}
