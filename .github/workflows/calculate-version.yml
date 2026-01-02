@@ -59,7 +59,7 @@ jobs:
           $releaseType = "${{ inputs.release-type }}".ToLowerInvariant()
           $now = [DateTime]::UtcNow
           $yy = $now.ToString("yy")
-          $MM = $now.ToString("MM")
+          $MM = $now.Month
           $yymm = "$yy.$MM"
 
           $tags = git tag
@@ -78,16 +78,16 @@ jobs:
             $msixVersion = "{0}.{1}.{2}.0" -f $yy, $MM, $patch        # 25.11.2.0
           } else {
             # Beta: find latest stable tag to get YY.MM reference
-            $stablePattern = "^v(\d{2})\.(\d{2})\.(\d+)$"
+            $stablePattern = "^v(\d{2})\.(\d{1,2})\.(\d+)$"
             $latestStableYYMM = $null
             $latestStableDate = [DateTime]::MinValue
 
             foreach ($t in $tags) {
               if ($t -match $stablePattern) {
                 $tagYY = $Matches[1]
-                $tagMM = $Matches[2]
+                $tagMM = [int]$Matches[2]
                 try {
-                  $tagDate = [DateTime]::ParseExact("20$tagYY-$tagMM-01", "yyyy-MM-dd", $null)
+                  $tagDate = [DateTime]::ParseExact(("20{0}-{1:00}-01" -f $tagYY, $tagMM), "yyyy-MM-dd", $null)
                   if ($tagDate -gt $latestStableDate) {
                     $latestStableDate = $tagDate
                     $latestStableYYMM = "$tagYY.$tagMM"
@@ -102,8 +102,9 @@ jobs:
             }
 
             # Extract YY and MM from latest stable YY.MM
-            $refYY = $latestStableYYMM.Substring(0,2)
-            $refMM = $latestStableYYMM.Substring(3,2)
+            $refParts = $latestStableYYMM.Split('.')
+            $refYY = $refParts[0]
+            $refMM = [int]$refParts[1]
 
             # Pattern: v25.11.0-beta.1, v25.11.0-beta.2, etc.
             $betaPattern = "^v$latestStableYYMM\.0-beta\.(\d+)$"

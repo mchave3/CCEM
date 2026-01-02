@@ -4,12 +4,12 @@ on:
   workflow_call:
     inputs:
       current-version:
-        description: 'Current version string (e.g., 25.11.2)'
+        description: 'Current version string (e.g., 26.1.1)'
         required: true
         type: string
     outputs:
       previous-tag:
-        description: 'Previous stable tag (e.g., v25.10.1)'
+        description: 'Previous stable tag (e.g., v26.1.0)'
         value: ${{ jobs.find.outputs.previous-tag }}
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
 
           # Get all tags matching stable pattern (vYY.MM.P)
           # Exclude beta tags
-          $allTags = git tag | Where-Object { $_ -match '^v\d{2}\.\d{2}\.\d+$' }
+          $allTags = git tag | Where-Object { $_ -match '^v\d{2}\.\d{1,2}\.\d+$' }
 
           if ($allTags.Count -eq 0) {
             Write-Host "⚠️ No previous stable tags found"
@@ -48,8 +48,8 @@ jobs:
             # Extract YY.MM and patch number for sorting
             $tagObjects = @()
             foreach ($tag in $allTags) {
-              if ($tag -match '^v(\d{2})\.(\d{2})\.(\d+)$') {
-                $yymm = [int]("$($Matches[1])$($Matches[2])")
+              if ($tag -match '^v(\d{2})\.(\d{1,2})\.(\d+)$') {
+                $yymm = [int]("{0}{1:00}" -f $Matches[1], [int]$Matches[2])
                 $patch = [int]$Matches[3]
                 $tagObjects += [PSCustomObject]@{
                   Tag = $tag
