@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download publish artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dotnet-publish
           path: ${{ inputs.publish-dir }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Upload Velopack artifacts
         id: upload
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.artifact-name }}
           path: ${{ inputs.output-dir }}/**
