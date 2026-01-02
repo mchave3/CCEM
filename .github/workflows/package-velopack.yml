@@ -148,7 +148,8 @@ jobs:
             -o "${{ inputs.output-dir }}" `
             -c "${{ inputs.channel }}" `
             --packTitle "${{ inputs.title }}" `
-            --icon "${{ inputs.icon-path }}"
+            --icon "${{ inputs.icon-path }}" `
+            --msiDeploymentTool
 
           if ($LASTEXITCODE -eq 0) {
             Write-Host "✅ Velopack packaging completed successfully"
