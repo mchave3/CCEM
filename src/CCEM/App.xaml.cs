@@ -159,10 +159,10 @@ public partial class App : Application
 
             // Wait for all tasks to complete.
             await Task.WhenAll(entryAnimationTask, contextMenuTask, updateTask, minimumDurationTask);
-            Logger?.Information("LoadComponentsAsync finished. Switching to interface.");
+            Logger?.Information("LoadComponentsAsync finished. Showing module selection.");
 
-            // Switch to the main interface.
-            window.SwitchToInterface();
+            // Switch to the module selection interface.
+            window.ShowModuleSelection();
         }
         catch (Exception ex)
         {

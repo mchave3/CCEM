@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using CCEM.Views.Modules;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 
@@ -16,6 +18,20 @@ public sealed partial class MainWindow : Window
     /// The main view model for this window.
     /// </summary>
     public MainViewModel ViewModel { get; }
+
+    private enum ModuleKind
+    {
+        Sccm,
+        Intune
+    }
+
+    private sealed record ModuleNavConfig(string MenuJsonPath, Type DefaultPage);
+
+    private static readonly IReadOnlyDictionary<ModuleKind, ModuleNavConfig> ModuleConfigs = new Dictionary<ModuleKind, ModuleNavConfig>
+    {
+        { ModuleKind.Sccm, new ModuleNavConfig("Assets/NavViewMenu/Sccm.json", typeof(SccmLandingPage)) },
+        { ModuleKind.Intune, new ModuleNavConfig("Assets/NavViewMenu/Intune.json", typeof(IntuneLandingPage)) }
+    };
 
     #region Application Initialization
     /// <summary>
@@ -69,6 +85,25 @@ public sealed partial class MainWindow : Window
     {
         AutoSuggestBoxHelper.OnITitleBarAutoSuggestBoxQuerySubmittedEvent(sender, args, NavFrame);
     }
+
+    private void SccmButton_Click(object sender, RoutedEventArgs e)
+    {
+        StartModule(ModuleKind.Sccm);
+    }
+
+    private void IntuneButton_Click(object sender, RoutedEventArgs e)
+    {
+        StartModule(ModuleKind.Intune);
+    }
+
+    private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    {
+        if (args.InvokedItemContainer == ExitNavItem)
+        {
+            sender.SelectedItem = null;
+            ShowModuleSelection();
+        }
+    }
     #endregion Event Handlers
 
     #region UI Transitions
@@ -90,35 +125,63 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Switches from the loading screen to the main interface.
+    /// Switches from the loading screen to the module selection screen.
     /// </summary>
-    public void SwitchToInterface()
+    public void ShowModuleSelection()
     {
         RunOnDispatcher(() =>
         {
             // Hide the loading screen.
             LoadingRoot.Visibility = Visibility.Collapsed;
 
-            // Show the main shell.
-            ShellRoot.Visibility = Visibility.Visible;
+            // Show module selection.
+            ShellRoot.Visibility = Visibility.Collapsed;
+            ModuleSelectionRoot.Visibility = Visibility.Visible;
+            SetTitleBar(MainContentGrid);
+        });
+    }
 
-            // Update title bar.
+    private void StartModule(ModuleKind module)
+    {
+        RunOnDispatcher(() =>
+        {
+            if (!ModuleConfigs.TryGetValue(module, out var config))
+            {
+                return;
+            }
+
+            ModuleSelectionRoot.Visibility = Visibility.Collapsed;
+            ShellRoot.Visibility = Visibility.Visible;
             SetTitleBar(AppTitleBar);
 
-            // Initialize navigation service.
             var navService = App.GetService<IJsonNavigationService>() as JsonNavigationService;
             if (navService != null)
             {
                 navService.Initialize(NavView, NavFrame, NavigationPageMappings.PageDictionary)
-                    .ConfigureDefaultPage(typeof(HomeLandingPage))
+                    .ConfigureDefaultPage(config.DefaultPage)
                     .ConfigureSettingsPage(typeof(SettingsPage))
-                    .ConfigureJsonFile("Assets/NavViewMenu/AppData.json")
+                    .ConfigureJsonFile(config.MenuJsonPath)
                     .ConfigureTitleBar(AppTitleBar)
                     .ConfigureBreadcrumbBar(BreadCrumbNav, BreadcrumbPageMappings.PageDictionary);
             }
+
+            EnsureExitFooterItem();
         });
     }
     #endregion UI Transitions
+
+    private void EnsureExitFooterItem()
+    {
+        if (NavView.FooterMenuItemsSource is not null)
+        {
+            NavView.FooterMenuItemsSource = null;
+        }
+
+        if (!NavView.FooterMenuItems.Contains(ExitNavItem))
+        {
+            NavView.FooterMenuItems.Add(ExitNavItem);
+        }
+    }
 
     #region Dispatcher Helpers
     /// <summary>

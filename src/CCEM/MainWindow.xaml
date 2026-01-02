@@ -57,7 +57,16 @@
             <NavigationView x:Name="NavView"
                             Grid.Row="1"
                             IsBackButtonVisible="Collapsed"
-                            IsPaneToggleButtonVisible="False">
+                            IsPaneToggleButtonVisible="False"
+                            ItemInvoked="NavView_ItemInvoked">
+                <NavigationView.FooterMenuItems>
+                    <NavigationViewItem x:Name="ExitNavItem"
+                                        Content="Exit">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xF3B1;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </NavigationView.FooterMenuItems>
                 <!--  Breadcrumb Navigation Header  -->
                 <NavigationView.Header>
                     <dev:BreadcrumbNavigator x:Name="BreadCrumbNav" />
@@ -65,6 +74,47 @@
                 <!--  Content Frame for Page Navigation  -->
                 <Frame x:Name="NavFrame" />
             </NavigationView>
+        </Grid>
+
+        <!--  Module Selection Screen (visible after splash)  -->
+        <Grid x:Name="ModuleSelectionRoot"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="24">
+                <Button Width="200"
+                        Padding="12"
+                        Click="SccmButton_Click">
+                    <StackPanel HorizontalAlignment="Center"
+                                Spacing="8">
+                        <Image Width="96"
+                               Height="96"
+                               Source="ms-appx:///Assets/Modules/SCCM/SccmLogo.scale-100.png"
+                               Stretch="Uniform" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="Configuration Manager" />
+                    </StackPanel>
+                </Button>
+                <Button Width="200"
+                        Padding="12"
+                        Click="IntuneButton_Click">
+                    <StackPanel HorizontalAlignment="Center"
+                                Spacing="8">
+                        <Image Width="96"
+                               Height="96"
+                               Source="ms-appx:///Assets/Modules/Intune/IntuneLogo.scale-100.png"
+                               Stretch="Uniform" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="Microsoft Intune" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!--  Loading/Splash Screen (visible at startup)  -->
