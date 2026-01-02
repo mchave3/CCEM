@@ -57,7 +57,16 @@
             <NavigationView x:Name="NavView"
                             Grid.Row="1"
                             IsBackButtonVisible="Collapsed"
-                            IsPaneToggleButtonVisible="False">
+                            IsPaneToggleButtonVisible="False"
+                            ItemInvoked="NavView_ItemInvoked">
+                <NavigationView.FooterMenuItems>
+                    <NavigationViewItem x:Name="ExitNavItem"
+                                        Content="Exit">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xF3B1;"/>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </NavigationView.FooterMenuItems>
                 <!--  Breadcrumb Navigation Header  -->
                 <NavigationView.Header>
                     <dev:BreadcrumbNavigator x:Name="BreadCrumbNav" />
@@ -65,6 +74,23 @@
                 <!--  Content Frame for Page Navigation  -->
                 <Frame x:Name="NavFrame" />
             </NavigationView>
+        </Grid>
+
+        <!--  Module Selection Screen (visible after splash)  -->
+        <Grid x:Name="ModuleSelectionRoot"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="24">
+                <Button Content="SCCM"
+                        MinWidth="160"
+                        Click="SccmButton_Click" />
+                <Button Content="Intune"
+                        MinWidth="160"
+                        Click="IntuneButton_Click" />
+            </StackPanel>
         </Grid>
 
         <!--  Loading/Splash Screen (visible at startup)  -->

@@ -19,8 +19,8 @@
 // | </auto-generated>                                                                                 |
 // -----------------------------------------------------------------------------------------------------
 
-// Define JSON file path variable for easy adjustment
-<# string JSON_FILE_PATH = "AppData.json"; #>
+// Define JSON folder path variable for easy adjustment
+<# string JSON_FOLDER_PATH = "Assets\\NavViewMenu"; #>
 using System;
 using System.Collections.Generic;
 
@@ -72,28 +72,31 @@ void ProcessItems(JsonElement items, List<string> xamlPages)
     }
 }
 
-string jsonFilePath = string.Empty;
+string jsonDirectory = string.Empty;
 List<string> xamlPages = null;
 string rootDirectory = FindProjectRoot(Path.GetDirectoryName(Host.TemplateFile));
 if (rootDirectory != null)
 {
-    jsonFilePath = FindJsonFile(rootDirectory, JSON_FILE_PATH);
+    jsonDirectory = Path.Combine(rootDirectory, JSON_FOLDER_PATH);
     xamlPages = GetXamlClasses(rootDirectory);
 }
 
-if (File.Exists(jsonFilePath))
+if (!string.IsNullOrWhiteSpace(jsonDirectory) && Directory.Exists(jsonDirectory))
 {
-    string jsonContent = File.ReadAllText(jsonFilePath);
-    using (JsonDocument jsonDoc = JsonDocument.Parse(jsonContent))
+    foreach (var jsonFilePath in Directory.GetFiles(jsonDirectory, "*.json", SearchOption.TopDirectoryOnly))
     {
-        JsonElement root = jsonDoc.RootElement;
-        if (root.TryGetProperty("Groups", out JsonElement groups) && groups.ValueKind == JsonValueKind.Array)
+        string jsonContent = File.ReadAllText(jsonFilePath);
+        using (JsonDocument jsonDoc = JsonDocument.Parse(jsonContent))
         {
-            foreach (JsonElement group in groups.EnumerateArray())
+            JsonElement root = jsonDoc.RootElement;
+            if (root.TryGetProperty("Groups", out JsonElement groups) && groups.ValueKind == JsonValueKind.Array)
             {
-                if (group.TryGetProperty("Items", out JsonElement items) && items.ValueKind == JsonValueKind.Array)
+                foreach (JsonElement group in groups.EnumerateArray())
                 {
-                    ProcessItems(items, xamlPages); // Call the recursive method
+                    if (group.TryGetProperty("Items", out JsonElement items) && items.ValueKind == JsonValueKind.Array)
+                    {
+                        ProcessItems(items, xamlPages); // Call the recursive method
+                    }
                 }
             }
         }
@@ -102,7 +105,7 @@ if (File.Exists(jsonFilePath))
 else
 {
 #>
-        //Json file not found.
+        //Json directory not found.
 <#
 }
 #>
@@ -150,13 +153,7 @@ List<string> GetXamlClasses(string projectDirectory)
     return xamlClasses;
 }
 
-// Helper function to find JSON file
-string FindJsonFile(string directory, string fileName)
-{
-    string[] files = Directory.GetFiles(directory, fileName, SearchOption.AllDirectories);
-    return files.Length > 0 ? files[0] : null;
-}
-
+// Helper function to find project root
 string FindProjectRoot(string directory)
 {
     while (!string.IsNullOrEmpty(directory))

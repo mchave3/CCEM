@@ -6,7 +6,8 @@
 // | </auto-generated>                                                                                 |
 // -----------------------------------------------------------------------------------------------------
 
-// Define JSON file path variable for easy adjustment
+// Define JSON folder path variable for easy adjustment
+
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,8 @@ public partial class NavigationPageMappings
 {
     public static Dictionary<string, Type> PageDictionary { get; } = new Dictionary<string, Type>
     {
-        {"CCEM.Views.HomeLandingPage", typeof(CCEM.Views.HomeLandingPage)},
+        {"CCEM.Views.Modules.IntuneLandingPage", typeof(CCEM.Views.Modules.IntuneLandingPage)},
+        {"CCEM.Views.Modules.SccmLandingPage", typeof(CCEM.Views.Modules.SccmLandingPage)},
+
     };
 }
