@@ -84,12 +84,36 @@
                         VerticalAlignment="Center"
                         Orientation="Horizontal"
                         Spacing="24">
-                <Button Content="SCCM"
-                        MinWidth="160"
-                        Click="SccmButton_Click" />
-                <Button Content="Intune"
-                        MinWidth="160"
-                        Click="IntuneButton_Click" />
+                <Button Width="200"
+                        Padding="12"
+                        Click="SccmButton_Click">
+                    <StackPanel HorizontalAlignment="Center"
+                                Spacing="8">
+                        <Image Width="96"
+                               Height="96"
+                               Source="ms-appx:///Assets/Modules/SCCM/SccmLogo.scale-100.png"
+                               Stretch="Uniform" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="Configuration Manager" />
+                    </StackPanel>
+                </Button>
+                <Button Width="200"
+                        Padding="12"
+                        Click="IntuneButton_Click">
+                    <StackPanel HorizontalAlignment="Center"
+                                Spacing="8">
+                        <Image Width="96"
+                               Height="96"
+                               Source="ms-appx:///Assets/Modules/Intune/IntuneLogo.scale-100.png"
+                               Stretch="Uniform" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Text="Microsoft Intune" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Grid>
 
