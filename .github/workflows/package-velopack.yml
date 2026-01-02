@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       version:
-        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        description: 'SemVer string (e.g., 25.11.2 or 25.11.0-beta.3)'
         required: true
         type: string
       publish-dir:
@@ -109,41 +109,18 @@ jobs:
 
           Write-Host "✅ Output directory ready"
 
-      - name: Normalize version for Velopack
-        id: normalize-version
-        shell: pwsh
-        run: |
-          $inputVersion = "${{ inputs.version }}"
-          Write-Host "Input version: $inputVersion"
-
-          # Velopack requires 3-part SemVer2 (Major.Minor.Patch[-Prerelease])
-          if ($inputVersion -match "^(\d+)\.(\d+)$") {
-            # Stable: 2510.1 → 2510.1.0
-            $normalized = "$inputVersion.0"
-          } elseif ($inputVersion -match "^(\d+)-Beta\.(\d+)$") {
-            # Beta: 2510-Beta.1 → 2510.0.1-Beta
-            $normalized = "$($Matches[1]).0.$($Matches[2])-Beta"
-          } else {
-            # Already valid or unknown format, pass through
-            $normalized = $inputVersion
-          }
-
-          Write-Host "Normalized version for Velopack: $normalized"
-          "velopack_version=$normalized" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
-
       - name: Package with Velopack
         shell: pwsh
         run: |
           Write-Host "Packaging with Velopack..."
           Write-Host "  App ID: ${{ inputs.app-id }}"
           Write-Host "  Version (original): ${{ inputs.version }}"
-          Write-Host "  Version (Velopack): ${{ steps.normalize-version.outputs.velopack_version }}"
           Write-Host "  Channel: ${{ inputs.channel }}"
           Write-Host "  Title: ${{ inputs.title }}"
 
           vpk pack `
             -u "${{ inputs.app-id }}" `
-            -v "${{ steps.normalize-version.outputs.velopack_version }}" `
+            -v "${{ inputs.version }}" `
             -p "${{ inputs.publish-dir }}" `
             -o "${{ inputs.output-dir }}" `
             -c "${{ inputs.channel }}" `
@@ -188,3 +165,4 @@ jobs:
           Write-Host "* **Channel**: ``${{ inputs.channel }}``" >> $env:GITHUB_STEP_SUMMARY
           Write-Host "* **Output**: ``${{ inputs.output-dir }}``" >> $env:GITHUB_STEP_SUMMARY
           Write-Host "* **Artifact**: ``${{ inputs.artifact-name }}``" >> $env:GITHUB_STEP_SUMMARY
+

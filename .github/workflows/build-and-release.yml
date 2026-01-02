@@ -46,7 +46,7 @@ on:
         default: ''
     outputs:
       version:
-        description: Short version identifier (YYMM.n or YYMM-Beta.BUILD)
+        description: SemVer version (YY.MM.P or YY.MM.0-beta.BUILD)
         value: ${{ jobs.calculate-version.outputs.version }}
       msix-version:
         description: 4-part MSIX version (e.g., 25.10.1.0 or 25.10.0.7)
