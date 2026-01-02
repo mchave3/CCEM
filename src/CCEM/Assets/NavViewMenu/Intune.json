@@ -4,7 +4,7 @@
     {
       "UniqueId": "Intune",
       "Title": "Intune",
-      "ImagePath": "ms-appx:///Assets/AppIcon.png",
+      "ImagePath": "ms-appx:///Assets/Modules/Intune/IntuneLogo.scale-100.png",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": true,
       "IsExpanded": false,
@@ -13,7 +13,7 @@
           "UniqueId": "CCEM.Views.Modules.IntuneLandingPage",
           "Title": "Intune",
           "Subtitle": "Microsoft Intune",
-          "ImagePath": "ms-appx:///Assets/AppIcon.png",
+          "ImagePath": "ms-appx:///Assets/Modules/Intune/IntuneLogo.scale-100.png",
           "HideItem": true
         }
       ]

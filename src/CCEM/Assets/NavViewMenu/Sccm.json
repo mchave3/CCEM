@@ -4,7 +4,7 @@
     {
       "UniqueId": "SCCM",
       "Title": "SCCM",
-      "ImagePath": "ms-appx:///Assets/AppIcon.png",
+      "ImagePath": "ms-appx:///Assets/Modules/SCCM/SccmLogo.scale-100.png",
       "IsSpecialSection": false,
       "ShowItemsWithoutGroup": true,
       "IsExpanded": false,
@@ -13,7 +13,7 @@
           "UniqueId": "CCEM.Views.Modules.SccmLandingPage",
           "Title": "SCCM",
           "Subtitle": "Configuration Manager",
-          "ImagePath": "ms-appx:///Assets/AppIcon.png",
+          "ImagePath": "ms-appx:///Assets/Modules/SCCM/SccmLogo.scale-100.png",
           "HideItem": true
         }
       ]
