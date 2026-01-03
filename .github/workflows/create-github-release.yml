@@ -84,14 +84,11 @@ jobs:
           $stablePattern = '^v(\d{2})\.(\d{1,2})\.(\d+)$'
           $betaPattern   = '^v(\d{2})\.(\d{1,2})\.0-beta\.(\d+)$'
 
-          function Get-LatestStableTag([string[]]$allTags, [string]$excludeTag, [int]$maxYY, [int]$maxMM) {
-            $stableTags =
-              $allTags |
-              ForEach-Object {
-                if ($_ -eq $excludeTag) { return }
-                $m = [regex]::Match($_, $stablePattern)
-                if (-not $m.Success) { return }
-
+          function Get-LatestStableTag([string[]]$allTags, [int]$beforeYY = 999, [int]$beforeMM = 99) {
+            # Find the latest stable tag, optionally before a given YY.MM version line
+            $stableTags = $allTags | ForEach-Object {
+              $m = [regex]::Match($_, $stablePattern)
+              if ($m.Success) {
                 [pscustomobject]@{
                   Tag   = $_
                   YY    = [int]$m.Groups[1].Value
@@ -99,62 +96,60 @@ jobs:
                   Patch = [int]$m.Groups[3].Value
                 }
               }
+            } | Where-Object { $_.YY -lt $beforeYY -or ($_.YY -eq $beforeYY -and $_.MM -lt $beforeMM) }
 
             if (-not $stableTags) { return "" }
-
-            $filtered =
-              $stableTags |
-              Where-Object { $_.YY -lt $maxYY -or ($_.YY -eq $maxYY -and $_.MM -lt $maxMM) }
-
-            if (-not $filtered) { return "" }
-            return ($filtered | Sort-Object YY, MM, Patch -Descending | Select-Object -First 1).Tag
+            return ($stableTags | Sort-Object YY, MM, Patch -Descending | Select-Object -First 1).Tag
           }
 
           $allTags = @(git tag --list 'v*')
+          Write-Host "Found $($allTags.Count) tags matching 'v*'"
           $previousTag = ""
 
           if ($currentTag -match $betaPattern) {
-            $yy = $Matches[1]
+            $yy = [int]$Matches[1]
             $mm = [int]$Matches[2]
             $build = [int]$Matches[3]
 
-            $sameLineBetaPattern = "^v$yy\\.$mm\\.0-beta\\.(\\d+)$"
-            $previousBuild =
-              $allTags |
-              ForEach-Object {
-                $m = [regex]::Match($_, $sameLineBetaPattern)
-                if ($m.Success) { [int]$m.Groups[1].Value } else { $null }
-              } |
-              Where-Object { $null -ne $_ -and $_ -lt $build } |
-              Sort-Object -Descending |
-              Select-Object -First 1
+            Write-Host "Beta detected: YY=$yy, MM=$mm, Build=$build"
 
-            if ($null -ne $previousBuild) {
+            # Look for previous beta in same version line
+            $sameLineBetaPattern = "^v$yy\.$mm\.0-beta\.(\d+)$"
+            $previousBuild = $allTags | ForEach-Object {
+              $m = [regex]::Match($_, $sameLineBetaPattern)
+              if ($m.Success) { [int]$m.Groups[1].Value }
+            } | Where-Object { $_ -lt $build } | Sort-Object -Descending | Select-Object -First 1
+
+            if ($previousBuild) {
               $previousTag = "v$yy.$mm.0-beta.$previousBuild"
+              Write-Host "Found previous beta: $previousTag"
             } else {
-              $previousTag = Get-LatestStableTag -allTags $allTags -excludeTag $currentTag -maxYY ([int]$yy) -maxMM $mm
+              # No previous beta, get latest stable overall
+              $previousTag = Get-LatestStableTag -allTags $allTags
+              Write-Host "No previous beta, using latest stable: $previousTag"
             }
           }
           elseif ($currentTag -match $stablePattern) {
-            $yy = $Matches[1]
+            $yy = [int]$Matches[1]
             $mm = [int]$Matches[2]
             $patch = [int]$Matches[3]
 
-            $sameLineStablePattern = "^v$yy\\.$mm\\.(\\d+)$"
-            $previousPatch =
-              $allTags |
-              ForEach-Object {
-                $m = [regex]::Match($_, $sameLineStablePattern)
-                if ($m.Success) { [int]$m.Groups[1].Value } else { $null }
-              } |
-              Where-Object { $null -ne $_ -and $_ -lt $patch } |
-              Sort-Object -Descending |
-              Select-Object -First 1
+            Write-Host "Stable detected: YY=$yy, MM=$mm, Patch=$patch"
 
-            if ($null -ne $previousPatch) {
+            # Look for previous patch in same version line
+            $sameLineStablePattern = "^v$yy\.$mm\.(\d+)$"
+            $previousPatch = $allTags | ForEach-Object {
+              $m = [regex]::Match($_, $sameLineStablePattern)
+              if ($m.Success) { [int]$m.Groups[1].Value }
+            } | Where-Object { $_ -lt $patch } | Sort-Object -Descending | Select-Object -First 1
+
+            if ($previousPatch) {
               $previousTag = "v$yy.$mm.$previousPatch"
+              Write-Host "Found previous patch: $previousTag"
             } else {
-              $previousTag = Get-LatestStableTag -allTags $allTags -excludeTag $currentTag -maxYY 999 -maxMM 99
+              # No previous patch, get latest stable before this version line
+              $previousTag = Get-LatestStableTag -allTags $allTags -beforeYY $yy -beforeMM $mm
+              Write-Host "No previous patch, using latest stable before $yy.$mm: $previousTag"
             }
           }
 
