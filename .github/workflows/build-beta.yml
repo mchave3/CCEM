@@ -23,5 +23,5 @@ jobs:
       source-branch: develop
       release-channel: beta
       release-type: beta
-      release-title-prefix: 'CCEM Beta'
+      release-title-prefix: 'CCEM Pre-Release'
     secrets: inherit
