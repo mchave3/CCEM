@@ -4,11 +4,11 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        description: 'Version string (e.g., 25.11.2 or 25.11.0-beta.3)'
         required: true
         type: string
       tag-name:
-        description: 'Git tag name (e.g., v2510.1)'
+        description: 'Git tag name (e.g., v25.11.2)'
         required: true
         type: string
       release-name:
@@ -23,40 +23,12 @@ on:
         description: 'Whether this is a prerelease (beta)'
         required: true
         type: boolean
-      release-body-template:
-        description: 'Path to release body template (markdown file)'
-        required: true
-        type: string
-      velopack-output-dir:
-        description: 'Directory containing Velopack releases'
-        required: true
-        type: string
       artifact-name:
         description: 'Name of the Velopack artifact to download'
         required: true
         type: string
       msix-dir:
         description: 'Directory containing MSIX files (optional)'
-        required: false
-        type: string
-        default: ''
-      pr-number:
-        description: 'Pull request number (for beta releases)'
-        required: false
-        type: number
-        default: 0
-      pr-title:
-        description: 'Pull request title (for beta releases)'
-        required: false
-        type: string
-        default: ''
-      pr-author:
-        description: 'Pull request author username (for beta releases)'
-        required: false
-        type: string
-        default: ''
-      pr-body:
-        description: 'Pull request body/description (for beta releases)'
         required: false
         type: string
         default: ''
@@ -108,156 +80,100 @@ jobs:
             }
           }
 
-      - name: Calculate hashes & generate FILES_TABLE
-        id: files-table
+      - name: Ensure local tag exists for changelog
         shell: pwsh
         run: |
-          $repo = "${{ github.repository }}"
-          $ver = "${{ inputs.version }}"
-          $rows = @()
+          $tag = "${{ inputs.tag-name }}"
+          $commit = "${{ inputs.source-commit }}"
+          $exists = git tag -l $tag
 
-          $collect = @()
-
-          # This directory contains only the final Velopack packages
-          $velopackDir = "downloaded-artifacts/velopack-releases"
-
-          if (Test-Path $velopackDir) {
-            Write-Host "Collecting files from Velopack output directory: $velopackDir"
-            $collect += Get-ChildItem -Path $velopackDir -File
+          if ([string]::IsNullOrWhiteSpace($exists)) {
+            Write-Host "Creating local tag $tag at $commit"
+            git tag $tag $commit
           } else {
-            Write-Host "⚠️ Velopack directory not found: $velopackDir"
+            Write-Host "Local tag already exists: $tag"
           }
 
-          # Collect MSIX files if directory is specified and exists
-          if ("${{ inputs.msix-dir }}" -ne "" -and (Test-Path "${{ inputs.msix-dir }}")) {
-            $collect += Get-ChildItem -Path "${{ inputs.msix-dir }}" -File -Recurse
-          }
-
-          # Filter out .json files from FILES_TABLE
-          $collect = $collect | Where-Object { $_.Extension -ne ".json" }
-
-          Write-Host "Found $($collect.Count) files for FILES_TABLE (excluding .json files)"
-
-          foreach ($f in ($collect | Sort-Object Name)) {
-            $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
-            $dl = "https://github.com/$repo/releases/download/${{ inputs.tag-name }}/$($f.Name)"
-            $badge = "https://img.shields.io/github/downloads/$repo/${{ inputs.tag-name }}/$($f.Name)?style=flat-square&label=&color=blue"
-            $rows += "|[$($f.Name)]($dl)|``$hash``|<picture>![$($f.Name)]($badge)</picture>|"
-            Write-Host "  - $($f.Name)"
-          }
-
-          $table = @"
-          ## Files
-          |Files|Hash (SHA256)|Downloads|
-          |---|---|---|
-          $($rows -join "`n")
-          "@
-
-          # Use multiline output
-          "files_table<<EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
-          $table | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "EOF" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
-
-      - name: Generate release body from template
-        id: release-body
+      - name: Determine previous tag for changelog
+        id: prev-tag
         shell: pwsh
         run: |
-          $templatePath = "${{ inputs.release-body-template }}"
+          $isPrerelease = "${{ inputs.is-prerelease }}"
+          $currentTag = "${{ inputs.tag-name }}"
+          $currentYYMM = ""
+          $prevTag = ""
 
-          if (-not (Test-Path $templatePath)) {
-            Write-Host "❌ Release body template not found: $templatePath"
-            exit 1
+          if ($currentTag -match '^v(\d{2})\.(\d{1,2})\.') {
+            $currentYYMM = "{0}.{1}" -f $Matches[1], [int]$Matches[2]
           }
 
-          $templateContent = Get-Content -Path $templatePath -Raw
-          $body = $templateContent
+          function Get-LatestStableTag([string]$excludeTag) {
+            $stableTags = git tag | Where-Object { $_ -match '^v\d{2}\.\d{1,2}\.\d+$' -and $_ -ne $excludeTag }
+            if ($stableTags.Count -eq 0) { return "" }
 
-          # Replace common placeholders
-          $repoFullName = "${{ github.repository }}"
-          $repoParts = $repoFullName -split "/"
-          $repoOwner = $repoParts[0]
-          $repoName = $repoParts[1]
-
-          $body = $body -replace '\{VERSION\}',"${{ inputs.version }}"
-          $body = $body -replace '\{REPO_OWNER\}',$repoOwner
-          $body = $body -replace '\{REPO_NAME\}',$repoName
-
-          # For beta releases: use PR information
-          if ("${{ inputs.is-prerelease }}" -eq "True" -and "${{ inputs.pr-number }}" -ne "0") {
-            Write-Host "Processing beta release with PR information"
-
-            $body = $body -replace '\{PR_TITLE\}',"${{ inputs.pr-title }}"
-            $body = $body -replace '\{PR_AUTHOR\}',"${{ inputs.pr-author }}"
-            $body = $body -replace '\{PR_NUMBER\}',"${{ inputs.pr-number }}"
-            $body = $body -replace '\{PR_REPO_OWNER\}',$repoOwner
-            $body = $body -replace '\{PR_REPO_NAME\}',$repoName
-
-            # Handle PR body (description)
-            $prBody = @"
-          ${{ inputs.pr-body }}
-          "@
-            if ([string]::IsNullOrWhiteSpace($prBody)) {
-              $prBody = "_No description provided_"
-            }
-            $body = $body -replace '\{PR_BODY\}',$prBody
-          }
-
-          # For stable releases: generate changelog
-          if ("${{ inputs.is-prerelease }}" -eq "False" -and "${{ inputs.previous-stable-tag }}" -ne "") {
-            Write-Host "Processing stable release - generating changelog"
-
-            # Get all merge commits since last stable tag
-            $fromTag = "${{ inputs.previous-stable-tag }}"
-            $logOutput = git log "$fromTag..HEAD" --merges --pretty=format:"%s|%an"
-
-            $changelog = ""
-            if ([string]::IsNullOrEmpty($logOutput)) {
-              $changelog = "_No changes recorded_"
-            } else {
-              $prEntries = @()
-
-              foreach ($line in $logOutput -split "`n") {
-                if ($line -match "Merge pull request #(\d+) from (.+)\|(.+)") {
-                  $prNumber = $Matches[1]
-                  $branch = $Matches[2]
-                  $authorName = $Matches[3]
-
-                  # Extract username from branch
-                  $username = if ($branch -match "^([^/]+)/") { $Matches[1] } else { $authorName }
-
-                  # Get PR title
-                  $prTitle = git log "$fromTag..HEAD" --grep="Merge pull request #$prNumber" --format=%B -n 1 | Select-Object -Skip 2 -First 1
-                  if ([string]::IsNullOrWhiteSpace($prTitle)) {
-                    $prTitle = "Pull Request #$prNumber"
-                  }
-                  $prTitle = $prTitle.Trim()
-
-                  $entry = "* **$prTitle** by [@$username](https://github.com/$username) - [#$prNumber](https://github.com/$repoOwner/$repoName/pull/$prNumber)"
-                  $prEntries += $entry
+            $tagObjects = foreach ($tag in $stableTags) {
+              if ($tag -match '^v(\d{2})\.(\d{1,2})\.(\d+)$') {
+                [PSCustomObject]@{
+                  Tag = $tag
+                  YYMM = [int]("{0}{1:00}" -f $Matches[1], [int]$Matches[2])
+                  Patch = [int]$Matches[3]
                 }
               }
+            }
 
-              if ($prEntries.Count -eq 0) {
-                $changelog = "_No pull requests found_"
-              } else {
-                $changelog = $prEntries -join "`n"
+            ($tagObjects | Sort-Object -Property YYMM, Patch -Descending | Select-Object -First 1).Tag
+          }
+
+          function Get-LatestBetaTag([string]$excludeTag, [string]$yymm) {
+            if ([string]::IsNullOrWhiteSpace($yymm)) { return "" }
+
+            $escapedYYMM = [regex]::Escape($yymm)
+            $pattern = "^v$escapedYYMM\.0-beta\.\d+$"
+            $betaTags = git tag | Where-Object { $_ -match $pattern -and $_ -ne $excludeTag }
+            if ($betaTags.Count -eq 0) { return "" }
+
+            $tagObjects = foreach ($tag in $betaTags) {
+              if ($tag -match '^v(\d{2})\.(\d{1,2})\.0-beta\.(\d+)$') {
+                [PSCustomObject]@{
+                  Tag = $tag
+                  YYMM = [int]("{0}{1:00}" -f $Matches[1], [int]$Matches[2])
+                  Build = [int]$Matches[3]
+                }
               }
             }
 
-            $body = $body -replace '\{CHANGELOG\}',$changelog
-            $body = $body -replace '\{PREVIOUS_TAG\}',"${{ inputs.previous-stable-tag }}"
+            ($tagObjects | Sort-Object -Property YYMM, Build -Descending | Select-Object -First 1).Tag
           }
 
-          # Replace FILES_TABLE placeholder
-          $body = $body -replace '\{FILES_TABLE\}',"${{ steps.files-table.outputs.files_table }}"
+          if ($isPrerelease -eq "True") {
+            $prevTag = Get-LatestBetaTag $currentTag $currentYYMM
+            if ([string]::IsNullOrWhiteSpace($prevTag)) {
+              $prevTag = Get-LatestStableTag $currentTag
+            }
+          } else {
+            $prevTag = "${{ inputs.previous-stable-tag }}"
+            if ([string]::IsNullOrWhiteSpace($prevTag)) {
+              $prevTag = Get-LatestStableTag $currentTag
+            }
+          }
 
-          # Save to file
-          $outputPath = "generated-release-body.md"
-          $body | Out-File -FilePath $outputPath -Encoding UTF8 -NoNewline
+          Write-Host "Previous tag for changelog: $prevTag"
+          "previous-tag=$prevTag" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-          Write-Host "✅ Release body generated successfully"
+      - name: Generate changelog (auto-changelog)
+        shell: pwsh
+        run: |
+          npm install -g auto-changelog
+          $prevTag = "${{ steps.prev-tag.outputs.previous-tag }}"
+          $currentTag = "${{ inputs.tag-name }}"
 
-          "body_path=$outputPath" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          $args = @("--tag-pattern", "^v\\d{2}\\.\\d{1,2}\\.", "--commit-limit", "false", "--hide-credit", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--ending-version", $currentTag)
+          if (-not [string]::IsNullOrWhiteSpace($prevTag)) {
+            $args += @("--starting-version", $prevTag)
+          }
+
+          Write-Host "Running: auto-changelog $($args -join ' ')"
+          auto-changelog @args
 
       - name: Prepare release files
         id: prepare-files
@@ -290,20 +206,20 @@ jobs:
           }
 
           $fileCount = (Get-ChildItem -Path $stagingDir -File).Count
-          Write-Host "✅ Total files prepared for release: $fileCount"
+          Write-Host "? Total files prepared for release: $fileCount"
 
           "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-      - name: Create Git tag & GitHub Release
+      - name: Create GitHub Release
         id: gh-release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ inputs.tag-name }}
+          tag: ${{ inputs.tag-name }}
           name: ${{ inputs.release-name }}
-          target_commitish: ${{ inputs.source-commit }}
+          commit: ${{ inputs.source-commit }}
           prerelease: ${{ inputs.is-prerelease }}
-          files: ${{ steps.prepare-files.outputs.staging-dir }}/*
-          body_path: ${{ steps.release-body.outputs.body_path }}
+          artifacts: ${{ steps.prepare-files.outputs.staging-dir }}/*
+          bodyFile: CHANGELOG.md
 
       - name: Calculate release URL
         id: release-url

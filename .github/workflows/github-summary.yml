@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: 'Version string (e.g., 2510.1 or 2510-Beta.1)'
+        description: 'Version string (e.g., 25.11.2 or 25.11.0-beta.3)'
         required: true
         type: string
       msix-version:
@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       tag-name:
-        description: 'Git tag name (e.g., v2510.1)'
+        description: 'Git tag name (e.g., v25.11.2)'
         required: true
         type: string
       release-channel:
