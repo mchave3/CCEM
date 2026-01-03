@@ -167,7 +167,7 @@ jobs:
           $prevTag = "${{ steps.prev-tag.outputs.previous-tag }}"
           $currentTag = "${{ inputs.tag-name }}"
 
-          $args = @("--tag-pattern", "^v\\d{2}\\.\\d{1,2}\\.", "--commit-limit", "false", "--hide-credit", "--output", "CHANGELOG.md", "--ending-version", $currentTag)
+          $args = @("--tag-pattern", "^v\\d{2}\\.\\d{1,2}\\.", "--commit-limit", "false", "--hide-credit", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--ending-version", $currentTag)
           if (-not [string]::IsNullOrWhiteSpace($prevTag)) {
             $args += @("--starting-version", $prevTag)
           }
