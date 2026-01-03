@@ -1,4 +1,4 @@
-name: ?? Create GitHub Release
+name: 🚀 Create GitHub Release
 
 on:
   workflow_call:
@@ -193,7 +193,7 @@ jobs:
               Write-Host "  Copied: $($_.Name)"
             }
           } else {
-            Write-Host "?? Velopack directory not found: $velopackDir"
+            Write-Host "⚠️ Velopack directory not found: $velopackDir"
           }
 
           # Copy MSIX files if available
