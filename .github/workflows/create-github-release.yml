@@ -87,13 +87,16 @@ jobs:
           function Get-LatestStableTag([string[]]$allTags, [string]$excludeTag, [int]$maxYY, [int]$maxMM) {
             $stableTags =
               $allTags |
-              Where-Object { $_ -match $stablePattern -and $_ -ne $excludeTag } |
               ForEach-Object {
+                if ($_ -eq $excludeTag) { return }
+                $m = [regex]::Match($_, $stablePattern)
+                if (-not $m.Success) { return }
+
                 [pscustomobject]@{
                   Tag   = $_
-                  YY    = [int]$Matches[1]
-                  MM    = [int]$Matches[2]
-                  Patch = [int]$Matches[3]
+                  YY    = [int]$m.Groups[1].Value
+                  MM    = [int]$m.Groups[2].Value
+                  Patch = [int]$m.Groups[3].Value
                 }
               }
 
@@ -118,9 +121,11 @@ jobs:
             $sameLineBetaPattern = "^v$yy\\.$mm\\.0-beta\\.(\\d+)$"
             $previousBuild =
               $allTags |
-              Where-Object { $_ -match $sameLineBetaPattern } |
-              ForEach-Object { [int]$Matches[1] } |
-              Where-Object { $_ -lt $build } |
+              ForEach-Object {
+                $m = [regex]::Match($_, $sameLineBetaPattern)
+                if ($m.Success) { [int]$m.Groups[1].Value } else { $null }
+              } |
+              Where-Object { $null -ne $_ -and $_ -lt $build } |
               Sort-Object -Descending |
               Select-Object -First 1
 
@@ -138,9 +143,11 @@ jobs:
             $sameLineStablePattern = "^v$yy\\.$mm\\.(\\d+)$"
             $previousPatch =
               $allTags |
-              Where-Object { $_ -match $sameLineStablePattern } |
-              ForEach-Object { [int]$Matches[1] } |
-              Where-Object { $_ -lt $patch } |
+              ForEach-Object {
+                $m = [regex]::Match($_, $sameLineStablePattern)
+                if ($m.Success) { [int]$m.Groups[1].Value } else { $null }
+              } |
+              Where-Object { $null -ne $_ -and $_ -lt $patch } |
               Sort-Object -Descending |
               Select-Object -First 1
 
