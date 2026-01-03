@@ -67,16 +67,7 @@ jobs:
       release-type: ${{ inputs.release-type }}
       source-branch: ${{ inputs.source-branch }}
 
-  # Job 2: Find previous stable tag (for stable releases only)
-  find-previous-tag:
-    name: 🔍 Find Previous Tag
-    needs: calculate-version
-    if: inputs.release-type == 'stable'
-    uses: ./.github/workflows/find-previous-stable-tag.yml
-    with:
-      current-version: ${{ needs.calculate-version.outputs.version }}
-
-  # Job 3: Build .NET project
+  # Job 2: Build .NET project
   build-dotnet:
     name: 🏗️ Build .NET
     needs: calculate-version
@@ -89,7 +80,7 @@ jobs:
       publish-dir: publish
       dotnet-version: 10.0.x
 
-  # Job 4: Package with Velopack
+  # Job 3: Package with Velopack
   package-velopack:
     name: 📦 Package Velopack
     needs: [calculate-version, build-dotnet]
@@ -104,10 +95,10 @@ jobs:
       icon-path: src/CCEM/Assets/AppIcon.ico
       artifact-name: velopack-${{ inputs.release-channel }}-${{ needs.calculate-version.outputs.version }}
 
-  # Job 5: Create GitHub Release
+  # Job 4: Create GitHub Release
   create-release:
     name: 🚀 Create Release
-    needs: [calculate-version, find-previous-tag, package-velopack]
+    needs: [calculate-version, package-velopack]
     if: always() && needs.calculate-version.result == 'success' && needs.package-velopack.result == 'success'
     uses: ./.github/workflows/create-github-release.yml
     with:
@@ -118,9 +109,8 @@ jobs:
       is-prerelease: ${{ inputs.release-type == 'beta' }}
       artifact-name: ${{ needs.package-velopack.outputs.artifact-name }}
       msix-dir: ''
-      previous-stable-tag: ${{ needs.find-previous-tag.outputs.previous-tag || '' }}
 
-  # Job 6: Generate GitHub Summary
+  # Job 5: Generate GitHub Summary
   github-summary:
     name: 📋 Summary
     needs: [calculate-version, create-release]
@@ -133,4 +123,3 @@ jobs:
       release-channel: ${{ inputs.release-channel }}
       release-url: ${{ needs.create-release.outputs.release-url }}
       source-commit: ${{ needs.calculate-version.outputs.source-commit }}
-

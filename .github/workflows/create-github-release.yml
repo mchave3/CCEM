@@ -32,11 +32,6 @@ on:
         required: false
         type: string
         default: ''
-      previous-stable-tag:
-        description: 'Previous stable tag (for stable releases changelog)'
-        required: false
-        type: string
-        default: ''
     outputs:
       release-url:
         description: 'URL of the created GitHub Release'
@@ -94,79 +89,13 @@ jobs:
             Write-Host "Local tag already exists: $tag"
           }
 
-      - name: Determine previous tag for changelog
-        id: prev-tag
-        shell: pwsh
-        run: |
-          $isPrerelease = "${{ inputs.is-prerelease }}"
-          $currentTag = "${{ inputs.tag-name }}"
-          $currentYYMM = ""
-          $prevTag = ""
-
-          if ($currentTag -match '^v(\d{2})\.(\d{1,2})\.') {
-            $currentYYMM = "{0}.{1}" -f $Matches[1], [int]$Matches[2]
-          }
-
-          function Get-LatestStableTag([string]$excludeTag) {
-            $stableTags = git tag | Where-Object { $_ -match '^v\d{2}\.\d{1,2}\.\d+$' -and $_ -ne $excludeTag }
-            if ($stableTags.Count -eq 0) { return "" }
-
-            $tagObjects = foreach ($tag in $stableTags) {
-              if ($tag -match '^v(\d{2})\.(\d{1,2})\.(\d+)$') {
-                [PSCustomObject]@{
-                  Tag = $tag
-                  YYMM = [int]("{0}{1:00}" -f $Matches[1], [int]$Matches[2])
-                  Patch = [int]$Matches[3]
-                }
-              }
-            }
-
-            ($tagObjects | Sort-Object -Property YYMM, Patch -Descending | Select-Object -First 1).Tag
-          }
-
-          function Get-LatestBetaTag([string]$excludeTag, [string]$yymm) {
-            if ([string]::IsNullOrWhiteSpace($yymm)) { return "" }
-
-            $escapedYYMM = [regex]::Escape($yymm)
-            $pattern = "^v$escapedYYMM\.0-beta\.\d+$"
-            $betaTags = git tag | Where-Object { $_ -match $pattern -and $_ -ne $excludeTag }
-            if ($betaTags.Count -eq 0) { return "" }
-
-            $tagObjects = foreach ($tag in $betaTags) {
-              if ($tag -match '^v(\d{2})\.(\d{1,2})\.0-beta\.(\d+)$') {
-                [PSCustomObject]@{
-                  Tag = $tag
-                  YYMM = [int]("{0}{1:00}" -f $Matches[1], [int]$Matches[2])
-                  Build = [int]$Matches[3]
-                }
-              }
-            }
-
-            ($tagObjects | Sort-Object -Property YYMM, Build -Descending | Select-Object -First 1).Tag
-          }
-
-          if ($isPrerelease -eq "True") {
-            $prevTag = Get-LatestBetaTag $currentTag $currentYYMM
-            if ([string]::IsNullOrWhiteSpace($prevTag)) {
-              $prevTag = Get-LatestStableTag $currentTag
-            }
-          } else {
-            $prevTag = "${{ inputs.previous-stable-tag }}"
-            if ([string]::IsNullOrWhiteSpace($prevTag)) {
-              $prevTag = Get-LatestStableTag $currentTag
-            }
-          }
-
-          Write-Host "Previous tag for changelog: $prevTag"
-          "previous-tag=$prevTag" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
-
       - name: Generate changelog (auto-changelog)
         shell: pwsh
         run: |
           npm install -g auto-changelog
           $currentTag = "${{ inputs.tag-name }}"
 
-          $args = @("--tag-pattern", "^v\d{2}\.\d{1,2}\.", "--commit-limit", "false", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--starting-version", $currentTag, "--ending-version", $currentTag)
+          $args = @("--tag-pattern", "^v\d{2}\.\d{1,2}\.", "--commit-limit", "false", "--hide-credit", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--starting-version", $currentTag, "--ending-version", $currentTag)
 
           Write-Host "Running: auto-changelog $($args -join ' ')"
           auto-changelog @args
