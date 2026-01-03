@@ -197,30 +197,53 @@ jobs:
 
           "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-      - name: Create GitHub Release (forced previous tag)
-        id: gh-release-forced
-        if: steps.previous-tag.outputs.tag != ''
-        uses: ncipollo/release-action@v1.20.0
-        with:
-          tag: ${{ inputs.tag-name }}
-          name: ${{ inputs.release-name }}
-          commit: ${{ inputs.source-commit }}
-          prerelease: ${{ inputs.is-prerelease }}
-          artifacts: ${{ steps.prepare-files.outputs.staging-dir }}/*
-          generateReleaseNotes: true
-          generateReleaseNotesPreviousTag: ${{ steps.previous-tag.outputs.tag }}
+      - name: Create GitHub Release
+        id: gh-release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ inputs.tag-name }}"
+          $name = "${{ inputs.release-name }}"
+          $commit = "${{ inputs.source-commit }}"
+          $isPrerelease = "${{ inputs.is-prerelease }}"
+          $previousTag = "${{ steps.previous-tag.outputs.tag }}"
+          $stagingDir = "${{ steps.prepare-files.outputs.staging-dir }}"
 
-      - name: Create GitHub Release (auto previous tag)
-        id: gh-release-auto
-        if: steps.previous-tag.outputs.tag == ''
-        uses: ncipollo/release-action@v1.20.0
-        with:
-          tag: ${{ inputs.tag-name }}
-          name: ${{ inputs.release-name }}
-          commit: ${{ inputs.source-commit }}
-          prerelease: ${{ inputs.is-prerelease }}
-          artifacts: ${{ steps.prepare-files.outputs.staging-dir }}/*
-          generateReleaseNotes: true
+          # Build the gh release create command
+          $args = @(
+            "release", "create", $tag,
+            "--title", $name,
+            "--target", $commit,
+            "--generate-notes"
+          )
+
+          # Add previous tag for release notes if available
+          if ($previousTag) {
+            $args += "--notes-start-tag"
+            $args += $previousTag
+          }
+
+          # Add prerelease flag
+          if ($isPrerelease -eq "true") {
+            $args += "--prerelease"
+          } else {
+            $args += "--latest"
+          }
+
+          # Add artifacts
+          $artifacts = Get-ChildItem -Path $stagingDir -File | ForEach-Object { $_.FullName }
+          foreach ($artifact in $artifacts) {
+            $args += $artifact
+          }
+
+          Write-Host "Creating release with: gh $($args -join ' ')"
+          & gh @args
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to create release"
+            exit 1
+          }
 
       - name: Calculate release URL
         id: release-url
