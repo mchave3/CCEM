@@ -19,31 +19,6 @@ on:
         description: Prefix used for the GitHub Release title (e.g., "CCEM" or "CCEM Beta")
         required: true
         type: string
-      pr-number:
-        description: 'Pull request number (for beta releases)'
-        required: false
-        type: number
-        default: 0
-      pr-title:
-        description: 'Pull request title (for beta releases)'
-        required: false
-        type: string
-        default: ''
-      pr-author:
-        description: 'Pull request author username (for beta releases)'
-        required: false
-        type: string
-        default: ''
-      pr-body:
-        description: 'Pull request body/description (for beta releases)'
-        required: false
-        type: string
-        default: ''
-      pr-url:
-        description: 'Pull request URL (for beta releases)'
-        required: false
-        type: string
-        default: ''
     outputs:
       version:
         description: SemVer version (YY.MM.P or YY.MM.0-beta.BUILD)
@@ -82,9 +57,6 @@ env:
   VELOPACK_TITLE: Client Center for Endpoint Manager
   VELOPACK_ICON: src/CCEM/Assets/AppIcon.ico
 
-  # Release body templates
-  RELEASE_BODY_BETA_TEMPLATE: .github/workflows/beta-body-template.md
-  RELEASE_BODY_STABLE_TEMPLATE: .github/workflows/release-body-template.md
 
 jobs:
   # Job 1: Calculate version based on release type
@@ -144,14 +116,8 @@ jobs:
       release-name: ${{ inputs.release-title-prefix }} ${{ needs.calculate-version.outputs.version }}
       source-commit: ${{ needs.calculate-version.outputs.source-commit }}
       is-prerelease: ${{ inputs.release-type == 'beta' }}
-      release-body-template: ${{ inputs.release-type == 'beta' && '.github/workflows/beta-body-template.md' || '.github/workflows/release-body-template.md' }}
-      velopack-output-dir: Releases
       artifact-name: ${{ needs.package-velopack.outputs.artifact-name }}
       msix-dir: ''
-      pr-number: ${{ inputs.pr-number }}
-      pr-title: ${{ inputs.pr-title }}
-      pr-author: ${{ inputs.pr-author }}
-      pr-body: ${{ inputs.pr-body }}
       previous-stable-tag: ${{ needs.find-previous-tag.outputs.previous-tag || '' }}
 
   # Job 6: Generate GitHub Summary
@@ -167,3 +133,4 @@ jobs:
       release-channel: ${{ inputs.release-channel }}
       release-url: ${{ needs.create-release.outputs.release-url }}
       source-commit: ${{ needs.calculate-version.outputs.source-commit }}
+
