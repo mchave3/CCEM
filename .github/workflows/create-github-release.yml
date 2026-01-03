@@ -56,6 +56,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
       - name: Download Velopack artifacts
         uses: actions/download-artifact@v7
         with:
@@ -70,6 +73,91 @@ jobs:
             Get-ChildItem -Path "downloaded-artifacts" -Recurse -File | ForEach-Object {
               Write-Host "* ``$($_.FullName)``" >> $env:GITHUB_STEP_SUMMARY
             }
+          }
+
+      - name: Calculate previous tag for release notes
+        id: previous-tag
+        shell: pwsh
+        run: |
+          $currentTag = "${{ inputs.tag-name }}"
+
+          $stablePattern = '^v(\d{2})\.(\d{1,2})\.(\d+)$'
+          $betaPattern   = '^v(\d{2})\.(\d{1,2})\.0-beta\.(\d+)$'
+
+          function Get-LatestStableTag([string[]]$allTags, [string]$excludeTag, [int]$maxYY, [int]$maxMM) {
+            $stableTags =
+              $allTags |
+              Where-Object { $_ -match $stablePattern -and $_ -ne $excludeTag } |
+              ForEach-Object {
+                [pscustomobject]@{
+                  Tag   = $_
+                  YY    = [int]$Matches[1]
+                  MM    = [int]$Matches[2]
+                  Patch = [int]$Matches[3]
+                }
+              }
+
+            if (-not $stableTags) { return "" }
+
+            $filtered =
+              $stableTags |
+              Where-Object { $_.YY -lt $maxYY -or ($_.YY -eq $maxYY -and $_.MM -lt $maxMM) }
+
+            if (-not $filtered) { return "" }
+            return ($filtered | Sort-Object YY, MM, Patch -Descending | Select-Object -First 1).Tag
+          }
+
+          $allTags = @(git tag --list 'v*')
+          $previousTag = ""
+
+          if ($currentTag -match $betaPattern) {
+            $yy = $Matches[1]
+            $mm = [int]$Matches[2]
+            $build = [int]$Matches[3]
+
+            $sameLineBetaPattern = "^v$yy\\.$mm\\.0-beta\\.(\\d+)$"
+            $previousBuild =
+              $allTags |
+              Where-Object { $_ -match $sameLineBetaPattern } |
+              ForEach-Object { [int]$Matches[1] } |
+              Where-Object { $_ -lt $build } |
+              Sort-Object -Descending |
+              Select-Object -First 1
+
+            if ($null -ne $previousBuild) {
+              $previousTag = "v$yy.$mm.0-beta.$previousBuild"
+            } else {
+              $previousTag = Get-LatestStableTag -allTags $allTags -excludeTag $currentTag -maxYY ([int]$yy) -maxMM $mm
+            }
+          }
+          elseif ($currentTag -match $stablePattern) {
+            $yy = $Matches[1]
+            $mm = [int]$Matches[2]
+            $patch = [int]$Matches[3]
+
+            $sameLineStablePattern = "^v$yy\\.$mm\\.(\\d+)$"
+            $previousPatch =
+              $allTags |
+              Where-Object { $_ -match $sameLineStablePattern } |
+              ForEach-Object { [int]$Matches[1] } |
+              Where-Object { $_ -lt $patch } |
+              Sort-Object -Descending |
+              Select-Object -First 1
+
+            if ($null -ne $previousPatch) {
+              $previousTag = "v$yy.$mm.$previousPatch"
+            } else {
+              $previousTag = Get-LatestStableTag -allTags $allTags -excludeTag $currentTag -maxYY 999 -maxMM 99
+            }
+          }
+
+          "tag=$previousTag" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+          Write-Host "Current tag:  $currentTag"
+          if ([string]::IsNullOrWhiteSpace($previousTag)) {
+            Write-Host "Previous tag: (auto)"
+          } else {
+            Write-Host "Previous tag: $previousTag"
           }
 
       - name: Prepare release files
@@ -107,9 +195,23 @@ jobs:
 
           "staging-dir=$stagingDir" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-      - name: Create GitHub Release
-        id: gh-release
-        uses: ncipollo/release-action@v1
+      - name: Create GitHub Release (forced previous tag)
+        id: gh-release-forced
+        if: steps.previous-tag.outputs.tag != ''
+        uses: ncipollo/release-action@v1.20.0
+        with:
+          tag: ${{ inputs.tag-name }}
+          name: ${{ inputs.release-name }}
+          commit: ${{ inputs.source-commit }}
+          prerelease: ${{ inputs.is-prerelease }}
+          artifacts: ${{ steps.prepare-files.outputs.staging-dir }}/*
+          generateReleaseNotes: true
+          generateReleaseNotesPreviousTag: ${{ steps.previous-tag.outputs.tag }}
+
+      - name: Create GitHub Release (auto previous tag)
+        id: gh-release-auto
+        if: steps.previous-tag.outputs.tag == ''
+        uses: ncipollo/release-action@v1.20.0
         with:
           tag: ${{ inputs.tag-name }}
           name: ${{ inputs.release-name }}
