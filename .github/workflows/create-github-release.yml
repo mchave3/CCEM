@@ -56,9 +56,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch all tags
-        run: git fetch --force --tags
-
       - name: Download Velopack artifacts
         uses: actions/download-artifact@v7
         with:
@@ -74,31 +71,6 @@ jobs:
               Write-Host "* ``$($_.FullName)``" >> $env:GITHUB_STEP_SUMMARY
             }
           }
-
-      - name: Ensure local tag exists for changelog
-        shell: pwsh
-        run: |
-          $tag = "${{ inputs.tag-name }}"
-          $commit = "${{ inputs.source-commit }}"
-          $exists = git tag -l $tag
-
-          if ([string]::IsNullOrWhiteSpace($exists)) {
-            Write-Host "Creating local tag $tag at $commit"
-            git tag $tag $commit
-          } else {
-            Write-Host "Local tag already exists: $tag"
-          }
-
-      - name: Generate changelog (auto-changelog)
-        shell: pwsh
-        run: |
-          npm install -g auto-changelog
-          $currentTag = "${{ inputs.tag-name }}"
-
-          $args = @("--tag-pattern", "^v\d{2}\.\d{1,2}\.", "--commit-limit", "false", "--hide-credit", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--starting-version", $currentTag, "--ending-version", $currentTag)
-
-          Write-Host "Running: auto-changelog $($args -join ' ')"
-          auto-changelog @args
 
       - name: Prepare release files
         id: prepare-files
@@ -144,7 +116,7 @@ jobs:
           commit: ${{ inputs.source-commit }}
           prerelease: ${{ inputs.is-prerelease }}
           artifacts: ${{ steps.prepare-files.outputs.staging-dir }}/*
-          bodyFile: CHANGELOG.md
+          generateReleaseNotes: true
 
       - name: Calculate release URL
         id: release-url
