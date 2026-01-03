@@ -166,36 +166,7 @@ jobs:
           npm install -g auto-changelog
           $currentTag = "${{ inputs.tag-name }}"
 
-          # Create custom template with contributors
-          $template = @'
-          # Changelog
-
-          All notable changes to this project will be documented in this file. Dates are displayed in UTC.
-
-          {{#each releases}}
-          {{#if title}}
-          ## [{{title}}]({{href}})
-          {{#if niceDate}}
-          > {{niceDate}}
-          {{/if}}
-
-          {{#each commits}}
-          - {{subject}} [`{{shorthash}}`]({{href}}) by **{{author}}**
-          {{/each}}
-
-          {{#if contributors}}
-          ### Contributors
-          {{#each contributors}}
-          - {{this}}
-          {{/each}}
-          {{/if}}
-          {{/if}}
-          {{/each}}
-          '@
-          $template | Out-File -FilePath "changelog-template.hbs" -Encoding utf8
-
-          # Generate changelog for current version only (no --starting-version)
-          $args = @("--tag-pattern", "^v\d{2}\.\d{1,2}\.", "--commit-limit", "false", "--hide-credit", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--ending-version", $currentTag, "--template", "changelog-template.hbs")
+          $args = @("--tag-pattern", "^v\d{2}\.\d{1,2}\.", "--commit-limit", "false", "--sort-commits", "date-desc", "--output", "CHANGELOG.md", "--starting-version", $currentTag, "--ending-version", $currentTag)
 
           Write-Host "Running: auto-changelog $($args -join ' ')"
           auto-changelog @args
