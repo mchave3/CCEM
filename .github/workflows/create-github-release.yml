@@ -149,7 +149,7 @@ jobs:
             } else {
               # No previous patch, get latest stable before this version line
               $previousTag = Get-LatestStableTag -allTags $allTags -beforeYY $yy -beforeMM $mm
-              Write-Host "No previous patch, using latest stable before $yy.$mm: $previousTag"
+              Write-Host "No previous patch, using latest stable before ${yy}.${mm}: $previousTag"
             }
           }
 
