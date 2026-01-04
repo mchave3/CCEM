@@ -174,7 +174,7 @@
                     <!--  App Title  -->
                     <TextBlock x:Name="AppTitle"
                                Margin="0,-10,0,-20"
-                               HorizontalAlignment="Left"
+                               HorizontalAlignment="Center"
                                FontFamily="Segoe UI Variable Display"
                                FontSize="90"
                                FontWeight="ExtraBlack"

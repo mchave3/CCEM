@@ -7,7 +7,6 @@
 // -----------------------------------------------------------------------------------------------------
 
 // Define JSON folder path variable for easy adjustment
-
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +17,5 @@ public partial class NavigationPageMappings
     {
         {"CCEM.Views.Modules.IntuneLandingPage", typeof(CCEM.Views.Modules.IntuneLandingPage)},
         {"CCEM.Views.Modules.SccmLandingPage", typeof(CCEM.Views.Modules.SccmLandingPage)},
-
     };
 }
