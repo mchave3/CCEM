@@ -16,6 +16,7 @@
 
 param(
     [string]$SourceLogo = "Logo_Original.png",
+    [string]$SourceWideSplash = "CCEM_wide_splash.jpeg",
     [string]$OutputPath = "src\CCEM\Assets"
 )
 
@@ -41,14 +42,22 @@ try {
 }
 
 # Vérifier le fichier source
-Write-ColorOutput "`n=== Vérification du logo source ===" "Cyan"
+Write-ColorOutput "`n=== Vérification des fichiers source ===" "Cyan"
 if (-not (Test-Path $SourceLogo)) {
-    Write-ColorOutput "✗ Fichier source introuvable: $SourceLogo" "Red"
+    Write-ColorOutput "✗ Fichier logo introuvable: $SourceLogo" "Red"
+    exit 1
+}
+
+if (-not (Test-Path $SourceWideSplash)) {
+    Write-ColorOutput "✗ Fichier wide/splash introuvable: $SourceWideSplash" "Red"
     exit 1
 }
 
 $sourceInfo = & magick identify -format "%wx%h %[colorspace] %[channels]" $SourceLogo
 Write-ColorOutput "✓ Logo source: $sourceInfo" "Green"
+
+$wideInfo = & magick identify -format "%wx%h %[colorspace] %[channels]" $SourceWideSplash
+Write-ColorOutput "✓ Wide/Splash source: $wideInfo" "Green"
 
 # Créer la structure de dossiers
 Write-ColorOutput "`n=== Création de la structure de dossiers ===" "Cyan"
@@ -75,17 +84,22 @@ function New-Asset {
         [int]$Width,
         [int]$Height = $Width,
         [string]$Background = "none",
-        [string]$Description = ""
+        [string]$Description = "",
+        [string]$SourceImage = $SourceLogo,
+        [bool]$CropToFit = $false
     )
 
     $fullPath = Join-Path $PSScriptRoot $OutputFile
 
     try {
         # Redimensionner avec haute qualité
-        if ($Background -eq "none") {
-            & magick $SourceLogo -background none -resize "${Width}x${Height}!" -flatten $fullPath 2>&1 | Out-Null
+        if ($CropToFit) {
+            # Pour les images wide/splash: redimensionner pour couvrir puis rogner au centre
+            & magick $SourceImage -resize "${Width}x${Height}^" -gravity center -extent "${Width}x${Height}" -flatten $fullPath 2>&1 | Out-Null
+        } elseif ($Background -eq "none") {
+            & magick $SourceImage -background none -resize "${Width}x${Height}!" -flatten $fullPath 2>&1 | Out-Null
         } else {
-            & magick $SourceLogo -background $Background -resize "${Width}x${Height}!" -flatten $fullPath 2>&1 | Out-Null
+            & magick $SourceImage -background $Background -resize "${Width}x${Height}!" -flatten $fullPath 2>&1 | Out-Null
         }
 
         if ($LASTEXITCODE -eq 0) {
@@ -239,7 +253,7 @@ $wideTileSizes = @{
 foreach ($scale in $wideTileSizes.Keys) {
     $width = $wideTileSizes[$scale][0]
     $height = $wideTileSizes[$scale][1]
-    if (New-Asset -OutputFile "$OutputPath\Tiles\Wide310x150Logo.scale-$scale.png" -Width $width -Height $height -Description "Wide310x150Logo.scale-$scale.png (${width}x${height})") {
+    if (New-Asset -OutputFile "$OutputPath\Tiles\Wide310x150Logo.scale-$scale.png" -Width $width -Height $height -SourceImage $SourceWideSplash -CropToFit $true -Description "Wide310x150Logo.scale-$scale.png (${width}x${height})") {
         $successCount++
     }
     $totalFiles++
@@ -259,7 +273,7 @@ $splashSizes = @{
 foreach ($scale in $splashSizes.Keys) {
     $width = $splashSizes[$scale][0]
     $height = $splashSizes[$scale][1]
-    if (New-Asset -OutputFile "$OutputPath\Splash\SplashScreen.scale-$scale.png" -Width $width -Height $height -Description "SplashScreen.scale-$scale.png (${width}x${height})") {
+    if (New-Asset -OutputFile "$OutputPath\Splash\SplashScreen.scale-$scale.png" -Width $width -Height $height -SourceImage $SourceWideSplash -CropToFit $true -Description "SplashScreen.scale-$scale.png (${width}x${height})") {
         $successCount++
     }
     $totalFiles++
