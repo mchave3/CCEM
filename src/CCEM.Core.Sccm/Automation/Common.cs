@@ -29,9 +29,7 @@ namespace CCEM.Core.Sccm.Automation
         {
             try
             {
-                TripleDESCryptoServiceProvider objDES = new TripleDESCryptoServiceProvider();
-                
-                SHA1CryptoServiceProvider objSHA1 = new SHA1CryptoServiceProvider();
+                using var objSHA1 = SHA1.Create();
                 byte[] bHash = objSHA1.ComputeHash(ASCIIEncoding.ASCII.GetBytes(strKey));
 
                 byte[] bRes = System.Security.Cryptography.ProtectedData.Protect(ASCIIEncoding.ASCII.GetBytes(strPlainText), bHash, DataProtectionScope.CurrentUser);
@@ -55,9 +53,7 @@ namespace CCEM.Core.Sccm.Automation
         {
             try
             {
-                TripleDESCryptoServiceProvider objDES = new TripleDESCryptoServiceProvider();
-                
-                SHA1CryptoServiceProvider objSHA1 = new SHA1CryptoServiceProvider();
+                using var objSHA1 = SHA1.Create();
                 byte[] bHash = objSHA1.ComputeHash(ASCIIEncoding.ASCII.GetBytes(strKey));
 
                 byte[] arrBuffer = Convert.FromBase64String(strBase64Text);
@@ -79,7 +75,8 @@ namespace CCEM.Core.Sccm.Automation
         public static string GetSha1(string value)
         {
             var data = Encoding.ASCII.GetBytes(value);
-            var hashData = new SHA1Managed().ComputeHash(data);
+            using var sha1 = SHA1.Create();
+            var hashData = sha1.ComputeHash(data);
 
             var hash = string.Empty;
 

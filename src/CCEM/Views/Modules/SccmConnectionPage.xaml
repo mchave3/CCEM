@@ -7,88 +7,96 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmConnectionViewModel">
-    <ScrollView Padding="{ThemeResource ContentPagePadding}"
-                HorizontalAlignment="Stretch"
+    
+    <ScrollView Padding="{StaticResource ContentPagePadding}"
                 VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="12">
-            <TextBlock FontSize="24"
-                       FontWeight="SemiBold"
-                       Text="SCCM Connection" />
+        <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+            
+            <!-- Page Header -->
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Connection" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="Connect to a remote computer to manage its SCCM client configuration." />
 
-            <TextBlock Text="{x:Bind ViewModel.StatusMessage}"
-                       Opacity="0.8"
-                       TextWrapping="WrapWholeWords" />
+            <!-- Status Card -->
+            <Border Style="{StaticResource InfoBarAreaStyle}"
+                    Visibility="{x:Bind ViewModel.IsConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE8FB;"
+                              Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                              FontSize="20" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Text="Connected"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{x:Bind ViewModel.ConnectedHostname, Mode=OneWay}"
+                                   Style="{StaticResource ListItemSubtitleStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-            <Grid ColumnSpacing="12"
-                  RowSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <!-- Connection Form Card -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Remote Host" />
+                    
+                    <TextBox Header="Hostname"
+                             Text="{x:Bind ViewModel.Hostname, Mode=TwoWay}"
+                             PlaceholderText="Enter computer name or IP address" />
+                    
+                    <NumberBox Header="Port"
+                               Value="{x:Bind ViewModel.Port, Mode=TwoWay}"
+                               SpinButtonPlacementMode="Compact"
+                               Minimum="1"
+                               Maximum="65535" />
+                    
+                    <CheckBox IsChecked="{x:Bind ViewModel.UseEncryption, Mode=TwoWay}"
+                              Content="Use HTTPS (encrypted connection)" />
+                </StackPanel>
+            </Border>
+            
+            <!-- Credentials Card -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Credentials" />
+                    <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                               Text="Leave empty to use integrated Windows authentication."
+                               Margin="0,0,0,8" />
+                    
+                    <TextBox Header="Username"
+                             Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
+                             PlaceholderText="DOMAIN\username or user@domain.com" />
+                    
+                    <PasswordBox Header="Password"
+                                 PasswordChanged="PasswordBox_OnPasswordChanged"
+                                 PlaceholderText="Enter password" />
+                </StackPanel>
+            </Border>
 
-                <TextBlock Grid.Row="0"
-                           Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Text="Hostname" />
-                <TextBox Grid.Row="0"
-                         Grid.Column="1"
-                         Text="{x:Bind ViewModel.Hostname, Mode=TwoWay}"
-                         PlaceholderText="e.g. PC1234" />
-
-                <TextBlock Grid.Row="1"
-                           Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Text="Port" />
-                <NumberBox Grid.Row="1"
-                           Grid.Column="1"
-                           Value="{x:Bind ViewModel.Port, Mode=TwoWay}"
-                           SpinButtonPlacementMode="Inline"
-                           Minimum="1"
-                           Maximum="65535" />
-
-                <TextBlock Grid.Row="2"
-                           Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Text="Username" />
-                <TextBox Grid.Row="2"
-                         Grid.Column="1"
-                         Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
-                         PlaceholderText="Leave blank for integrated auth" />
-
-                <TextBlock Grid.Row="3"
-                           Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Text="Password" />
-                <PasswordBox Grid.Row="3"
-                             Grid.Column="1"
-                             PasswordChanged="PasswordBox_OnPasswordChanged" />
-
-                <CheckBox Grid.Row="4"
-                          Grid.Column="1"
-                          IsChecked="{x:Bind ViewModel.UseEncryption, Mode=TwoWay}"
-                          Content="Use HTTPS (encryption)" />
-            </Grid>
-
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <Button Command="{x:Bind ViewModel.ConnectCommand}"
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                <Button Style="{StaticResource PrimaryCommandButtonStyle}"
+                        Command="{x:Bind ViewModel.ConnectCommand}"
                         Content="Connect" />
-                <Button Command="{x:Bind ViewModel.DisconnectCommand}"
+                <Button Style="{StaticResource CommandButtonStyle}"
+                        Command="{x:Bind ViewModel.DisconnectCommand}"
                         Content="Disconnect" />
-                <ProgressRing Width="20"
-                              Height="20"
-                              IsActive="{x:Bind ViewModel.IsBusy}" />
+                <ProgressRing Width="24" Height="24"
+                              IsActive="{x:Bind ViewModel.IsBusy}"
+                              Margin="8,0,0,0" />
             </StackPanel>
-
-            <TextBlock Text="{x:Bind ViewModel.ConnectedHostname, Mode=OneWay}"
-                       Opacity="0.7" />
+            
+            <!-- Status Message -->
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage}"
+                       Style="{StaticResource StatusTextStyle}"
+                       TextWrapping="WrapWholeWords"
+                       Margin="0,12,0,0" />
+            
         </StackPanel>
     </ScrollView>
 </Page>

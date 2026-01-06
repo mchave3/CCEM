@@ -7,39 +7,63 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmAgentSettingsViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                    Content="Refresh" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="Agent Settings" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                        Style="{ThemeResource PrimaryCommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
 
+        <!-- Settings List -->
         <ListView Grid.Row="2"
-                  ItemsSource="{x:Bind ViewModel.Properties}">
+                  ItemsSource="{x:Bind ViewModel.Properties, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SccmAgentPropertyRow">
-                    <Grid ColumnSpacing="12">
+                    <Grid Padding="{ThemeResource SmallSpacing}"
+                          ColumnSpacing="{ThemeResource LargeSpacing}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="240" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock FontWeight="SemiBold"
-                                   Text="{x:Bind Name}" />
+                        <FontIcon FontSize="16"
+                                  Glyph="&#xE713;"
+                                  Opacity="0.6"
+                                  VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1"
+                                   Style="{ThemeResource ListItemTitleStyle}"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind Name}" />
+                        <TextBlock Grid.Column="2"
                                    Opacity="0.85"
+                                   VerticalAlignment="Center"
                                    Text="{x:Bind Value}"
                                    TextWrapping="Wrap" />
                     </Grid>

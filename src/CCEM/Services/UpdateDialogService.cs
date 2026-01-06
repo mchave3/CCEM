@@ -76,7 +76,7 @@ public sealed class UpdateDialogService : IUpdateDialogService
             DefaultButton = ContentDialogButton.Primary
         };
 
-        if (App.MainWindow.Content is FrameworkElement root)
+        if (App.MainWindow?.Content is FrameworkElement root)
         {
             dialog.XamlRoot = root.XamlRoot;
         }

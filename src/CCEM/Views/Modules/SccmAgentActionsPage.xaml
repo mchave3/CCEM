@@ -7,71 +7,142 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmAgentActionsViewModel">
-    <ScrollView Padding="{ThemeResource ContentPagePadding}"
-                HorizontalAlignment="Stretch"
+    
+    <ScrollView Padding="{StaticResource ContentPagePadding}"
                 VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="16">
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <ProgressRing Width="20"
-                              Height="20"
-                              IsActive="{x:Bind ViewModel.IsBusy}" />
-                <TextBlock VerticalAlignment="Center"
-                           Opacity="0.8"
-                           Text="{x:Bind ViewModel.StatusMessage}" />
+        <StackPanel MaxWidth="900">
+            
+            <!-- Page Header -->
+            <StackPanel Margin="{StaticResource PageHeaderMargin}">
+                <TextBlock Style="{StaticResource PageTitleStyle}"
+                           Text="Agent Actions" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                           Text="Trigger SCCM client actions such as inventory collection, policy refresh, and software updates." />
             </StackPanel>
 
-            <TextBlock FontSize="20"
-                       FontWeight="SemiBold"
-                       Text="Inventory" />
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <Button Command="{x:Bind ViewModel.HardwareInventoryDeltaCommand}"
-                        Content="Hardware (delta)" />
-                <Button Command="{x:Bind ViewModel.HardwareInventoryFullCommand}"
-                        Content="Hardware (full)" />
-                <Button Command="{x:Bind ViewModel.SoftwareInventoryDeltaCommand}"
-                        Content="Software (delta)" />
-                <Button Command="{x:Bind ViewModel.SoftwareInventoryFullCommand}"
-                        Content="Software (full)" />
-            </StackPanel>
+            <!-- Status Bar -->
+            <Border Style="{StaticResource InfoBarAreaStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                    <ProgressRing Width="20" Height="20"
+                                  IsActive="{x:Bind ViewModel.IsBusy}" />
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{x:Bind ViewModel.StatusMessage}"
+                               Style="{StaticResource StatusTextStyle}" />
+                </StackPanel>
+            </Border>
 
-            <TextBlock FontSize="20"
-                       FontWeight="SemiBold"
-                       Text="Policy" />
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <Button Command="{x:Bind ViewModel.MachinePolicyRequestCommand}"
-                        Content="Machine: request" />
-                <Button Command="{x:Bind ViewModel.MachinePolicyEvaluateCommand}"
-                        Content="Machine: evaluate" />
-                <Button Command="{x:Bind ViewModel.UserPolicyRequestCommand}"
-                        Content="User: request" />
-                <Button Command="{x:Bind ViewModel.UserPolicyEvaluateCommand}"
-                        Content="User: evaluate" />
-            </StackPanel>
+            <!-- Inventory Section -->
+            <Border Style="{StaticResource CardStyle}" Margin="{StaticResource SectionMargin}">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE9D9;" FontSize="24"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" 
+                                       Text="Inventory" Margin="0" />
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="Collect hardware and software inventory data" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.HardwareInventoryDeltaCommand}"
+                                Content="Hardware (Delta)" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.HardwareInventoryFullCommand}"
+                                Content="Hardware (Full)" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.SoftwareInventoryDeltaCommand}"
+                                Content="Software (Delta)" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.SoftwareInventoryFullCommand}"
+                                Content="Software (Full)" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
-            <TextBlock FontSize="20"
-                       FontWeight="SemiBold"
-                       Text="Software Updates" />
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <Button Command="{x:Bind ViewModel.SoftwareUpdatesEvaluateCycleCommand}"
-                        Content="Evaluate cycle" />
-                <Button Command="{x:Bind ViewModel.SoftwareUpdatesScanCommand}"
-                        Content="Force scan" />
-            </StackPanel>
+            <!-- Policy Section -->
+            <Border Style="{StaticResource CardStyle}" Margin="{StaticResource SectionMargin}">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE8B7;" FontSize="24"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" 
+                                       Text="Policy" Margin="0" />
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="Request and evaluate machine and user policies" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.MachinePolicyRequestCommand}"
+                                Content="Machine: Request" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.MachinePolicyEvaluateCommand}"
+                                Content="Machine: Evaluate" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.UserPolicyRequestCommand}"
+                                Content="User: Request" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.UserPolicyEvaluateCommand}"
+                                Content="User: Evaluate" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
 
-            <TextBlock FontSize="20"
-                       FontWeight="SemiBold"
-                       Text="Reset" />
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <Button Command="{x:Bind ViewModel.ResetPolicySoftCommand}"
-                        Content="Reset policy (soft)" />
-                <Button Command="{x:Bind ViewModel.ResetPolicyHardCommand}"
-                        Content="Reset policy (hard)" />
-            </StackPanel>
+            <!-- Software Updates Section -->
+            <Border Style="{StaticResource CardStyle}" Margin="{StaticResource SectionMargin}">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE895;" FontSize="24"
+                                  Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" 
+                                       Text="Software Updates" Margin="0" />
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="Trigger update evaluation and scan cycles" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.SoftwareUpdatesEvaluateCycleCommand}"
+                                Content="Evaluate Cycle" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.SoftwareUpdatesScanCommand}"
+                                Content="Force Scan" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Reset Section -->
+            <Border Style="{StaticResource CardStyle}" Margin="{StaticResource SectionMargin}">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE72C;" FontSize="24"
+                                  Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitleStyle}" 
+                                       Text="Reset" Margin="0" />
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="Reset client policy (use with caution)" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.ResetPolicySoftCommand}"
+                                Content="Reset Policy (Soft)" />
+                        <Button Style="{StaticResource CommandButtonStyle}"
+                                Command="{x:Bind ViewModel.ResetPolicyHardCommand}"
+                                Content="Reset Policy (Hard)" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
         </StackPanel>
     </ScrollView>
 </Page>

@@ -7,49 +7,77 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmSoftwareDistributionSummaryViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                    Content="Refresh" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="Distribution Summary" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                        Style="{ThemeResource PrimaryCommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
 
+        <!-- Distribution Items List -->
         <ListView Grid.Row="2"
-                  ItemsSource="{x:Bind ViewModel.Items}">
+                  ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SccmSoftwareStatusRow">
-                    <Grid ColumnSpacing="12">
+                    <Grid Padding="{ThemeResource SmallSpacing}"
+                          ColumnSpacing="{ThemeResource MediumSpacing}">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Spacing="2">
-                            <TextBlock FontWeight="SemiBold"
-                                       Text="{x:Bind Name}" />
-                            <TextBlock Opacity="0.7"
-                                       Text="{x:Bind Type}" />
-                            <TextBlock Opacity="0.7"
-                                       Text="{x:Bind Status}" />
-                        </StackPanel>
+                        <FontIcon FontSize="24"
+                                  Glyph="&#xE896;"
+                                  Opacity="0.7" />
                         <StackPanel Grid.Column="1"
-                                    HorizontalAlignment="Right">
-                            <TextBlock Text="{x:Bind PercentComplete}" />
-                            <TextBlock Opacity="0.7"
-                                       Text="{x:Bind ErrorCode}" />
+                                    Spacing="2">
+                            <TextBlock Style="{ThemeResource ListItemTitleStyle}"
+                                       Text="{x:Bind Name}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="{x:Bind Type}" />
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="•" />
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="{x:Bind Status}" />
+                            </StackPanel>
                         </StackPanel>
+                        <Border Grid.Column="2"
+                                Style="{ThemeResource BadgeStyle}">
+                            <TextBlock Text="{x:Bind PercentComplete}" />
+                        </Border>
+                        <TextBlock Grid.Column="3"
+                                   Style="{ThemeResource ListItemSubtitleStyle}"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind ErrorCode}" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

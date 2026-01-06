@@ -1,7 +1,7 @@
-# Task Plan: Migration sccmclictr -> CCEM
+# Task Plan: Validation Post-Migration sccmclictr -> CCEM
 
 ## Goal
-Porter l’application legacy **sccmclictr** (.NET Framework 4.8 / WPF) vers **CCEM** (.NET 10 / WinUI 3) en migrant la logique (lib + services) et l’UI (écrans & workflows) avec une architecture maintenable.
+Effectuer une revue complète post-migration pour identifier et corriger tous les problèmes d'interface et de logique métier dans CCEM.
 
 ## Phases
 - [x] Phase 1: Réactiver le code legacy (CCCM_source)
@@ -10,19 +10,27 @@ Porter l’application legacy **sccmclictr** (.NET Framework 4.8 / WPF) vers **C
 - [x] Phase 4: Plan de migration (mapping + milestones)
 - [x] Phase 5: Portage logique (libs .NET 10)
 - [x] Phase 6: Portage UI (WinUI 3 pages)
-- [ ] Phase 7: Validation (build, smoke tests)
+- [ ] Phase 7: Validation complète (build, code review, smoke tests)
+  - [ ] 7.1: Build et correction des erreurs de compilation
+  - [ ] 7.2: Revue des ViewModels (MVVM patterns, bindings)
+  - [ ] 7.3: Revue des Views (XAML, data bindings)
+  - [ ] 7.4: Revue de la couche Automation (logique métier SCCM)
+  - [ ] 7.5: Revue des Services (DI, connexion)
+  - [ ] 7.6: Tests fonctionnels (runtime)
 
 ## Key Questions
-1. Quelles sont les “capabilities” principales de sccmclictr (features, écrans, plugins) à reproduire ?
-2. Quelle séparation CCEM doit-on viser (Core / Modules / UI) pour garder une base propre ?
-3. Quels composants legacy sont réutilisables tels quels (WMI, registry, services) et lesquels doivent être réécrits (UI, threading, interop) ?
-4. Comment gérer plugins/add-ons côté WinUI (chargement, navigation, permissions, packaging) ?
+1. Le build compile-t-il sans erreurs?
+2. Les ViewModels implémentent-ils correctement ObservableObject et les RelayCommand?
+3. Les bindings XAML sont-ils corrects (x:Bind vs Binding, modes)?
+4. La logique métier WSMan/WMI est-elle fonctionnelle en .NET 10?
+5. Le service de connexion SCCM est-il correctement injecté dans tous les ViewModels?
 
 ## Decisions Made
-- Restaurer le code legacy depuis l’historique git (commit `0d01d34`) plutôt que les placeholders “submodule” actuels, afin de pouvoir analyser et porter.
+- Restaurer le code legacy depuis l'historique git (commit 0d01d34) plutôt que les placeholders submodule actuels.
+- Utiliser dotnet build src/CCEM.slnx -p:Platform=x64 pour le build.
 
 ## Errors Encountered
-- `dotnet build src/CCEM/CCEM.csproj` échoue si `Platform` n’est pas `x64` (WindowsAppSDKSelfContained) : utiliser `dotnet build src/CCEM.slnx -p:Platform=x64`.
+- (À remplir lors de la revue)
 
 ## Status
-**Currently in Phase 7** - UI SCCM: tous les onglets legacy + un écran `Sccm.Tools` (équivalent plugins) sont portés ; reste à faire: smoke tests (runtime), polish UX et packaging.
+**Currently in Phase 7.1** - Build initial et collecte des erreurs de compilation

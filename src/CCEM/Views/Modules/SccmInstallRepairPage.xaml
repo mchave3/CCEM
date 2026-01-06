@@ -7,36 +7,157 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmInstallRepairViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RepairAgentCommand}"
-                    Content="Repair agent" />
-            <Button Command="{x:Bind ViewModel.UninstallAgentCommand}"
-                    Content="Uninstall agent" />
-            <Button Command="{x:Bind ViewModel.ResetPausedSoftwareDistributionCommand}"
-                    Content="Reset paused SWDist" />
-            <Button Command="{x:Bind ViewModel.ResetProvisioningModeCommand}"
-                    Content="Reset provisioning mode" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="Install &amp; Repair" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
 
-        <TextBlock Grid.Row="2"
-                   Opacity="0.7"
-                   Text="These actions call existing SCCM client repair/uninstall routines on the target device."
-                   TextWrapping="Wrap" />
+        <!-- Actions Grid -->
+        <ScrollViewer Grid.Row="2">
+            <StackPanel Spacing="{ThemeResource LargeSpacing}">
+                <!-- Info Banner -->
+                <InfoBar IsOpen="True"
+                         IsClosable="False"
+                         Severity="Informational"
+                         Title="Agent Maintenance"
+                         Message="These actions call existing SCCM client repair/uninstall routines on the target device. Use with caution." />
+
+                <!-- Action Cards -->
+                <Grid ColumnSpacing="{ThemeResource LargeSpacing}"
+                      RowSpacing="{ThemeResource LargeSpacing}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Repair Agent Card -->
+                    <Border Style="{ThemeResource CardStyle}"
+                            Padding="{ThemeResource CardPadding}">
+                        <StackPanel Spacing="{ThemeResource MediumSpacing}">
+                            <StackPanel Orientation="Horizontal" Spacing="{ThemeResource SmallSpacing}">
+                                <FontIcon FontSize="24" Glyph="&#xE90F;" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Style="{ThemeResource SectionTitleStyle}"
+                                           VerticalAlignment="Center"
+                                           Text="Repair Agent" />
+                            </StackPanel>
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="Runs the SCCM client repair routine to fix common issues."
+                                       TextWrapping="Wrap" />
+                            <Button Command="{x:Bind ViewModel.RepairAgentCommand}"
+                                    Style="{ThemeResource PrimaryCommandButtonStyle}"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="14" Glyph="&#xE90F;" />
+                                    <TextBlock Text="Repair Agent" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Uninstall Agent Card -->
+                    <Border Grid.Column="1"
+                            Style="{ThemeResource CardStyle}"
+                            Padding="{ThemeResource CardPadding}">
+                        <StackPanel Spacing="{ThemeResource MediumSpacing}">
+                            <StackPanel Orientation="Horizontal" Spacing="{ThemeResource SmallSpacing}">
+                                <FontIcon FontSize="24" Glyph="&#xE74D;" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                                <TextBlock Style="{ThemeResource SectionTitleStyle}"
+                                           VerticalAlignment="Center"
+                                           Text="Uninstall Agent" />
+                            </StackPanel>
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="Completely removes the SCCM client from the device."
+                                       TextWrapping="Wrap" />
+                            <Button Command="{x:Bind ViewModel.UninstallAgentCommand}"
+                                    Style="{ThemeResource CommandButtonStyle}"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="14" Glyph="&#xE74D;" />
+                                    <TextBlock Text="Uninstall Agent" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Reset SW Distribution Card -->
+                    <Border Grid.Row="1"
+                            Style="{ThemeResource CardStyle}"
+                            Padding="{ThemeResource CardPadding}">
+                        <StackPanel Spacing="{ThemeResource MediumSpacing}">
+                            <StackPanel Orientation="Horizontal" Spacing="{ThemeResource SmallSpacing}">
+                                <FontIcon FontSize="24" Glyph="&#xE896;" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Style="{ThemeResource SectionTitleStyle}"
+                                           VerticalAlignment="Center"
+                                           Text="Reset Software Distribution" />
+                            </StackPanel>
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="Clears paused software distribution state."
+                                       TextWrapping="Wrap" />
+                            <Button Command="{x:Bind ViewModel.ResetPausedSoftwareDistributionCommand}"
+                                    Style="{ThemeResource CommandButtonStyle}"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                                    <TextBlock Text="Reset Paused SWDist" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Reset Provisioning Mode Card -->
+                    <Border Grid.Row="1"
+                            Grid.Column="1"
+                            Style="{ThemeResource CardStyle}"
+                            Padding="{ThemeResource CardPadding}">
+                        <StackPanel Spacing="{ThemeResource MediumSpacing}">
+                            <StackPanel Orientation="Horizontal" Spacing="{ThemeResource SmallSpacing}">
+                                <FontIcon FontSize="24" Glyph="&#xE713;" Foreground="{ThemeResource SystemAccentColor}" />
+                                <TextBlock Style="{ThemeResource SectionTitleStyle}"
+                                           VerticalAlignment="Center"
+                                           Text="Reset Provisioning Mode" />
+                            </StackPanel>
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="Exits provisioning mode if stuck during imaging."
+                                       TextWrapping="Wrap" />
+                            <Button Command="{x:Bind ViewModel.ResetProvisioningModeCommand}"
+                                    Style="{ThemeResource CommandButtonStyle}"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                                    <TextBlock Text="Reset Provisioning Mode" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>
 

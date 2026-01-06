@@ -7,50 +7,111 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmEventMonitoringViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    
+    <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                    Content="Refresh" />
-            <NumberBox Width="120"
-                       Header="Max events"
-                       Minimum="1"
-                       Maximum="500"
-                       Value="{x:Bind ViewModel.MaxEvents, Mode=TwoWay}" />
-            <TextBox Width="260"
-                     Header="Filter"
-                     PlaceholderText="Search message"
-                     Text="{x:Bind ViewModel.FilterText, Mode=TwoWay}" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{StaticResource PageHeaderMargin}">
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Event Monitoring" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="View Windows event logs from the remote computer." />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Style="{StaticResource InfoBarAreaStyle}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <Button Style="{StaticResource PrimaryCommandButtonStyle}"
+                        Command="{x:Bind ViewModel.RefreshCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                
+                <NumberBox Grid.Column="1"
+                           Width="120"
+                           Header="Max Events"
+                           Minimum="1"
+                           Maximum="500"
+                           SpinButtonPlacementMode="Compact"
+                           Value="{x:Bind ViewModel.MaxEvents, Mode=TwoWay}" />
+                
+                <TextBox Grid.Column="2"
+                         Header="Filter"
+                         PlaceholderText="Search in messages..."
+                         Text="{x:Bind ViewModel.FilterText, Mode=TwoWay}" />
+                
+                <ProgressRing Grid.Column="3"
+                              Width="20" Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading}"
+                              VerticalAlignment="Bottom"
+                              Margin="0,0,0,8" />
+                
+                <TextBlock Grid.Column="4"
+                           Style="{StaticResource StatusTextStyle}"
+                           Text="{x:Bind ViewModel.StatusMessage}"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,8" />
+            </Grid>
+        </Border>
 
+        <!-- Events List -->
         <ListView Grid.Row="2"
-                  ItemsSource="{x:Bind ViewModel.Events}">
+                  ItemsSource="{x:Bind ViewModel.Events}"
+                  SelectionMode="Single"
+                  Margin="0,8,0,0">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SccmEventLogRow">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold"
-                                   Text="{x:Bind TimeCreated}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind Level}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind Id}" />
-                        <TextBlock Opacity="0.85"
-                                   Text="{x:Bind Message}"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
+                    <Grid Padding="8,12" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Event Icon -->
+                        <FontIcon Glyph="&#xE7BA;"
+                                  FontSize="20"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        
+                        <!-- Event Info -->
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Style="{StaticResource ListItemTitleStyle}"
+                                           Text="{x:Bind TimeCreated}" />
+                                <Border Style="{StaticResource BadgeStyle}">
+                                    <TextBlock Text="{x:Bind Level}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="{x:Bind Message}"
+                                       TextWrapping="WrapWholeWords"
+                                       MaxLines="3" />
+                        </StackPanel>
+                        
+                        <!-- Event ID Badge -->
+                        <Border Grid.Column="2" Style="{StaticResource BadgeStyle}">
+                            <TextBlock Text="{x:Bind Id}"
+                                       FontSize="12"
+                                       FontFamily="Consolas" />
+                        </Border>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

@@ -7,47 +7,87 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmCcmEvalViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                    Content="Refresh" />
-            <Button Command="{x:Bind ViewModel.RunCommand}"
-                    Content="Run CCMEval" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="CCM Evaluation" />
+            <StackPanel Orientation="Horizontal" Spacing="{ThemeResource SmallSpacing}">
+                <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                           Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+                <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                           Text="•" />
+                <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                           Text="{x:Bind ViewModel.LastRun, Mode=OneWay}" />
+            </StackPanel>
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                        Style="{ThemeResource PrimaryCommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.RunCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE768;" />
+                        <TextBlock Text="Run CCMEval" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
 
-        <TextBlock Grid.Row="2"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.LastRun}" />
-
-        <ListView Grid.Row="3"
-                  ItemsSource="{x:Bind ViewModel.Results}">
+        <!-- Results List -->
+        <ListView Grid.Row="2"
+                  ItemsSource="{x:Bind ViewModel.Results, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SccmCcmEvalRow">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold"
-                                   Text="{x:Bind Description}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind ResultType}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind ResultCode}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind ResultDetail}" />
-                    </StackPanel>
+                    <Grid Padding="{ThemeResource SmallSpacing}"
+                          ColumnSpacing="{ThemeResource MediumSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="24"
+                                  Glyph="&#xE9D9;"
+                                  Opacity="0.7" />
+                        <StackPanel Grid.Column="1"
+                                    Spacing="2">
+                            <TextBlock Style="{ThemeResource ListItemTitleStyle}"
+                                       Text="{x:Bind Description}" />
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="{x:Bind ResultDetail}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2"
+                                    Spacing="4"
+                                    VerticalAlignment="Center">
+                            <Border Style="{ThemeResource BadgeStyle}">
+                                <TextBlock Text="{x:Bind ResultType}" />
+                            </Border>
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       HorizontalAlignment="Right"
+                                       Text="{x:Bind ResultCode}" />
+                        </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

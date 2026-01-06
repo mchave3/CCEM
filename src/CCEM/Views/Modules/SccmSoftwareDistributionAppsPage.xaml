@@ -7,53 +7,111 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmSoftwareDistributionAppsViewModel">
-    <Grid Padding="{ThemeResource ContentPagePadding}">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal"
-                    Spacing="8">
-            <Button Command="{x:Bind ViewModel.RefreshCommand}"
-                    Content="Refresh" />
-            <Button Command="{x:Bind ViewModel.InstallSelectedCommand}"
-                    Content="Install" />
-            <Button Command="{x:Bind ViewModel.RepairSelectedCommand}"
-                    Content="Repair" />
-            <Button Command="{x:Bind ViewModel.UninstallSelectedCommand}"
-                    Content="Uninstall" />
-            <Button Command="{x:Bind ViewModel.DownloadSelectedCommand}"
-                    Content="Download" />
-            <Button Command="{x:Bind ViewModel.CancelSelectedCommand}"
-                    Content="Cancel" />
-            <ProgressRing Width="20"
-                          Height="20"
-                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="Applications" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Opacity="0.7"
-                   Text="{x:Bind ViewModel.StatusMessage}" />
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                        Style="{ThemeResource PrimaryCommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.InstallSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE896;" />
+                        <TextBlock Text="Install" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.RepairSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE90F;" />
+                        <TextBlock Text="Repair" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.UninstallSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE74D;" />
+                        <TextBlock Text="Uninstall" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.DownloadSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE896;" />
+                        <TextBlock Text="Download" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.CancelSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE711;" />
+                        <TextBlock Text="Cancel" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
 
+        <!-- Applications List -->
         <ListView Grid.Row="2"
-                  ItemsSource="{x:Bind ViewModel.Applications}"
+                  ItemsSource="{x:Bind ViewModel.Applications, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedApplication, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SccmApplicationRow">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold"
-                                   Text="{x:Bind Name}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind Publisher}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind InstallState}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind EvaluationStateText}" />
-                        <TextBlock Opacity="0.7"
-                                   Text="{x:Bind AllowedActionsText}" />
-                    </StackPanel>
+                    <Grid Padding="{ThemeResource SmallSpacing}"
+                          ColumnSpacing="{ThemeResource MediumSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="24"
+                                  Glyph="&#xE74C;"
+                                  Opacity="0.7" />
+                        <StackPanel Grid.Column="1"
+                                    Spacing="2">
+                            <TextBlock Style="{ThemeResource ListItemTitleStyle}"
+                                       Text="{x:Bind Name}" />
+                            <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                       Text="{x:Bind Publisher}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="{x:Bind InstallState}" />
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="•" />
+                                <TextBlock Style="{ThemeResource ListItemSubtitleStyle}"
+                                           Text="{x:Bind AllowedActionsText}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <Border Grid.Column="2"
+                                Style="{ThemeResource BadgeStyle}">
+                            <TextBlock Text="{x:Bind EvaluationStateText}" />
+                        </Border>
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

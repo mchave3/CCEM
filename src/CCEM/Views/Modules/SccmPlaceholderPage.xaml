@@ -6,13 +6,24 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d">
     <Grid Padding="{ThemeResource ContentPagePadding}">
-        <StackPanel Spacing="8">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="{ThemeResource LargeSpacing}">
+            <FontIcon FontSize="64"
+                      Glyph="&#xE946;"
+                      Opacity="0.4" />
             <TextBlock x:Name="HeaderText"
-                       FontSize="24"
-                       FontWeight="SemiBold" />
-            <TextBlock Opacity="0.7"
-                       Text="This page is scaffolded as part of the sccmclictr -> CCEM migration and will be implemented next."
+                       Style="{ThemeResource PageTitleStyle}"
+                       HorizontalAlignment="Center" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       HorizontalAlignment="Center"
+                       Text="This page is under development"
                        TextWrapping="WrapWholeWords" />
+            <InfoBar IsOpen="True"
+                     IsClosable="False"
+                     Severity="Informational"
+                     Title="Coming Soon"
+                     Message="This page is scaffolded as part of the sccmclictr → CCEM migration and will be implemented next." />
         </StackPanel>
     </Grid>
 </Page>

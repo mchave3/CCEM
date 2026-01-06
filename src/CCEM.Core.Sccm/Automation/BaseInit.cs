@@ -76,7 +76,7 @@ namespace CCEM.Core.Sccm.Automation
             enc.GetBytes(str.ToCharArray(), 0, str.Length, unicodeText, 0, true);
 
             //Change to be FIPS compliant 
-            System.Security.Cryptography.SHA1 sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
+            using var sha1 = System.Security.Cryptography.SHA1.Create();
             byte[] result = sha1.ComputeHash(unicodeText);
 
 
