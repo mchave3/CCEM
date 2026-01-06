@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmServiceWindowsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmServiceWindowsViewModel">
+
+    <Grid Padding="{StaticResource ContentPagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Page Header -->
+        <StackPanel Margin="{StaticResource PageHeaderMargin}">
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Service Windows" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="View and manage maintenance windows for the SCCM client." />
+        </StackPanel>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+            <StackPanel Spacing="{StaticResource MediumSpacing}">
+                <!-- Actions Row -->
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Style="{StaticResource PrimaryCommandButtonStyle}"
+                            Command="{x:Bind ViewModel.RefreshCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                            <TextBlock Text="Refresh" />
+                        </StackPanel>
+                    </Button>
+
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{x:Bind ViewModel.ScopeIndex, Mode=TwoWay}"
+                              Width="180"
+                              Header="View">
+                        <ComboBoxItem Content="Requested Config" />
+                        <ComboBoxItem Content="Actual Config" />
+                    </ComboBox>
+
+                    <ProgressRing Grid.Column="3"
+                                  Width="20" Height="20"
+                                  IsActive="{x:Bind ViewModel.IsLoading}"
+                                  VerticalAlignment="Bottom"
+                                  Margin="0,0,0,8" />
+                </Grid>
+
+                <!-- Create New Section -->
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Header="Schedule IDs"
+                             PlaceholderText="Enter schedule ID string"
+                             Text="{x:Bind ViewModel.NewSchedules, Mode=TwoWay}" />
+
+                    <NumberBox Grid.Column="1"
+                               Width="100"
+                               Header="Type"
+                               Minimum="1"
+                               Maximum="6"
+                               SpinButtonPlacementMode="Compact"
+                               Value="{x:Bind ViewModel.NewServiceWindowType, Mode=TwoWay}" />
+
+                    <Button Grid.Column="2"
+                            Style="{StaticResource CommandButtonStyle}"
+                            Command="{x:Bind ViewModel.CreateCommand}"
+                            VerticalAlignment="Bottom"
+                            Content="Create" />
+
+                    <Button Grid.Column="3"
+                            Style="{StaticResource CommandButtonStyle}"
+                            Command="{x:Bind ViewModel.DeleteSelectedCommand}"
+                            VerticalAlignment="Bottom"
+                            Content="Delete Selected" />
+                </Grid>
+
+                <TextBlock Style="{StaticResource StatusTextStyle}"
+                           Text="{x:Bind ViewModel.StatusMessage}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Service Windows List -->
+        <ListView Grid.Row="2"
+                  ItemsSource="{x:Bind ViewModel.ServiceWindows}"
+                  SelectedItem="{x:Bind ViewModel.SelectedServiceWindow, Mode=TwoWay}"
+                  SelectionMode="Single">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SccmServiceWindowRow">
+                    <Grid Padding="8,12" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Window Icon -->
+                        <FontIcon Glyph="&#xE823;"
+                                  FontSize="20"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                        <!-- Window Info -->
+                        <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Style="{StaticResource ListItemTitleStyle}"
+                                       Text="{x:Bind ServiceWindowId}" />
+                            <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                                       Text="{x:Bind Schedules}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <!-- Type Badge -->
+                        <Border Grid.Column="2" Style="{StaticResource BadgeStyle}">
+                            <TextBlock Text="{x:Bind ServiceWindowType}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold" />
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
+

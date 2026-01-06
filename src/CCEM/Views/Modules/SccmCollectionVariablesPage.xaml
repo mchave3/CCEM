@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmCollectionVariablesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmCollectionVariablesViewModel">
+    <Grid Padding="{ThemeResource ContentPagePadding}"
+          RowSpacing="{ThemeResource MediumSpacing}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Page Header -->
+        <StackPanel Margin="{ThemeResource PageHeaderMargin}">
+            <TextBlock Style="{ThemeResource PageTitleStyle}"
+                       Text="Collection Variables" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+        </StackPanel>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="1"
+                Style="{ThemeResource InfoBarAreaStyle}">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="{ThemeResource SmallSpacing}">
+                <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                        Style="{ThemeResource PrimaryCommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        <TextBlock Text="Refresh" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind ViewModel.DecodeSelectedCommand}"
+                        Style="{ThemeResource CommandButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon FontSize="14" Glyph="&#xE8C0;" />
+                        <TextBlock Text="Decode Selected" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Variables List -->
+        <ListView Grid.Row="2"
+                  ItemsSource="{x:Bind ViewModel.Variables, Mode=OneWay}"
+                  SelectedItem="{x:Bind ViewModel.SelectedVariable, Mode=TwoWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SccmCollectionVariableRow">
+                    <Grid Padding="{ThemeResource SmallSpacing}"
+                          ColumnSpacing="{ThemeResource MediumSpacing}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="200" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="16"
+                                  Glyph="&#xE8AC;"
+                                  Opacity="0.6"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1"
+                                   Style="{ThemeResource ListItemTitleStyle}"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind Name}" />
+                        <TextBlock Grid.Column="2"
+                                   FontFamily="Consolas"
+                                   Opacity="0.85"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind Value}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Decoded Value Panel -->
+        <Border Grid.Row="3"
+                Style="{ThemeResource CardStyle}"
+                Padding="{ThemeResource CardPadding}">
+            <StackPanel Spacing="{ThemeResource SmallSpacing}">
+                <TextBlock Style="{ThemeResource SectionTitleStyle}"
+                           Text="Decoded Value" />
+                <TextBox IsReadOnly="True"
+                         FontFamily="Consolas"
+                         Text="{x:Bind ViewModel.DecodedValue, Mode=OneWay}"
+                         TextWrapping="Wrap"
+                         MinHeight="60" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Page>
+

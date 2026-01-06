@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmPlaceholderPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+    <Grid Padding="{ThemeResource ContentPagePadding}">
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="{ThemeResource LargeSpacing}">
+            <FontIcon FontSize="64"
+                      Glyph="&#xE946;"
+                      Opacity="0.4" />
+            <TextBlock x:Name="HeaderText"
+                       Style="{ThemeResource PageTitleStyle}"
+                       HorizontalAlignment="Center" />
+            <TextBlock Style="{ThemeResource PageSubtitleStyle}"
+                       HorizontalAlignment="Center"
+                       Text="This page is under development"
+                       TextWrapping="WrapWholeWords" />
+            <InfoBar IsOpen="True"
+                     IsClosable="False"
+                     Severity="Informational"
+                     Title="Coming Soon"
+                     Message="This page is scaffolded as part of the sccmclictr → CCEM migration and will be implemented next." />
+        </StackPanel>
+    </Grid>
+</Page>
+

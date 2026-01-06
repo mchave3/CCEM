@@ -96,6 +96,7 @@ public partial class App : Application
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IJsonNavigationService, JsonNavigationService>();
         services.AddSingleton<IUpdateDialogService, UpdateDialogService>();
+        services.AddSingleton<ISccmConnectionService, SccmConnectionService>();
         services.AddSingleton<IVelopackUpdateService>(_ =>
         {
             // Configure Velopack update service.
@@ -106,6 +107,30 @@ public partial class App : Application
         });
 
         services.AddTransient<MainViewModel>();
+        services.AddTransient<SccmConnectionViewModel>();
+        services.AddTransient<SccmServicesViewModel>();
+        services.AddTransient<SccmProcessesViewModel>();
+        services.AddTransient<SccmCacheViewModel>();
+        services.AddTransient<SccmSoftwareUpdatesViewModel>();
+        services.AddTransient<SccmLogsViewModel>();
+        services.AddTransient<SccmWmiBrowserViewModel>();
+        services.AddTransient<SccmAgentActionsViewModel>();
+        services.AddTransient<SccmInstalledSoftwareViewModel>();
+        services.AddTransient<SccmComponentsViewModel>();
+        services.AddTransient<SccmAdvertisementsViewModel>();
+        services.AddTransient<SccmSoftwareDistributionAppsViewModel>();
+        services.AddTransient<SccmSoftwareDistributionSummaryViewModel>();
+        services.AddTransient<SccmAllUpdatesViewModel>();
+        services.AddTransient<SccmExecutionHistoryViewModel>();
+        services.AddTransient<SccmServiceWindowsViewModel>();
+        services.AddTransient<SccmCollectionVariablesViewModel>();
+        services.AddTransient<SccmCcmEvalViewModel>();
+        services.AddTransient<SccmPowerSettingsViewModel>();
+        services.AddTransient<SccmAgentSettingsViewModel>();
+        services.AddTransient<SccmSettingsMgmtViewModel>();
+        services.AddTransient<SccmEventMonitoringViewModel>();
+        services.AddTransient<SccmInstallRepairViewModel>();
+        services.AddTransient<SccmToolsViewModel>();
         services.AddSingleton<ContextMenuService>();
         services.AddTransient<GeneralSettingViewModel>();
         services.AddTransient<AppUpdateSettingViewModel>();

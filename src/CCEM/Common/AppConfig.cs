@@ -12,7 +12,7 @@ public partial class AppConfig : NotifiyingJsonSettings, IVersionable
     private string fileName { get; set; } = Constants.AppConfigPath;
 
     private bool useDeveloperMode { get; set; }
-    private string lastUpdateCheck { get; set; }
+    private string lastUpdateCheck { get; set; } = string.Empty;
     private string updateChannel { get; set; } = "Stable";
     private string lastInstalledChannel { get; set; } = "Stable";
     private bool isUpdateChannelOverridden { get; set; }

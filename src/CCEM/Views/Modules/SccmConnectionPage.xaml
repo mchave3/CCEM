@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmConnectionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmConnectionViewModel">
+
+    <ScrollView Padding="{StaticResource ContentPagePadding}"
+                VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+
+            <!-- Page Header -->
+            <TextBlock Style="{StaticResource PageTitleStyle}"
+                       Text="Connection" />
+            <TextBlock Style="{StaticResource PageSubtitleStyle}"
+                       Text="Connect to a remote computer to manage its SCCM client configuration." />
+
+            <!-- Status Card -->
+            <Border Style="{StaticResource InfoBarAreaStyle}"
+                    Visibility="{x:Bind ViewModel.IsConnected, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE8FB;"
+                              Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                              FontSize="20" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Text="Connected"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{x:Bind ViewModel.ConnectedHostname, Mode=OneWay}"
+                                   Style="{StaticResource ListItemSubtitleStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Connection Form Card -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Remote Host" />
+
+                    <TextBox Header="Hostname"
+                             Text="{x:Bind ViewModel.Hostname, Mode=TwoWay}"
+                             PlaceholderText="Enter computer name or IP address" />
+
+                    <NumberBox Header="Port"
+                               Value="{x:Bind ViewModel.Port, Mode=TwoWay}"
+                               SpinButtonPlacementMode="Compact"
+                               Minimum="1"
+                               Maximum="65535" />
+
+                    <CheckBox IsChecked="{x:Bind ViewModel.UseEncryption, Mode=TwoWay}"
+                              Content="Use HTTPS (encrypted connection)" />
+                </StackPanel>
+            </Border>
+
+            <!-- Credentials Card -->
+            <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <StackPanel Spacing="{StaticResource MediumSpacing}">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Credentials" />
+                    <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
+                               Text="Leave empty to use integrated Windows authentication."
+                               Margin="0,0,0,8" />
+
+                    <TextBox Header="Username"
+                             Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
+                             PlaceholderText="DOMAIN\username or user@domain.com" />
+
+                    <PasswordBox Header="Password"
+                                 PasswordChanged="PasswordBox_OnPasswordChanged"
+                                 PlaceholderText="Enter password" />
+                </StackPanel>
+            </Border>
+
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
+                <Button Style="{StaticResource PrimaryCommandButtonStyle}"
+                        Command="{x:Bind ViewModel.ConnectCommand}"
+                        Content="Connect" />
+                <Button Style="{StaticResource CommandButtonStyle}"
+                        Command="{x:Bind ViewModel.DisconnectCommand}"
+                        Content="Disconnect" />
+                <ProgressRing Width="24" Height="24"
+                              IsActive="{x:Bind ViewModel.IsBusy}"
+                              Margin="8,0,0,0" />
+            </StackPanel>
+
+            <!-- Status Message -->
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage}"
+                       Style="{StaticResource StatusTextStyle}"
+                       TextWrapping="WrapWholeWords"
+                       Margin="0,12,0,0" />
+
+        </StackPanel>
+    </ScrollView>
+</Page>

@@ -18,23 +18,47 @@ public partial class AppUpdateSettingViewModel : ObservableObject
     private VelopackUpdateCheckResult? _lastCheckResult;
     private string _changeLog = string.Empty;
 
-    [ObservableProperty]
-    private string currentVersion;
+    private string _currentVersion = string.Empty;
+    public string CurrentVersion
+    {
+        get => _currentVersion;
+        set => SetProperty(ref _currentVersion, value);
+    }
 
-    [ObservableProperty]
-    private string lastUpdateCheck;
+    private string _lastUpdateCheck = string.Empty;
+    public string LastUpdateCheck
+    {
+        get => _lastUpdateCheck;
+        set => SetProperty(ref _lastUpdateCheck, value);
+    }
 
-    [ObservableProperty]
-    private bool isUpdateAvailable;
+    private bool _isUpdateAvailable;
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        set => SetProperty(ref _isUpdateAvailable, value);
+    }
 
-    [ObservableProperty]
-    private bool isLoading;
+    private bool _isLoading;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
 
-    [ObservableProperty]
-    private bool isCheckButtonEnabled = true;
+    private bool _isCheckButtonEnabled = true;
+    public bool IsCheckButtonEnabled
+    {
+        get => _isCheckButtonEnabled;
+        set => SetProperty(ref _isCheckButtonEnabled, value);
+    }
 
-    [ObservableProperty]
-    private string loadingStatus = "Status";
+    private string _loadingStatus = "Status";
+    public string LoadingStatus
+    {
+        get => _loadingStatus;
+        set => SetProperty(ref _loadingStatus, value);
+    }
 
     public AppUpdateSettingViewModel(IVelopackUpdateService updateService, IUpdateDialogService updateDialogService)
     {
