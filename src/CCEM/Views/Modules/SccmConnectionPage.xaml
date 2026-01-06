@@ -7,11 +7,11 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmConnectionViewModel">
-    
+
     <ScrollView Padding="{StaticResource ContentPagePadding}"
                 VerticalScrollBarVisibility="Auto">
         <StackPanel MaxWidth="600" HorizontalAlignment="Left">
-            
+
             <!-- Page Header -->
             <TextBlock Style="{StaticResource PageTitleStyle}"
                        Text="Connection" />
@@ -43,22 +43,22 @@
                 <StackPanel Spacing="{StaticResource MediumSpacing}">
                     <TextBlock Style="{StaticResource SectionTitleStyle}"
                                Text="Remote Host" />
-                    
+
                     <TextBox Header="Hostname"
                              Text="{x:Bind ViewModel.Hostname, Mode=TwoWay}"
                              PlaceholderText="Enter computer name or IP address" />
-                    
+
                     <NumberBox Header="Port"
                                Value="{x:Bind ViewModel.Port, Mode=TwoWay}"
                                SpinButtonPlacementMode="Compact"
                                Minimum="1"
                                Maximum="65535" />
-                    
+
                     <CheckBox IsChecked="{x:Bind ViewModel.UseEncryption, Mode=TwoWay}"
                               Content="Use HTTPS (encrypted connection)" />
                 </StackPanel>
             </Border>
-            
+
             <!-- Credentials Card -->
             <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                 <StackPanel Spacing="{StaticResource MediumSpacing}">
@@ -67,11 +67,11 @@
                     <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
                                Text="Leave empty to use integrated Windows authentication."
                                Margin="0,0,0,8" />
-                    
+
                     <TextBox Header="Username"
                              Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
                              PlaceholderText="DOMAIN\username or user@domain.com" />
-                    
+
                     <PasswordBox Header="Password"
                                  PasswordChanged="PasswordBox_OnPasswordChanged"
                                  PlaceholderText="Enter password" />
@@ -90,13 +90,13 @@
                               IsActive="{x:Bind ViewModel.IsBusy}"
                               Margin="8,0,0,0" />
             </StackPanel>
-            
+
             <!-- Status Message -->
             <TextBlock Text="{x:Bind ViewModel.StatusMessage}"
                        Style="{StaticResource StatusTextStyle}"
                        TextWrapping="WrapWholeWords"
                        Margin="0,12,0,0" />
-            
+
         </StackPanel>
     </ScrollView>
 </Page>

@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmToolsViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,13 +32,13 @@
                         <TextBlock Text="Tools" />
                     </StackPanel>
                 </PivotItem.Header>
-                
+
                 <Grid Margin="0,16,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    
+
                     <!-- Tools Toolbar -->
                     <Border Style="{StaticResource InfoBarAreaStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
@@ -57,7 +57,7 @@
                                        Margin="8,0,0,0" />
                         </StackPanel>
                     </Border>
-                    
+
                     <!-- Tools List -->
                     <ListView Grid.Row="1"
                               ItemsSource="{x:Bind ViewModel.Tools}"
@@ -72,11 +72,11 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    
+
                                     <FontIcon Glyph="&#xE90F;"
                                               FontSize="20"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    
+
                                     <StackPanel Grid.Column="1" Spacing="2">
                                         <TextBlock Style="{StaticResource ListItemTitleStyle}"
                                                    Text="{x:Bind Title}" />
@@ -85,7 +85,7 @@
                                                    TextWrapping="WrapWholeWords"
                                                    MaxLines="2" />
                                     </StackPanel>
-                                    
+
                                     <Button Grid.Column="2"
                                             Style="{StaticResource CommandButtonStyle}"
                                             Tag="{x:Bind}"
@@ -106,7 +106,7 @@
                         <TextBlock Text="Scripts" />
                     </StackPanel>
                 </PivotItem.Header>
-                
+
                 <Grid Margin="0,16,0,0" RowSpacing="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -121,7 +121,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            
+
                             <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
                                 <Button Style="{StaticResource CommandButtonStyle}"
                                         Command="{x:Bind ViewModel.RefreshScriptsCommand}">
@@ -145,7 +145,7 @@
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
-                            
+
                             <TextBlock Grid.Row="1"
                                        Style="{StaticResource StatusTextStyle}"
                                        Text="{x:Bind ViewModel.ScriptRoot}"
@@ -172,12 +172,12 @@
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            
+
                                             <FontIcon Glyph="&#xE756;"
                                                       FontSize="16"
                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                       Margin="0,0,12,0" />
-                                            
+
                                             <StackPanel Grid.Column="1" Spacing="2">
                                                 <TextBlock Style="{StaticResource ListItemTitleStyle}"
                                                            Text="{x:Bind Name}" />

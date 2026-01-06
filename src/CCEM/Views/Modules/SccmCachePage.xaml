@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmCacheViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -30,7 +30,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                
+
                 <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
                     <Button Style="{StaticResource PrimaryCommandButtonStyle}"
                             Command="{x:Bind ViewModel.RefreshCommand}">
@@ -57,7 +57,7 @@
                                   IsActive="{x:Bind ViewModel.IsLoading}"
                                   Margin="8,0,0,0" />
                 </StackPanel>
-                
+
                 <TextBlock Grid.Column="1"
                            Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}" />
@@ -78,12 +78,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <!-- Cache Icon -->
                         <FontIcon Glyph="&#xE7B8;"
                                   FontSize="20"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        
+
                         <!-- Cache Item Info -->
                         <StackPanel Grid.Column="1" Spacing="2">
                             <TextBlock Style="{StaticResource ListItemTitleStyle}"
@@ -93,9 +93,9 @@
                                        TextTrimming="CharacterEllipsis"
                                        MaxLines="1" />
                         </StackPanel>
-                        
+
                         <!-- Size & Version Info -->
-                        <StackPanel Grid.Column="2" 
+                        <StackPanel Grid.Column="2"
                                     HorizontalAlignment="Right"
                                     Spacing="2">
                             <Border Style="{StaticResource BadgeStyle}" HorizontalAlignment="Right">

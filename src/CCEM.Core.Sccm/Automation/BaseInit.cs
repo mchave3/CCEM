@@ -1,8 +1,8 @@
 //SCCM Client Center Automation Library (SCCMCliCtr.automation)
 //Copyright (c) 2018 by Roger Zander
 
-//This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 3 of the License, or any later version. 
-//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details. 
+//This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 3 of the License, or any later version.
+//This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 //GNU General Public License: http://www.gnu.org/licenses/lgpl.html
 
 using System;
@@ -16,7 +16,7 @@ using System.Runtime.Caching;
 namespace CCEM.Core.Sccm.Automation
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class baseInit : IDisposable
     {
@@ -56,7 +56,7 @@ namespace CCEM.Core.Sccm.Automation
 
                         Cache.Dispose();
                     }
-                        
+
                 }
                 catch { }
             }
@@ -75,7 +75,7 @@ namespace CCEM.Core.Sccm.Automation
             byte[] unicodeText = new byte[str.Length * 2];
             enc.GetBytes(str.ToCharArray(), 0, str.Length, unicodeText, 0, true);
 
-            //Change to be FIPS compliant 
+            //Change to be FIPS compliant
             using var sha1 = System.Security.Cryptography.SHA1.Create();
             byte[] result = sha1.ComputeHash(unicodeText);
 
@@ -305,7 +305,7 @@ namespace CCEM.Core.Sccm.Automation
             if (!MethodParams.StartsWith("("))
                 MethodParams = "(" + MethodParams + ")";
 
-            PSObject pResult = null; 
+            PSObject pResult = null;
             string sPSCode = string.Format("([wmiclass]'{0}').{1}{2}", WMIPath, WMIMethod, MethodParams);
 
             if (!bShowPSCodeOnly)
@@ -459,7 +459,7 @@ namespace CCEM.Core.Sccm.Automation
 
             //Trace the PowerShell Command
             tsPSCode.TraceInformation(PSCode);
-            
+
 
             return sResult;
         }
@@ -617,7 +617,7 @@ namespace CCEM.Core.Sccm.Automation
 
                 if (Value.StartsWith("$"))
                     Value = Value.Remove(0, 1);
-                
+
                 Cache.Add(sHash, Value, DateTime.Now + cacheTime);
 
                 foreach (PSObject obj in WSMan.RunPSScript(sPSCode, remoteRunspace))
@@ -850,7 +850,7 @@ namespace CCEM.Core.Sccm.Automation
    }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class ccm : baseInit
     {

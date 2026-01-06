@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmServicesViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -30,7 +30,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                
+
                 <StackPanel Orientation="Horizontal" Spacing="{StaticResource SmallSpacing}">
                     <Button Style="{StaticResource PrimaryCommandButtonStyle}"
                             Command="{x:Bind ViewModel.RefreshCommand}">
@@ -43,7 +43,7 @@
                                   IsActive="{x:Bind ViewModel.IsLoading}"
                                   Margin="8,0,0,0" />
                 </StackPanel>
-                
+
                 <TextBlock Grid.Column="1"
                            Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}" />
@@ -63,12 +63,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <!-- Status Icon -->
                         <FontIcon Glyph="&#xE8B7;"
                                   FontSize="20"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        
+
                         <!-- Service Info -->
                         <StackPanel Grid.Column="1" Spacing="2">
                             <TextBlock Style="{StaticResource ListItemTitleStyle}"
@@ -76,7 +76,7 @@
                             <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
                                        Text="{x:Bind Name}" />
                         </StackPanel>
-                        
+
                         <!-- Status Badge -->
                         <Border Grid.Column="2" Style="{StaticResource BadgeStyle}">
                             <TextBlock Text="{x:Bind State}"

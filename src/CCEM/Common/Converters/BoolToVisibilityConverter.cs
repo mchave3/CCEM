@@ -16,19 +16,19 @@ public partial class BoolToVisibilityConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, string language)
     {
         bool boolValue = value is bool b && b;
-        
+
         if (IsInverted)
         {
             boolValue = !boolValue;
         }
-        
+
         return boolValue ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)
     {
         bool result = value is Visibility visibility && visibility == Visibility.Visible;
-        
+
         return IsInverted ? !result : result;
     }
 }

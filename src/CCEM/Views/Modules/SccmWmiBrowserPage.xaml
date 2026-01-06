@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmWmiBrowserViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -33,18 +33,18 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBox Text="{x:Bind ViewModel.WmiNamespace, Mode=TwoWay}"
                              Header="Namespace"
                              PlaceholderText="root\cimv2" />
-                    
+
                     <ToggleSwitch Grid.Column="1"
                                   IsOn="{x:Bind ViewModel.UseCim, Mode=TwoWay}"
                                   OffContent="WMI"
                                   OnContent="CIM"
                                   VerticalAlignment="Bottom"
                                   Margin="0,0,0,4" />
-                    
+
                     <Button Grid.Column="2"
                             Style="{StaticResource PrimaryCommandButtonStyle}"
                             Command="{x:Bind ViewModel.RunQueryCommand}"
@@ -54,13 +54,13 @@
                             <TextBlock Text="Run Query" />
                         </StackPanel>
                     </Button>
-                    
+
                     <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,8">
                         <ProgressRing Width="20" Height="20"
                                       IsActive="{x:Bind ViewModel.IsLoading}" />
                     </StackPanel>
                 </Grid>
-                
+
                 <TextBox Text="{x:Bind ViewModel.WqlQuery, Mode=TwoWay}"
                          Header="WQL Query"
                          PlaceholderText="SELECT * FROM Win32_OperatingSystem"
@@ -68,7 +68,7 @@
                          TextWrapping="Wrap"
                          FontFamily="Cascadia Code, Consolas"
                          MinHeight="80" />
-                
+
                 <TextBlock Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}" />
             </StackPanel>
@@ -88,11 +88,11 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock Text="Results"
                                Style="{StaticResource SectionTitleStyle}"
                                Margin="16,12,16,8" />
-                    
+
                     <ListView Grid.Row="1"
                               ItemsSource="{x:Bind ViewModel.Results}"
                               SelectedItem="{x:Bind ViewModel.SelectedResult, Mode=TwoWay}"
@@ -104,12 +104,12 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    
+
                                     <FontIcon Glyph="&#xE9D9;"
                                               FontSize="16"
                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                               Margin="0,0,12,0" />
-                                    
+
                                     <TextBlock Grid.Column="1"
                                                Text="{x:Bind Display}"
                                                Style="{StaticResource ListItemTitleStyle}"
@@ -128,11 +128,11 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock Text="Properties"
                                Style="{StaticResource SectionTitleStyle}"
                                Margin="16,12,16,8" />
-                    
+
                     <ListView Grid.Row="1"
                               ItemsSource="{x:Bind ViewModel.SelectedProperties}"
                               SelectionMode="None">

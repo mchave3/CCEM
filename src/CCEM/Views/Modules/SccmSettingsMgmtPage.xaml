@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmSettingsMgmtViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                
+
                 <Button Style="{StaticResource PrimaryCommandButtonStyle}"
                         Command="{x:Bind ViewModel.RefreshCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -40,18 +40,18 @@
                         <TextBlock Text="Refresh" />
                     </StackPanel>
                 </Button>
-                
+
                 <ToggleSwitch Grid.Column="1"
                               IsOn="{x:Bind ViewModel.ShowDifferencesOnly, Mode=TwoWay}"
                               OffContent="All"
                               OnContent="Differences only"
                               Margin="16,0,0,0" />
-                
+
                 <ProgressRing Grid.Column="2"
                               Width="20" Height="20"
                               IsActive="{x:Bind ViewModel.IsLoading}"
                               Margin="16,0,0,0" />
-                
+
                 <TextBlock Grid.Column="3"
                            Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}" />
@@ -72,12 +72,12 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <!-- Component Icon -->
                         <FontIcon Glyph="&#xE713;"
                                   FontSize="20"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        
+
                         <!-- Component Info -->
                         <StackPanel Grid.Column="1" Spacing="2">
                             <TextBlock Style="{StaticResource ListItemTitleStyle}"
@@ -85,7 +85,7 @@
                             <TextBlock Style="{StaticResource ListItemSubtitleStyle}"
                                        Text="{x:Bind Status}" />
                         </StackPanel>
-                        
+
                         <!-- Requested State -->
                         <StackPanel Grid.Column="2" Spacing="2" MinWidth="100">
                             <TextBlock Text="Requested"
@@ -93,7 +93,7 @@
                             <TextBlock Text="{x:Bind RequestedEnabled}"
                                        FontWeight="SemiBold" />
                         </StackPanel>
-                        
+
                         <!-- Actual State -->
                         <StackPanel Grid.Column="3" Spacing="2" MinWidth="100">
                             <TextBlock Text="Actual"

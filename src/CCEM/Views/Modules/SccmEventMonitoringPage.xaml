@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmEventMonitoringViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -33,7 +33,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                
+
                 <Button Style="{StaticResource PrimaryCommandButtonStyle}"
                         Command="{x:Bind ViewModel.RefreshCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -41,7 +41,7 @@
                         <TextBlock Text="Refresh" />
                     </StackPanel>
                 </Button>
-                
+
                 <NumberBox Grid.Column="1"
                            Width="120"
                            Header="Max Events"
@@ -49,18 +49,18 @@
                            Maximum="500"
                            SpinButtonPlacementMode="Compact"
                            Value="{x:Bind ViewModel.MaxEvents, Mode=TwoWay}" />
-                
+
                 <TextBox Grid.Column="2"
                          Header="Filter"
                          PlaceholderText="Search in messages..."
                          Text="{x:Bind ViewModel.FilterText, Mode=TwoWay}" />
-                
+
                 <ProgressRing Grid.Column="3"
                               Width="20" Height="20"
                               IsActive="{x:Bind ViewModel.IsLoading}"
                               VerticalAlignment="Bottom"
                               Margin="0,0,0,8" />
-                
+
                 <TextBlock Grid.Column="4"
                            Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}"
@@ -82,12 +82,12 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <!-- Event Icon -->
                         <FontIcon Glyph="&#xE7BA;"
                                   FontSize="20"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        
+
                         <!-- Event Info -->
                         <StackPanel Grid.Column="1" Spacing="4">
                             <StackPanel Orientation="Horizontal" Spacing="12">
@@ -104,7 +104,7 @@
                                        TextWrapping="WrapWholeWords"
                                        MaxLines="3" />
                         </StackPanel>
-                        
+
                         <!-- Event ID Badge -->
                         <Border Grid.Column="2" Style="{StaticResource BadgeStyle}">
                             <TextBlock Text="{x:Bind Id}"

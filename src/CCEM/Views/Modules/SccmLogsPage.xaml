@@ -7,7 +7,7 @@
       xmlns:vm="using:CCEM.ViewModels.Modules"
       mc:Ignorable="d"
       x:DataType="vm:SccmLogsViewModel">
-    
+
     <Grid Padding="{StaticResource ContentPagePadding}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -30,7 +30,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                
+
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -38,11 +38,11 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBox Text="{x:Bind ViewModel.FilePath, Mode=TwoWay}"
                              PlaceholderText="Enter log file path (e.g., C:\Windows\CCM\Logs\PolicyAgent.log)"
                              Header="Log File Path" />
-                    
+
                     <NumberBox Grid.Column="1"
                                Width="100"
                                Value="{x:Bind ViewModel.TailLines, Mode=TwoWay}"
@@ -50,7 +50,7 @@
                                Minimum="1"
                                Maximum="5000"
                                Header="Lines" />
-                    
+
                     <Button Grid.Column="2"
                             Style="{StaticResource PrimaryCommandButtonStyle}"
                             Command="{x:Bind ViewModel.LoadCommand}"
@@ -60,14 +60,14 @@
                             <TextBlock Text="Load" />
                         </StackPanel>
                     </Button>
-                    
+
                     <ProgressRing Grid.Column="3"
                                   Width="20" Height="20"
                                   IsActive="{x:Bind ViewModel.IsLoading}"
                                   VerticalAlignment="Bottom"
                                   Margin="0,0,0,8" />
                 </Grid>
-                
+
                 <TextBlock Grid.Row="1"
                            Style="{StaticResource StatusTextStyle}"
                            Text="{x:Bind ViewModel.StatusMessage}" />

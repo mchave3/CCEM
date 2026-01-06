@@ -16,12 +16,12 @@ public sealed partial class StringToVisibilityConverter : IValueConverter
     public object Convert(object? value, Type targetType, object parameter, string language)
     {
         bool hasValue = !string.IsNullOrWhiteSpace(value as string);
-        
+
         if (IsInverted)
         {
             hasValue = !hasValue;
         }
-        
+
         return hasValue ? Visibility.Visible : Visibility.Collapsed;
     }
 
