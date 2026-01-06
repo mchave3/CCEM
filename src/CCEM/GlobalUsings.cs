@@ -1,6 +1,8 @@
 global using CCEM.Common;
 global using CCEM.Core.Logger;
+global using CCEM.Services;
 global using CCEM.ViewModels;
+global using CCEM.ViewModels.Modules;
 global using CCEM.Views;
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmConnectionPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmConnectionViewModel">
+    <ScrollView Padding="{ThemeResource ContentPagePadding}"
+                HorizontalAlignment="Stretch"
+                VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="12">
+            <TextBlock FontSize="24"
+                       FontWeight="SemiBold"
+                       Text="SCCM Connection" />
+
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage}"
+                       Opacity="0.8"
+                       TextWrapping="WrapWholeWords" />
+
+            <Grid ColumnSpacing="12"
+                  RowSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Hostname" />
+                <TextBox Grid.Row="0"
+                         Grid.Column="1"
+                         Text="{x:Bind ViewModel.Hostname, Mode=TwoWay}"
+                         PlaceholderText="e.g. PC1234" />
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Port" />
+                <NumberBox Grid.Row="1"
+                           Grid.Column="1"
+                           Value="{x:Bind ViewModel.Port, Mode=TwoWay}"
+                           SpinButtonPlacementMode="Inline"
+                           Minimum="1"
+                           Maximum="65535" />
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Username" />
+                <TextBox Grid.Row="2"
+                         Grid.Column="1"
+                         Text="{x:Bind ViewModel.Username, Mode=TwoWay}"
+                         PlaceholderText="Leave blank for integrated auth" />
+
+                <TextBlock Grid.Row="3"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Password" />
+                <PasswordBox Grid.Row="3"
+                             Grid.Column="1"
+                             PasswordChanged="PasswordBox_OnPasswordChanged" />
+
+                <CheckBox Grid.Row="4"
+                          Grid.Column="1"
+                          IsChecked="{x:Bind ViewModel.UseEncryption, Mode=TwoWay}"
+                          Content="Use HTTPS (encryption)" />
+            </Grid>
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.ConnectCommand}"
+                        Content="Connect" />
+                <Button Command="{x:Bind ViewModel.DisconnectCommand}"
+                        Content="Disconnect" />
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsBusy}" />
+            </StackPanel>
+
+            <TextBlock Text="{x:Bind ViewModel.ConnectedHostname, Mode=OneWay}"
+                       Opacity="0.7" />
+        </StackPanel>
+    </ScrollView>
+</Page>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmInstallRepairPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmInstallRepairViewModel">
+    <Grid Padding="{ThemeResource ContentPagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+            <Button Command="{x:Bind ViewModel.RepairAgentCommand}"
+                    Content="Repair agent" />
+            <Button Command="{x:Bind ViewModel.UninstallAgentCommand}"
+                    Content="Uninstall agent" />
+            <Button Command="{x:Bind ViewModel.ResetPausedSoftwareDistributionCommand}"
+                    Content="Reset paused SWDist" />
+            <Button Command="{x:Bind ViewModel.ResetProvisioningModeCommand}"
+                    Content="Reset provisioning mode" />
+            <ProgressRing Width="20"
+                          Height="20"
+                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Opacity="0.7"
+                   Text="{x:Bind ViewModel.StatusMessage}" />
+
+        <TextBlock Grid.Row="2"
+                   Opacity="0.7"
+                   Text="These actions call existing SCCM client repair/uninstall routines on the target device."
+                   TextWrapping="Wrap" />
+    </Grid>
+</Page>
+

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmAdvertisementsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmAdvertisementsViewModel">
+    <Grid Padding="{ThemeResource ContentPagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+            <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                    Content="Refresh" />
+            <Button Command="{x:Bind ViewModel.TriggerSelectedCommand}"
+                    Content="Trigger" />
+            <Button Command="{x:Bind ViewModel.EnforceSelectedCommand}"
+                    Content="Enforce + Trigger" />
+            <ProgressRing Width="20"
+                          Height="20"
+                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Opacity="0.7"
+                   Text="{x:Bind ViewModel.StatusMessage}" />
+
+        <ListView Grid.Row="2"
+                  ItemsSource="{x:Bind ViewModel.Advertisements}"
+                  SelectedItem="{x:Bind ViewModel.SelectedAdvertisement, Mode=TwoWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SccmAdvertisementRow">
+                    <StackPanel Spacing="2">
+                        <TextBlock FontWeight="SemiBold"
+                                   Text="{x:Bind ProgramName}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind PackageId}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind AdvertisementId}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
+

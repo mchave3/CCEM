@@ -15,6 +15,150 @@
           "Subtitle": "Configuration Manager",
           "ImagePath": "ms-appx:///Assets/Modules/SCCM/SccmLogo.scale-100.png",
           "HideItem": true
+        },
+        {
+          "UniqueId": "CCEM.Views.Modules.SccmConnectionPage",
+          "Title": "Connection",
+          "Subtitle": "Connect to a device"
+        },
+        {
+          "UniqueId": "Sccm.AgentActions",
+          "SectionId": "CCEM.Views.Modules.SccmAgentActionsPage",
+          "Title": "Agent Actions",
+          "Subtitle": "Trigger SCCM client actions",
+          "Parameter": "Agent Actions"
+        },
+        {
+          "UniqueId": "Sccm.AgentSettings",
+          "SectionId": "CCEM.Views.Modules.SccmAgentSettingsPage",
+          "Title": "Agent Settings",
+          "Parameter": "Agent Settings"
+        },
+        {
+          "UniqueId": "Sccm.SettingsMgmt",
+          "SectionId": "CCEM.Views.Modules.SccmSettingsMgmtPage",
+          "Title": "Settings Mgmt",
+          "Parameter": "Settings Mgmt"
+        },
+        {
+          "UniqueId": "Sccm.ServiceWindows",
+          "SectionId": "CCEM.Views.Modules.SccmServiceWindowsPage",
+          "Title": "Service Windows",
+          "Parameter": "Service Windows"
+        },
+        {
+          "UniqueId": "Sccm.InstalledSoftware",
+          "SectionId": "CCEM.Views.Modules.SccmInstalledSoftwarePage",
+          "Title": "Installed Software",
+          "Parameter": "Installed Software"
+        },
+        {
+          "UniqueId": "Sccm.EventMonitoring",
+          "SectionId": "CCEM.Views.Modules.SccmEventMonitoringPage",
+          "Title": "Event Monitoring",
+          "Parameter": "Event Monitoring"
+        },
+        {
+          "UniqueId": "Sccm.Advertisements",
+          "SectionId": "CCEM.Views.Modules.SccmAdvertisementsPage",
+          "Title": "Advertisements",
+          "Parameter": "Advertisements"
+        },
+        {
+          "UniqueId": "Sccm.SoftwareDistributionApps",
+          "SectionId": "CCEM.Views.Modules.SccmSoftwareDistributionAppsPage",
+          "Title": "Software Distribution Apps",
+          "Parameter": "Software Distribution Apps"
+        },
+        {
+          "UniqueId": "Sccm.Cache",
+          "SectionId": "CCEM.Views.Modules.SccmCachePage",
+          "Title": "Cache",
+          "Parameter": "Cache"
+        },
+        {
+          "UniqueId": "Sccm.Components",
+          "SectionId": "CCEM.Views.Modules.SccmComponentsPage",
+          "Title": "Components",
+          "Parameter": "Components"
+        },
+        {
+          "UniqueId": "Sccm.SoftwareDistributionSummary",
+          "SectionId": "CCEM.Views.Modules.SccmSoftwareDistributionSummaryPage",
+          "Title": "Software Distribution",
+          "Parameter": "Software Distribution"
+        },
+        {
+          "UniqueId": "Sccm.Services",
+          "SectionId": "CCEM.Views.Modules.SccmServicesPage",
+          "Title": "Services",
+          "Parameter": "Services"
+        },
+        {
+          "UniqueId": "Sccm.Processes",
+          "SectionId": "CCEM.Views.Modules.SccmProcessesPage",
+          "Title": "Processes",
+          "Parameter": "Processes"
+        },
+        {
+          "UniqueId": "Sccm.SoftwareUpdates",
+          "SectionId": "CCEM.Views.Modules.SccmSoftwareUpdatesPage",
+          "Title": "Software Updates",
+          "Parameter": "Software Updates"
+        },
+        {
+          "UniqueId": "Sccm.AllUpdates",
+          "SectionId": "CCEM.Views.Modules.SccmAllUpdatesPage",
+          "Title": "All Updates",
+          "Parameter": "All Updates"
+        },
+        {
+          "UniqueId": "Sccm.ExecutionHistory",
+          "SectionId": "CCEM.Views.Modules.SccmExecutionHistoryPage",
+          "Title": "Execution History",
+          "Parameter": "Execution History"
+        },
+        {
+          "UniqueId": "Sccm.InstallRepair",
+          "SectionId": "CCEM.Views.Modules.SccmInstallRepairPage",
+          "Title": "Install / Repair",
+          "Parameter": "Install / Repair"
+        },
+        {
+          "UniqueId": "Sccm.CollectionVariables",
+          "SectionId": "CCEM.Views.Modules.SccmCollectionVariablesPage",
+          "Title": "Collection Variables",
+          "Parameter": "Collection Variables"
+        },
+        {
+          "UniqueId": "Sccm.CcmEval",
+          "SectionId": "CCEM.Views.Modules.SccmCcmEvalPage",
+          "Title": "CCM Eval",
+          "Parameter": "CCM Eval"
+        },
+        {
+          "UniqueId": "Sccm.PowerSettings",
+          "SectionId": "CCEM.Views.Modules.SccmPowerSettingsPage",
+          "Title": "Power Settings",
+          "Parameter": "Power Settings"
+        },
+        {
+          "UniqueId": "Sccm.LogMonitoring",
+          "SectionId": "CCEM.Views.Modules.SccmLogsPage",
+          "Title": "Log Monitoring",
+          "Parameter": "Log Monitoring"
+        },
+        {
+          "UniqueId": "Sccm.WmiBrowser",
+          "SectionId": "CCEM.Views.Modules.SccmWmiBrowserPage",
+          "Title": "WMI Browser",
+          "Parameter": "WMI Browser"
+        },
+        {
+          "UniqueId": "Sccm.Tools",
+          "SectionId": "CCEM.Views.Modules.SccmToolsPage",
+          "Title": "Tools",
+          "Subtitle": "Legacy plugins"
         }
       ]
     }

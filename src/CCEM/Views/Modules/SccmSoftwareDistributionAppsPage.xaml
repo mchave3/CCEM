@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmSoftwareDistributionAppsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmSoftwareDistributionAppsViewModel">
+    <Grid Padding="{ThemeResource ContentPagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+            <Button Command="{x:Bind ViewModel.RefreshCommand}"
+                    Content="Refresh" />
+            <Button Command="{x:Bind ViewModel.InstallSelectedCommand}"
+                    Content="Install" />
+            <Button Command="{x:Bind ViewModel.RepairSelectedCommand}"
+                    Content="Repair" />
+            <Button Command="{x:Bind ViewModel.UninstallSelectedCommand}"
+                    Content="Uninstall" />
+            <Button Command="{x:Bind ViewModel.DownloadSelectedCommand}"
+                    Content="Download" />
+            <Button Command="{x:Bind ViewModel.CancelSelectedCommand}"
+                    Content="Cancel" />
+            <ProgressRing Width="20"
+                          Height="20"
+                          IsActive="{x:Bind ViewModel.IsLoading}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Opacity="0.7"
+                   Text="{x:Bind ViewModel.StatusMessage}" />
+
+        <ListView Grid.Row="2"
+                  ItemsSource="{x:Bind ViewModel.Applications}"
+                  SelectedItem="{x:Bind ViewModel.SelectedApplication, Mode=TwoWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:SccmApplicationRow">
+                    <StackPanel Spacing="2">
+                        <TextBlock FontWeight="SemiBold"
+                                   Text="{x:Bind Name}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind Publisher}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind InstallState}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind EvaluationStateText}" />
+                        <TextBlock Opacity="0.7"
+                                   Text="{x:Bind AllowedActionsText}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
+

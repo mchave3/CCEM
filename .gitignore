@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Local working copies of upstream legacy repos (used for analysis only)
+legacy_upstream/

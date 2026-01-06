@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page x:Class="CCEM.Views.Modules.SccmAgentActionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:CCEM.ViewModels.Modules"
+      mc:Ignorable="d"
+      x:DataType="vm:SccmAgentActionsViewModel">
+    <ScrollView Padding="{ThemeResource ContentPagePadding}"
+                HorizontalAlignment="Stretch"
+                VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="16">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <ProgressRing Width="20"
+                              Height="20"
+                              IsActive="{x:Bind ViewModel.IsBusy}" />
+                <TextBlock VerticalAlignment="Center"
+                           Opacity="0.8"
+                           Text="{x:Bind ViewModel.StatusMessage}" />
+            </StackPanel>
+
+            <TextBlock FontSize="20"
+                       FontWeight="SemiBold"
+                       Text="Inventory" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.HardwareInventoryDeltaCommand}"
+                        Content="Hardware (delta)" />
+                <Button Command="{x:Bind ViewModel.HardwareInventoryFullCommand}"
+                        Content="Hardware (full)" />
+                <Button Command="{x:Bind ViewModel.SoftwareInventoryDeltaCommand}"
+                        Content="Software (delta)" />
+                <Button Command="{x:Bind ViewModel.SoftwareInventoryFullCommand}"
+                        Content="Software (full)" />
+            </StackPanel>
+
+            <TextBlock FontSize="20"
+                       FontWeight="SemiBold"
+                       Text="Policy" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.MachinePolicyRequestCommand}"
+                        Content="Machine: request" />
+                <Button Command="{x:Bind ViewModel.MachinePolicyEvaluateCommand}"
+                        Content="Machine: evaluate" />
+                <Button Command="{x:Bind ViewModel.UserPolicyRequestCommand}"
+                        Content="User: request" />
+                <Button Command="{x:Bind ViewModel.UserPolicyEvaluateCommand}"
+                        Content="User: evaluate" />
+            </StackPanel>
+
+            <TextBlock FontSize="20"
+                       FontWeight="SemiBold"
+                       Text="Software Updates" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.SoftwareUpdatesEvaluateCycleCommand}"
+                        Content="Evaluate cycle" />
+                <Button Command="{x:Bind ViewModel.SoftwareUpdatesScanCommand}"
+                        Content="Force scan" />
+            </StackPanel>
+
+            <TextBlock FontSize="20"
+                       FontWeight="SemiBold"
+                       Text="Reset" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8">
+                <Button Command="{x:Bind ViewModel.ResetPolicySoftCommand}"
+                        Content="Reset policy (soft)" />
+                <Button Command="{x:Bind ViewModel.ResetPolicyHardCommand}"
+                        Content="Reset policy (hard)" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollView>
+</Page>
+
